@@ -8,8 +8,6 @@ SET(VERSION_PATCH 0)
 # Tell CMake where to find our CMake modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
-# add_subdirectory (src)
-
 # Compiler settings
 SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -O0 -Wpedantic -Wextra -Wall -std=c++11" )
 
@@ -21,6 +19,10 @@ FIND_PACKAGE(GLM REQUIRED)
 FIND_PACKAGE(JPEG REQUIRED)
 FIND_PACKAGE(PNG REQUIRED)
 FIND_PACKAGE(png++ REQUIRED)
+FIND_PACKAGE(Boost REQUIRED)
+FIND_PACKAGE(assimp REQUIRED)
+
+# ADD_SUBDIRECTORY(src/NUGL)
 
 # Include directories
 INCLUDE_DIRECTORIES(
@@ -44,5 +46,9 @@ TARGET_LINK_LIBRARIES(game
     ${OPENGL_gl_LIBRARY}
     ${GLEW_LIBRARY}
     ${GLFW_LIBRARIES}
-#    png jpeg assimp m boost_system boost_filesystem
+    ${JPEG_LIBRARIES}
+    ${PNG_LIBRARIES}
+    ${BOOST_SYSTEM_LIBRARY}
+    ${BOOST_FILESYSTEM_LIBRARY}
+    ${ASSIMP_LIBRARIES}
     )
