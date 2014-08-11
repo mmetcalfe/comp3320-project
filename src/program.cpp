@@ -11,6 +11,7 @@
 #include "Shader.h"
 #include "ShaderProgram.h"
 #include "Buffer.h"
+#include "VertexArray.h"
 
 void errorCallback(int error, const char* description) {
     std::cerr << "GLFW ERROR: " << description << std::endl;
