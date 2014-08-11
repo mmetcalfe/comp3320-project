@@ -1,5 +1,5 @@
-cmake_minimum_required (VERSION 2.6)
-project (comp3320_project)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+PROJECT(comp3320_project)
 
 SET(VERSION_MAJOR 0)
 SET(VERSION_MINOR 1)
@@ -17,22 +17,26 @@ SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -O0 -Wpedantic -Wextra -Wall -std=c+
 FIND_PACKAGE(OpenGL REQUIRED)
 FIND_PACKAGE(GLEW REQUIRED)
 FIND_PACKAGE(GLFW REQUIRED)
+FIND_PACKAGE(GLM REQUIRED)
 
-FILE(GLOB_RECURSE inc_files
-    "**.h"
-    )
+# Include directories
+INCLUDE_DIRECTORIES("src/util")
 
-# FILE(GLOB src_files
-#      "src/*.cpp" ,
-#      )
+#FILE(GLOB_RECURSE inc_files
+#    "util/**.h"
+#    )
 
-SET(exec_resources
-    ${inc_files}
-    ${src_files}
+FILE(GLOB src_files
+      "src/**.cpp" ,
     )
 
 # Add Executables
-set(game_src "src/program.cpp" ${exec_resources})
-add_executable (game ${game_src})
+SET(game_src ${inc_files} ${src_files})
+ADD_EXECUTABLE (game ${game_src})
 SET_TARGET_PROPERTIES(game PROPERTIES LINKER_LANGUAGE CXX)
-# target_link_libraries(game ${OPENGL} glfw3 glew png jpeg assimp m boost_system boost_filesystem)
+TARGET_LINK_LIBRARIES(game
+    ${OPENGL_gl_LIBRARY}
+    ${GLEW_LIBRARY}
+    ${GLFW_LIBRARIES}
+#    png jpeg assimp m boost_system boost_filesystem
+    )
