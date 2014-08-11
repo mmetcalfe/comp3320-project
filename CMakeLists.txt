@@ -20,7 +20,7 @@ FIND_PACKAGE(GLFW REQUIRED)
 FIND_PACKAGE(GLM REQUIRED)
 
 # Include directories
-INCLUDE_DIRECTORIES("src/util")
+INCLUDE_DIRECTORIES("src/utility")
 
 #FILE(GLOB_RECURSE inc_files
 #    "util/**.h"
