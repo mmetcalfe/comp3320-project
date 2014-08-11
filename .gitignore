@@ -1,0 +1,16 @@
+# CLion
+.idea/
+
+# Build and CMake files
+build/
+Makefile
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+install_manifest.txt
+
+# Miscellaneous
+*.swp
+*~
+.DS_Store
+
