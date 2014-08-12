@@ -7,13 +7,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "utility/debug.h"
+
 class Camera {
 public:
     inline void lookAt(glm::vec3 lookAtPos) {
         view = glm::lookAt(pos, lookAtPos, up);
     };
 
-    inline void processKeyboardInput(GLFWwindow* window) {
+    inline void processKeyboardInput(GLFWwindow* window, float deltaTime) {
         glm::vec3 move = {0, 0, 0};
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
             move.z += 1;
@@ -32,21 +34,41 @@ public:
             move = glm::normalize(move);
         }
 
+        pos += move * deltaTime * speed;
+    }
+
+    inline void processMouseInput(GLFWwindow* window, float deltaTime) {
+        double xPos, yPos;
+        glfwGetCursorPos(window, &xPos, &yPos);
+        glm::vec2 cursor(xPos, yPos);
+        static glm::vec2 lastCursor = cursor;
+        glm::vec2 deltaMouse = cursor - lastCursor;
+        lastCursor = cursor;
+
+//        // Unnecessary, as the cursor is disabled.
+//        glfwSetCursorPos(window, windowWidth / 2, windowHeight / 2);
+
+        horizontalAngle -= float(deltaMouse[1]) * lookSpeed * deltaTime;
+        verticalAngle -= float(deltaMouse[0]) * lookSpeed * deltaTime;
+
+        std::cout << __func__ << ": " << deltaMouse << std::endl;
+    }
+
+    inline void processPlayerInput(GLFWwindow* window) {
         float currentTime = glfwGetTime();
         float deltaTime = float(currentTime - lastUpdateTime);
         lastUpdateTime = currentTime;
 
-        pos += move * deltaTime * speed;
-    }
+        processKeyboardInput(window, deltaTime);
+        processMouseInput(window, deltaTime);
 
-    inline void processPlayerInput(GLFWwindow* window) {
-        int windowWidth, windowHeight;
-        glfwGetWindowSize(window, &windowWidth, &windowHeight);
-
-        double xPos, yPos;
-        glfwGetCursorPos(window, &xPos, &yPos);
-//        glfwSetCursorPos(window, windowWidth / 2, windowHeight / 2);
-        glm::vec2 deltaMouse = {xPos - (windowWidth / 2), yPos - (windowHeight / 2)};
+//        int windowWidth, windowHeight;
+//        glfwGetWindowSize(window, &windowWidth, &windowHeight);
+//
+//        double xPos, yPos;
+//        glfwGetCursorPos(window, &xPos, &yPos);
+////        glfwSetCursorPos(window, windowWidth / 2, windowHeight / 2);
+//        glm::vec2 deltaMouse = {xPos - (windowWidth / 2), yPos - (windowHeight / 2)};
 
 
 //        int windowWidth, windowHeight;

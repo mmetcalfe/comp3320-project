@@ -8,6 +8,8 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "utility/debug.h"
+#include "utility/make_unique.h"
+
 #include "NUGL/Shader.h"
 #include "NUGL/ShaderProgram.h"
 #include "NUGL/Buffer.h"
@@ -15,9 +17,33 @@
 #include "NUGL/Texture.h"
 #include "SceneModel.h"
 
+static auto camera = std::make_unique<Camera>();
+
 void errorCallback(int error, const char* description) {
     std::cerr << "GLFW ERROR: " << description << std::endl;
 }
+
+void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
+    if (height == 0) {
+        height = 1;
+    }
+
+    camera->proj = glm::perspective(camera->fov, width / float(height), 1.0f, 100.0f);
+}
+
+//void cursorPositionCallback(GLFWwindow* window, double x, double y) {
+////    camera->processMouseInput(window, x, y);
+//    std::cout << __func__ << ": [" << x << ", " << y << "]" << std::endl;
+//}
+
+//void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+//    std::cout << __func__ << ", Key: {" << std::endl;
+//    std::cout << "  key: " << key << std::endl;
+//    std::cout << "  scancode: " << scancode << std::endl;
+//    std::cout << "  action: " << action << std::endl;
+//    std::cout << "  mods: " << mods << std::endl;
+//    std::cout << "  }" << std::endl;
+//}
 
 int main(int argc, char** argv) {
     glfwInit();
@@ -35,7 +61,16 @@ int main(int argc, char** argv) {
 
     glfwMakeContextCurrent(window);
 
+    // Disable cursor to allow correct mouse input for camera controls on OSX.
+    // See: http://stackoverflow.com/questions/14468039/glfw-glfwsetmousepos-bug-on-mac-os-x-10-7-with-opengl-camera
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
+//    glfwSetCursorPosCallback(window, cursorPositionCallback);
+//    glfwSetKeyCallback(window, keyCallback);
+
     checkForAndPrintGLError(__FILE__, __LINE__);
+
 
     // Initialise GLEW:
     glewExperimental = GL_TRUE;
@@ -69,16 +104,16 @@ int main(int argc, char** argv) {
     checkForAndPrintGLError(__FILE__, __LINE__);
 
 
-    Camera camera;
+//    Camera camera;
     // Projection transform: glm::perspective(FOV, Aspect, Near, Far);
-    camera.pos = glm::vec3(50.0f, 50.0f, 30.0f);
-    camera.fov = 45;
-    camera.speed = 10;
-    camera.lookSpeed = 10;
-    camera.up = glm::vec3(0.0f, 0.0f, 1.0f);
-    camera.proj = glm::perspective(camera.fov, 800.0f / 600.0f, 1.0f, 100.0f);
-    camera.lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
-    camera.lastUpdateTime = glfwGetTime();
+    camera->pos = glm::vec3(50.0f, 50.0f, 30.0f);
+    camera->fov = 45;
+    camera->speed = 10;
+    camera->lookSpeed = 10;
+    camera->up = glm::vec3(0.0f, 0.0f, 1.0f);
+    camera->proj = glm::perspective(camera->fov, 800.0f / 600.0f, 1.0f, 100.0f);
+    camera->lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
+    camera->lastUpdateTime = glfwGetTime();
 
     // Depth buffer:
     glEnable(GL_DEPTH_TEST);
@@ -104,8 +139,7 @@ int main(int argc, char** argv) {
 
         checkForAndPrintGLError(__FILE__, __LINE__);
 
-        eagle5Model.draw(model, camera);
-
+        eagle5Model.draw(model, *camera);
 
         checkForAndPrintGLError(__FILE__, __LINE__);
         /* Swap front and back buffers */
@@ -114,6 +148,8 @@ int main(int argc, char** argv) {
 
         /* Poll for and process events */
         glfwPollEvents();
+
+        camera->processPlayerInput(window);
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, GL_TRUE);
