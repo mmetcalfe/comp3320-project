@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
     glewInit();
     checkForAndPrintGLError(__FILE__, __LINE__);
 
-
+    // Load shaders:
     auto flatProgram = NUGL::ShaderProgram::createFromFiles({
             {GL_VERTEX_SHADER, "src/shaders/vs_pos_mvp.gl"},
             {GL_FRAGMENT_SHADER, "src/shaders/fs_white.gl"},
@@ -94,6 +94,7 @@ int main(int argc, char** argv) {
     textureProgram.link();
 
 
+    // Load assets:
     auto eagle5Model = SceneModel::loadFromFile("assets/eagle_5_transport/eagle_5_transport_landed.obj");
 //    auto eagle5Model = SceneModel::loadFromFile("assets/galaxy_cruiser_3ds.3DS");
 //    auto eagle5Model = SceneModel::loadFromFile("assets/cube.obj");
@@ -103,27 +104,23 @@ int main(int argc, char** argv) {
     eagle5Model.createVertexArrays();
     checkForAndPrintGLError(__FILE__, __LINE__);
 
-
-//    Camera camera;
-    // Projection transform: glm::perspective(FOV, Aspect, Near, Far);
+    // Setup Camera:
     camera->pos = glm::vec3(50.0f, 50.0f, 30.0f);
     camera->fov = 45;
     camera->speed = 10;
-    camera->lookSpeed = 10;
+    camera->lookSpeed = 0.5;
     camera->up = glm::vec3(0.0f, 0.0f, 1.0f);
     camera->proj = glm::perspective(camera->fov, 800.0f / 600.0f, 1.0f, 100.0f);
     camera->lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
     camera->lastUpdateTime = glfwGetTime();
 
-    // Depth buffer:
+
     glEnable(GL_DEPTH_TEST);
 
 //    // Backface culling:
 //    glEnable (GL_CULL_FACE); // cull face
 //    glCullFace (GL_BACK); // cull back face
 //    glFrontFace (GL_CCW); // GL_CCW for counter clock-wise
-
-
 
     while (!glfwWindowShouldClose(window)) {
         /* Render here */

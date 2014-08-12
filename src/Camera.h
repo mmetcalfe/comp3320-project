@@ -8,6 +8,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "utility/debug.h"
+#include "utility/math/coordinates.h"
 
 class Camera {
 public:
@@ -18,23 +19,25 @@ public:
     inline void processKeyboardInput(GLFWwindow* window, float deltaTime) {
         glm::vec3 move = {0, 0, 0};
         if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-            move.z += 1;
-        }
-        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-            move.z -= 1;
-        }
-        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
             move.x += 1;
         }
-        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
             move.x -= 1;
+        }
+        if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+            move.y += 1;
+        }
+        if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+            move.y -= 1;
         }
 
         if (glm::length(move) > 0) {
             move = glm::normalize(move);
         }
 
-        pos += move * deltaTime * speed;
+        glm::vec3 right = glm::cross(dir, up);
+        pos += dir * move.x * speed * deltaTime;
+        pos += right * move.y * speed * deltaTime;
     }
 
     inline void processMouseInput(GLFWwindow* window, float deltaTime) {
@@ -45,13 +48,15 @@ public:
         glm::vec2 deltaMouse = cursor - lastCursor;
         lastCursor = cursor;
 
-//        // Unnecessary, as the cursor is disabled.
+        // Note: glfwSetCursorPos does not work on OSX.
+        // As a workaround we have set GLFW_CURSOR_DISABLED.
 //        glfwSetCursorPos(window, windowWidth / 2, windowHeight / 2);
 
-        horizontalAngle -= float(deltaMouse[1]) * lookSpeed * deltaTime;
-        verticalAngle -= float(deltaMouse[0]) * lookSpeed * deltaTime;
+        horizontalAngle -= float(deltaMouse[0]) * lookSpeed * deltaTime;
+        verticalAngle -= float(deltaMouse[1]) * lookSpeed * deltaTime;
+        verticalAngle = glm::clamp<float>(verticalAngle, -M_PI_2 * 0.9, M_PI_2 * 0.9);
 
-        std::cout << __func__ << ": " << deltaMouse << std::endl;
+        dir = utility::math::coordinates::sphericalToCartesian(glm::vec3(1, horizontalAngle, verticalAngle));
     }
 
     inline void processPlayerInput(GLFWwindow* window) {
@@ -62,52 +67,7 @@ public:
         processKeyboardInput(window, deltaTime);
         processMouseInput(window, deltaTime);
 
-//        int windowWidth, windowHeight;
-//        glfwGetWindowSize(window, &windowWidth, &windowHeight);
-//
-//        double xPos, yPos;
-//        glfwGetCursorPos(window, &xPos, &yPos);
-////        glfwSetCursorPos(window, windowWidth / 2, windowHeight / 2);
-//        glm::vec2 deltaMouse = {xPos - (windowWidth / 2), yPos - (windowHeight / 2)};
-
-
-//        int windowWidth, windowHeight;
-//        glfwGetWindowSize(window, &windowWidth, &windowHeight);
-//        glm::vec2 windowDimensions(windowWidth, windowHeight);
-//
-//        double xPos, yPos;
-//        glfwGetCursorPos(window, &xPos, &yPos);
-//        glm::vec2 cursor(xPos, yPos);
-//
-//        glfwSetCursorPos(window, windowWidth / 2, windowHeight / 2);
-//        glm::vec2 deltaMouse = cursor - (windowDimensions / 2.0f;
-//        std::cout << __func__ << ", windowDimensions: " << windowDimensions[0] << ", " << windowDimensions[1] << std::endl;
-//        std::cout << __func__ << ", cursor: " << cursor[0] << ", " << cursor[1] << std::endl;
-//        std::cout << __func__ << ", deltaMouse: " << deltaMouse[0] << ", " << deltaMouse[1] << std::endl;
-
-
-//        glm::mat4 trans;
-//        trans = glm::translate(trans, pos);
-//
-//        horizontalAngle -= float(deltaMouse[1]) * lookSpeed * deltaTime;
-//        verticalAngle -= float(deltaMouse[0]) * lookSpeed * deltaTime;
-////        horizontalAngle = glm::clamp(horizontalAngle, -180.0f, 180.0f);
-////        verticalAngle = glm::clamp(verticalAngle, -80.0f, 80.0f);
-//
-//        glm::mat4 rot;
-//        rot = glm::rotate(rot, horizontalAngle, glm::vec3(0.0f, 1.0f, 0.0f));
-//        rot = glm::rotate(rot, verticalAngle, glm::vec3(0.0f, 0.0f, 1.0f));
-
-////        std::cout << __func__ << ", mouse: " << xPos << ", " << yPos << std::endl;
-//        std::cout << __func__ << ", deltaMouse: " << deltaMouse[0] << ", " << deltaMouse[1] << std::endl;
-////        std::cout << __func__ << ", pos: " << pos << std::endl;
-//        std::cout << __func__ << ", angles: " << horizontalAngle << ", " << verticalAngle << std::endl;
-////        view = trans * rot;
-////        std::cout << __func__ << ", view: " << view << std::endl;
-//
-//        glm::vec4 dir = rot * glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
-//        std::cout << __func__ << ", dir: " << dir << std::endl;
-//        lookAt(pos + glm::vec3(dir.x, dir.y, dir.z));
+        lookAt(pos + dir);
     }
 
 
@@ -122,7 +82,7 @@ public:
     glm::mat4 proj;
 
     float speed = 10;
-    float lookSpeed = 10;
+    float lookSpeed = 0.5;
     float lastUpdateTime = 0;
 };
 
