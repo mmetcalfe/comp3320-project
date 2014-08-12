@@ -5,8 +5,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "debug.h"
-#include "strutil.h"
+#include "utility/debug.h"
+#include "utility/strutil.h"
 
 namespace NUGL {
     inline void printShaderDebugInfo(GLuint shaderId) {

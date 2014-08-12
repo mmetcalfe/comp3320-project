@@ -9,7 +9,7 @@
 #include <png++/png.hpp>
 #include <jpeglib.h>
 
-#include "debug.h"
+#include "utility/debug.h"
 
 namespace NUGL {
     class Texture {

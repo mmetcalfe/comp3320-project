@@ -6,7 +6,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "debug.h"
+#include "utility/debug.h"
 
 namespace NUGL {
     inline int getSizeOfOpenGlType(GLenum type) {

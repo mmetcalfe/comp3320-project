@@ -6,8 +6,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "debug.h"
-#include "Shader.h"
+#include "utility/debug.h"
+#include "NUGL/Shader.h"
 
 namespace NUGL {
     inline void printProgramDebugInfo(GLuint programId) {
