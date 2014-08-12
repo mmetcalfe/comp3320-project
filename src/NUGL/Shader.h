@@ -58,12 +58,13 @@ namespace NUGL {
             glDeleteShader(shaderId);
         }
 
-        inline void setSource(std::string sourceString) {
+        inline void setSource(const std::string& sourceString) {
             auto shaderSource = sourceString.c_str();
             glShaderSource(shaderId, 1, &shaderSource, nullptr);
         }
 
-        inline void setSourceFromFile(std::string fileName) {
+        inline void setSourceFromFile(const std::string& fileName) {
+            std::cout << __func__ << ": " << fileName << std::endl;
             auto fileString = utility::strutil::getFileString(fileName);
             auto shaderSource = fileString.c_str();
             glShaderSource(shaderId, 1, &shaderSource, nullptr);

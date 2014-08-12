@@ -44,16 +44,16 @@ int main(int argc, char** argv) {
 
 
     auto flatProgram = NUGL::ShaderProgram::createFromFiles({
-            {GL_VERTEX_SHADER, "vs_pos_mvp.gl"},
-            {GL_FRAGMENT_SHADER, "fs_white.gl"},
+            {GL_VERTEX_SHADER, "src/shaders/vs_pos_mvp.gl"},
+            {GL_FRAGMENT_SHADER, "src/shaders/fs_white.gl"},
     });
     flatProgram.bindFragDataLocation(0, "outColor");
     flatProgram.link();
 
 
     auto textureProgram = NUGL::ShaderProgram::createFromFiles({
-            {GL_VERTEX_SHADER, "vs_pos_tex_mvp.gl"},
-            {GL_FRAGMENT_SHADER, "fs_tex.gl"},
+            {GL_VERTEX_SHADER, "src/shaders/vs_pos_tex_mvp.gl"},
+            {GL_FRAGMENT_SHADER, "src/shaders/fs_tex.gl"},
     });
     textureProgram.bindFragDataLocation(0, "outColor");
     textureProgram.link();

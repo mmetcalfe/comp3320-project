@@ -54,6 +54,7 @@ namespace NUGL {
         static inline ShaderProgram createFromFiles(std::vector<std::pair<GLenum, const std::string&>> shaders) {
             ShaderProgram program;
             for (auto& pair : shaders) {
+                std::cout << __func__ << ": " << pair.second << std::endl;
                 auto shader = std::make_shared<Shader>(pair.first, pair.second);
                 shader->compile();
                 shader->printDebugInfo();

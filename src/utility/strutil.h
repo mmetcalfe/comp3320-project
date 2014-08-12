@@ -12,7 +12,7 @@ namespace strutil {
         if (!ifs.good()) {
             std::stringstream errMsg;
             errMsg << __func__ << ": Could not open file '" << fileName << "'.";
-            throw std::invalid_argument(errMsg.str().c_str());
+            throw std::invalid_argument(errMsg.str());
         }
 
         std::string content( (std::istreambuf_iterator<char>(ifs) ),
