@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
     checkForAndPrintGLError(__FILE__, __LINE__);
 
     // Setup Camera:
-    camera->pos = glm::vec3(50.0f, 50.0f, 30.0f);
+    camera->pos = glm::vec3(30.0f, 30.0f, 30.0f);
     camera->fov = 45;
     camera->speed = 10;
     camera->lookSpeed = 0.5;
@@ -151,7 +151,7 @@ int main(int argc, char** argv) {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, GL_TRUE);
 
-//        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+//        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
     // Clean up GLFW:

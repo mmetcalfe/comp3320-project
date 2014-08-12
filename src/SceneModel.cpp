@@ -31,14 +31,14 @@ unsigned int getPostProcessingFlags() {
     pFlags |= aiProcess_RemoveRedundantMaterials; // Searches for redundant/unreferenced materials and removes them.
 //    pFlags |= aiProcess_FixInfacingNormals;       // This step tries to determine which meshes have normal vectors that are facing inwards and inverts them.
     pFlags |= aiProcess_SortByPType;              // This step splits meshes with more than one primitive type in homogeneous sub-meshes.
-//    pFlags |= aiProcess_FindDegenerates;          // This step searches all meshes for degenerate primitives and converts them to proper lines or points.
-//    pFlags |= aiProcess_FindInvalidData;          // This step searches all meshes for invalid data, such as zeroed normal vectors or invalid UV coords and removes/fixes them. This is intended to get rid of some common exporter errors.
-//    pFlags |= aiProcess_GenUVCoords;              // This step converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
-//    pFlags |= aiProcess_TransformUVCoords;        // This step applies per-texture UV transformations and bakes them into stand-alone vtexture coordinate channels.
+    pFlags |= aiProcess_FindDegenerates;          // This step searches all meshes for degenerate primitives and converts them to proper lines or points.
+    pFlags |= aiProcess_FindInvalidData;          // This step searches all meshes for invalid data, such as zeroed normal vectors or invalid UV coords and removes/fixes them. This is intended to get rid of some common exporter errors.
+    pFlags |= aiProcess_GenUVCoords;              // This step converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
+    pFlags |= aiProcess_TransformUVCoords;        // This step applies per-texture UV transformations and bakes them into stand-alone vtexture coordinate channels.
 //    pFlags |= aiProcess_FindInstances;            // This step searches for duplicate meshes and replaces them with references to the first mesh.
-//    pFlags |= aiProcess_OptimizeMeshes;           // A postprocessing step to reduce the number of meshes.
-//    pFlags |= aiProcess_OptimizeGraph;            // A postprocessing step to optimize the scene hierarchy.
-//    pFlags |= aiProcess_FlipUVs;                  // This step flips all UV coordinates along the y-axis and adjusts material settings and bitangents accordingly.
+    pFlags |= aiProcess_OptimizeMeshes;           // A postprocessing step to reduce the number of meshes.
+    pFlags |= aiProcess_OptimizeGraph;            // A postprocessing step to optimize the scene hierarchy.
+    pFlags |= aiProcess_FlipUVs;                  // This step flips all UV coordinates along the y-axis and adjusts material settings and bitangents accordingly.
 //    pFlags |= aiProcess_FlipWindingOrder;         // This step adjusts the output face winding order to be CW.
 //    pFlags |= aiProcess_SplitByBoneCount;         // This step splits meshes with many bones into sub-meshes so that each su-bmesh has fewer or as many bones as a given limit.
 //    pFlags |= aiProcess_Debone;                   // This step removes bones losslessly or according to some threshold.
@@ -56,17 +56,15 @@ SceneModel::Material copyAiMaterial(const std::string& fileName, const aiMateria
 
     auto diffTexCount = srcMaterial->GetTextureCount(aiTextureType_DIFFUSE);
     for (unsigned int t = 0; t < diffTexCount; t++) {
-        std::string texString;
-
         aiString path;
         srcMaterial->GetTexture(aiTextureType_DIFFUSE, t, &path);
         boost::filesystem::path p(fileName);
         boost::filesystem::path dir = p.parent_path();
         dir += path.C_Str();
-
-        std::cout << __FILE__ << ", " << __LINE__ << ": " << dir.string() << std::endl;
+//        std::cout << __FILE__ << ", " << __LINE__ << ": " << dir.string() << std::endl;
 
         material.texDiffuse = std::make_unique<NUGL::Texture>(GL_TEXTURE0 + t, GL_TEXTURE_2D);
+
         if (dir.extension() == "png") {
             material.texDiffuse->loadFromPNG(dir.string());
         } else {
@@ -164,9 +162,11 @@ void SceneModel::createMeshBuffers() {
 
             if (mesh.isTextured()) {
                 auto& texCoord = mesh.texCoords[i];
-#warning Texcoords are inverted!
-                vertices.push_back(1 - texCoord.x); // TODO: fix texcoords ??
-                vertices.push_back(1 - texCoord.y);
+//#warning Texcoords are inverted!
+//                vertices.push_back(1 - texCoord.x); // TODO: fix texcoords ??
+//                vertices.push_back(1 - texCoord.y);
+                vertices.push_back(texCoord.x);
+                vertices.push_back(texCoord.y);
             }
         }
         mesh.vertexBuffer = std::make_unique<NUGL::Buffer>();
@@ -223,6 +223,7 @@ void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 &parentModel, Camera
         mesh.shaderProgram->use();
 
         if (mesh.isTextured()) {
+            mesh.material->texDiffuse->bind();
             mesh.shaderProgram->setUniform("tex", mesh.material->texDiffuse->unit() - GL_TEXTURE0);
         }
 
