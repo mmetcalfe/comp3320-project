@@ -50,6 +50,7 @@ namespace NUGL {
         }
 
         Shader(GLenum shaderType, const std::string& sourceFileName) {
+            std::cout << __func__ << ": " << sourceFileName << std::endl;
             shaderId = glCreateShader(shaderType);
             setSourceFromFile(sourceFileName);
         }

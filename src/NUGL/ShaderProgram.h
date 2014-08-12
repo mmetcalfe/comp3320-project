@@ -51,7 +51,7 @@ namespace NUGL {
             programId = glCreateProgram();
         }
 
-        static inline ShaderProgram createFromFiles(std::vector<std::pair<GLenum, const std::string&>> shaders) {
+        static inline ShaderProgram createFromFiles(std::vector<std::pair<GLenum, std::string>> shaders) {
             ShaderProgram program;
             for (auto& pair : shaders) {
                 std::cout << __func__ << ": " << pair.second << std::endl;
@@ -72,7 +72,7 @@ namespace NUGL {
             glAttachShader(programId, shader->id());
         }
 
-        inline void bindFragDataLocation(GLuint colorNumber, const std::string name) {
+        inline void bindFragDataLocation(GLuint colorNumber, const std::string& name) {
             glBindFragDataLocation(programId, colorNumber, name.c_str());
         }
 
