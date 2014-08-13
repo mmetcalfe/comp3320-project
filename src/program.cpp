@@ -103,6 +103,7 @@ int main(int argc, char** argv) {
     eagle5Model.createVertexArrays();
     checkForAndPrintGLError(__FILE__, __LINE__);
 
+
     // Setup Camera:
     camera->pos = glm::vec3(0.0f, 0.0f, 10.0f);
     camera->fov = 45;
@@ -127,7 +128,7 @@ int main(int argc, char** argv) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glm::mat4 model;
-        model = glm::rotate(model, 90.0f, glm::vec3(1.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
 //        float scale = 10;
 //        float scale = 1.0;
         float scale = 0.2;
