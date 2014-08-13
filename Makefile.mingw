@@ -1,7 +1,7 @@
 CXX = g++
 STD = -std=c++11
 INC = -Isrc
-CFLAGS = -g -O0 -Wpedantic -Wextra -Wall
+CFLAGS = -g -O0 -Wpedantic -Wextra -Wall -Wno-unused-parameter
 DEFS = -DGLM_FORCE_RADIANS -D_USE_MATH_DEFINES -DGLEW_STATIC
 DEPFLAGS = -MMD -MP
 EXE = game
