@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
     // Load shaders:
     auto flatProgram = NUGL::ShaderProgram::createFromFiles({
             {GL_VERTEX_SHADER, "src/shaders/vs_pos_mvp.gl"},
-            {GL_FRAGMENT_SHADER, "src/shaders/fs_white.gl"},
+            {GL_FRAGMENT_SHADER, "src/shaders/fs_uniform.gl"},
     });
     flatProgram.bindFragDataLocation(0, "outColor");
     flatProgram.link();
@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
     checkForAndPrintGLError(__FILE__, __LINE__);
 
     // Setup Camera:
-    camera->pos = glm::vec3(30.0f, 30.0f, 30.0f);
+    camera->pos = glm::vec3(0.0f, 0.0f, 10.0f);
     camera->fov = 45;
     camera->speed = 10;
     camera->lookSpeed = 0.5;

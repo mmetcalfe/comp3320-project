@@ -85,18 +85,18 @@ namespace utility {
         for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
             auto *material = scene->mMaterials[i];
             std::cout << "  Material " << i << ": {" << std::endl;
-//        std::cout << "    NumProperties: " << material->mNumProperties << "," << std::endl;
-//        std::cout << "    Properties " << " {" << std::endl;
-//        for (int p = 0; p < material->mNumProperties; p++) {
-//            auto* property = material->mProperties[p];
-//            std::cout << "      " << property->mKey.C_Str() << ": {" << std::endl // API_MATKEY_XXX defines
-//                      << "        mType: " << getAiPropertyTypeInfoName(property->mType) << "," << std::endl
-//                      << "        mSemantic: " << getAiTextureTypeName(aiTextureType(property->mSemantic)) << "," << std::endl
-//                      << "        mIndex: " << property->mIndex << "," << std::endl
-//                      << "        mDataLength: " << property->mDataLength << "," << std::endl
-//                      << "      }," << std::endl;
-//        }
-//        std::cout << "    }" << std::endl;
+            std::cout << "    NumProperties: " << material->mNumProperties << "," << std::endl;
+            std::cout << "    Properties " << " {" << std::endl;
+            for (unsigned int p = 0; p < material->mNumProperties; p++) {
+                auto* property = material->mProperties[p];
+                std::cout << "      " << property->mKey.C_Str() << ": {" << std::endl // API_MATKEY_XXX defines
+                          << "        mType: " << getAiPropertyTypeInfoName(property->mType) << "," << std::endl
+                          << "        mSemantic: " << getAiTextureTypeName(aiTextureType(property->mSemantic)) << "," << std::endl
+                          << "        mIndex: " << property->mIndex << "," << std::endl
+                          << "        mDataLength: " << property->mDataLength << "," << std::endl
+                          << "      }," << std::endl;
+            }
+            std::cout << "    }" << std::endl;
 
             auto diffTexCount = material->GetTextureCount(aiTextureType_DIFFUSE);
             if (diffTexCount > 0) {

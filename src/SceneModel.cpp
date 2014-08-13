@@ -34,7 +34,7 @@ unsigned int getPostProcessingFlags() {
     pFlags |= aiProcess_FindDegenerates;          // This step searches all meshes for degenerate primitives and converts them to proper lines or points.
     pFlags |= aiProcess_FindInvalidData;          // This step searches all meshes for invalid data, such as zeroed normal vectors or invalid UV coords and removes/fixes them. This is intended to get rid of some common exporter errors.
     pFlags |= aiProcess_GenUVCoords;              // This step converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
-    pFlags |= aiProcess_TransformUVCoords;        // This step applies per-texture UV transformations and bakes them into stand-alone vtexture coordinate channels.
+//    pFlags |= aiProcess_TransformUVCoords;        // This step applies per-texture UV transformations and bakes them into stand-alone vtexture coordinate channels.
 //    pFlags |= aiProcess_FindInstances;            // This step searches for duplicate meshes and replaces them with references to the first mesh.
     pFlags |= aiProcess_OptimizeMeshes;           // A postprocessing step to reduce the number of meshes.
     pFlags |= aiProcess_OptimizeGraph;            // A postprocessing step to optimize the scene hierarchy.
@@ -225,6 +225,9 @@ void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 &parentModel, Camera
         if (mesh.isTextured()) {
             mesh.material->texDiffuse->bind();
             mesh.shaderProgram->setUniform("tex", mesh.material->texDiffuse->unit() - GL_TEXTURE0);
+        } else {
+            mesh.shaderProgram->setUniform("materialColour", mesh.material->colDiffuse);
+//            std::cout << __FILE__ << ", " << __LINE__ << ": " << mesh.material->colDiffuse << std::endl;
         }
 
         mesh.vertexArray->bind();

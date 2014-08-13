@@ -53,7 +53,6 @@ namespace NUGL {
         static inline ShaderProgram createFromFiles(std::vector<std::pair<GLenum, std::string>> shaders) {
             ShaderProgram program;
             for (auto& pair : shaders) {
-                std::cout << __func__ << ": " << pair.second << std::endl;
                 auto shader = std::make_shared<Shader>(pair.first, pair.second);
                 shader->compile();
                 shader->printDebugInfo();
@@ -110,10 +109,17 @@ namespace NUGL {
         }
         inline void setUniform(GLint uniLoc, const glm::mat4& value, GLboolean transpose = GL_FALSE) {
             glUniformMatrix4fv(uniLoc, 1, transpose, glm::value_ptr(value));
+            checkForAndPrintGLError(__FILE__, __LINE__);
+        }
+
+        inline void setUniform(GLint uniLoc, const glm::vec3& value) {
+            glUniform3fv(uniLoc, 1, glm::value_ptr(value));
+            checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
         inline void setUniform(GLint uniLoc, GLint value) {
             glUniform1i(uniLoc, value);
+            checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
     private:

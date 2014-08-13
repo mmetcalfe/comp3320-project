@@ -49,7 +49,6 @@ namespace NUGL {
         }
 
         Shader(GLenum shaderType, const std::string& sourceFileName) {
-            std::cout << __func__ << ": " << sourceFileName << std::endl;
             shaderId = glCreateShader(shaderType);
             setSourceFromFile(sourceFileName);
         }
@@ -61,17 +60,19 @@ namespace NUGL {
         inline void setSource(const std::string& sourceString) {
             auto shaderSource = sourceString.c_str();
             glShaderSource(shaderId, 1, &shaderSource, nullptr);
+            checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
         inline void setSourceFromFile(const std::string& fileName) {
-            std::cout << __func__ << ": " << fileName << std::endl;
             auto fileString = utility::strutil::getFileString(fileName);
             auto shaderSource = fileString.c_str();
             glShaderSource(shaderId, 1, &shaderSource, nullptr);
+            checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
         inline void compile() {
             glCompileShader(shaderId);
+            checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
         inline void printDebugInfo() {
