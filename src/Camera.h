@@ -35,6 +35,12 @@ public:
             move = glm::normalize(move);
         }
 
+        if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT))
+            move *= 5;
+
+        if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL))
+            move *= 0.2;
+
         glm::vec3 right = glm::cross(dir, up);
         pos += dir * move.x * speed * deltaTime;
         pos += right * move.y * speed * deltaTime;
