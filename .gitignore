@@ -1,18 +1,22 @@
 # CLion
 .idea/
 
+# Assets aren't stored in git
+/assets/
+
 # Build and CMake files
 build/
 CMakeCache.txt
+Makefile
 CMakeFiles/
 cmake_install.cmake
 install_manifest.txt
 
+# Windows Makefile build
 *.d
 *.o
 /game
 /game.exe
-assets/
 
 # Miscellaneous
 *.swp
