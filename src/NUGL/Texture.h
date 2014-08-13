@@ -8,6 +8,8 @@
 #include <png++/png.hpp>
 #include <jpeglib.h>
 
+#include <boost/filesystem.hpp>
+
 #include "utility/debug.h"
 
 namespace NUGL {
@@ -28,6 +30,15 @@ namespace NUGL {
         inline void bind() {
             glActiveTexture(textureUnit);
             glBindTexture(textureTarget, textureId);
+        }
+
+        inline void loadFromImage(const std::string& fileName) {
+            boost::filesystem::path p(fileName);
+            if (p.extension() == "png") {
+                loadFromPNG(fileName);
+            } else {
+                loadFromJPEG(fileName);
+            }
         }
 
         inline void loadFromPNG(const std::string& fileName) {

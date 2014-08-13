@@ -64,17 +64,12 @@ SceneModel::Material copyAiMaterial(const std::string& fileName, const aiMateria
 //        std::cout << __FILE__ << ", " << __LINE__ << ": " << dir.string() << std::endl;
 
         material.texDiffuse = std::make_unique<NUGL::Texture>(GL_TEXTURE0 + t, GL_TEXTURE_2D);
-
-        if (dir.extension() == "png") {
-            material.texDiffuse->loadFromPNG(dir.string());
-        } else {
-            material.texDiffuse->loadFromJPEG(dir.string());
-        }
+        material.texDiffuse->loadFromImage(dir.string());
         material.texDiffuse->setParam(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         material.texDiffuse->setParam(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         material.texDiffuse->setParam(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         material.texDiffuse->setParam(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        break; // Only use first texture
+        break; // Only use first texture. TODO: Support multiple textures.
     }
 
     return std::move(material);
@@ -204,7 +199,6 @@ void SceneModel::draw(glm::mat4& model, Camera& camera) {
 
 void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 &parentModel, Camera& camera) {
     glm::mat4 model = parentModel * node.transform;
-//    glm::mat4 model = node.transform * parentModel;
 
     textureProgram->use();
     textureProgram->setUniform("model", model);
@@ -227,7 +221,6 @@ void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 &parentModel, Camera
             mesh.shaderProgram->setUniform("tex", mesh.material->texDiffuse->unit() - GL_TEXTURE0);
         } else {
             mesh.shaderProgram->setUniform("materialColour", mesh.material->colDiffuse);
-//            std::cout << __FILE__ << ", " << __LINE__ << ": " << mesh.material->colDiffuse << std::endl;
         }
 
         mesh.vertexArray->bind();

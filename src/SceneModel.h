@@ -39,7 +39,6 @@ public:
         std::shared_ptr<NUGL::ShaderProgram> shaderProgram;
 
         inline bool isTextured() {
-//            return materials[mesh.material].texDiffuse != nullptr && !texCoords.empty();
             return material->texDiffuse != nullptr && !texCoords.empty();
         }
     };
