@@ -9,7 +9,10 @@ SET(VERSION_PATCH 0)
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
 # Compiler settings
-SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -O0 -Wpedantic -Wextra -Wall -Wno-unused-parameter -DGLEW_STATIC -std=c++11" )
+SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -g -O0 -Wpedantic -Wextra -Wall -Wno-unused-parameter -std=c++11" )
+ADD_DEFINITIONS(-DGLEW_STATIC)
+ADD_DEFINITIONS(-DGLM_FORCE_RADIANS)
+ADD_DEFINITIONS(-D_USE_MATH_DEFINES)
 
 # Shared libraries
 FIND_PACKAGE(OpenGL REQUIRED)
