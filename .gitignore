@@ -3,11 +3,16 @@
 
 # Build and CMake files
 build/
-Makefile
 CMakeCache.txt
 CMakeFiles/
 cmake_install.cmake
 install_manifest.txt
+
+*.d
+*.o
+/game
+/game.exe
+assets/
 
 # Miscellaneous
 *.swp

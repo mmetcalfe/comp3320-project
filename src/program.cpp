@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
 
 
     // Load assets:
-    auto eagle5Model = SceneModel::loadFromFile("assets/eagle_5_transport/eagle_5_transport_landed.obj");
+    auto eagle5Model = SceneModel::loadFromFile("assets/eagle 5 transport/eagle 5 transport landed.obj");
 //    auto eagle5Model = SceneModel::loadFromFile("assets/galaxy_cruiser_3ds.3DS");
 //    auto eagle5Model = SceneModel::loadFromFile("assets/cube.obj");
     eagle5Model.flatProgram = std::make_shared<NUGL::ShaderProgram>(flatProgram);

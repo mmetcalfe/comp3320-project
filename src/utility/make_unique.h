@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 // Patch for std::make_unique in c++11 (should be fixed in c++14)
 #if __cplusplus == 201103L
 namespace std {
