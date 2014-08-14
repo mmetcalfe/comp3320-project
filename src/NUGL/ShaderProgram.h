@@ -28,20 +28,26 @@ namespace NUGL {
         glGetProgramiv(programId, GL_ACTIVE_UNIFORMS, &activeUniforms);
         GLint activeUniformMaxLength;
         glGetProgramiv(programId, GL_ACTIVE_UNIFORM_MAX_LENGTH, &activeUniformMaxLength);
-        char buffer[512];
-        glGetProgramInfoLog(programId, 512, nullptr, buffer);
-        printf("printProgramDebugInfo(%d) {\n", programId);
-        printf("  GL_DELETE_STATUS: %s,\n", deleteStatus == GL_TRUE ? "Flagged for deletion" : "False");
-        printf("  GL_LINK_STATUS: %s,\n", linkStatus == GL_TRUE ? "Success" : "Failure");
-        printf("  GL_VALIDATE_STATUS: %s,\n", validateStatus == GL_TRUE ? "Success" : "Failure");
-        printf("  GL_INFO_LOG_LENGTH: %d,\n", infoLogLength);
-        printf("  GL_ATTACHED_SHADERS: %d,\n", attachedShaders);
-        printf("  GL_ACTIVE_ATTRIBUTES: %d,\n", activeAttributes);
-        printf("  GL_ACTIVE_ATTRIBUTE_MAX_LENGTH: %d,\n", activeAttributeMaxLength);
-        printf("  GL_ACTIVE_UNIFORMS: %d,\n", activeUniforms);
-        printf("  GL_ACTIVE_UNIFORM_MAX_LENGTH: %d,\n", activeUniformMaxLength);
-        printf("  glGetProgramInfoLog: %s,\n", buffer);
-        printf("}\n");
+        char infoLogBuff[512];
+        glGetProgramInfoLog(programId, 512, nullptr, infoLogBuff);
+        std::cout << "printProgramDebugInfo(" << programId << ") {" << std::endl;
+        std::cout << "  GL_DELETE_STATUS: " << (deleteStatus == GL_TRUE ? "Flagged for deletion" : "False") << "," << std::endl;
+        std::cout << "  GL_LINK_STATUS: " << (linkStatus == GL_TRUE ? "Success" : "Failure") << "," << std::endl;
+        std::cout << "  GL_VALIDATE_STATUS: " << (validateStatus == GL_TRUE ? "Success" : "Failure") << "," << std::endl;
+        std::cout << "  GL_INFO_LOG_LENGTH: " << infoLogLength << "," << std::endl;
+        std::cout << "  GL_ATTACHED_SHADERS: " << attachedShaders << "," << std::endl;
+        std::cout << "  GL_ACTIVE_ATTRIBUTES: " << activeAttributes << "," << std::endl;
+        std::cout << "  GL_ACTIVE_ATTRIBUTE_MAX_LENGTH: " << activeAttributeMaxLength << "," << std::endl;
+        std::cout << "  GL_ACTIVE_UNIFORMS: " << activeUniforms << "," << std::endl;
+        std::cout << "  GL_ACTIVE_UNIFORM_MAX_LENGTH: " << activeUniformMaxLength << "," << std::endl;
+        std::cout << "  glGetProgramInfoLog: " << infoLogBuff << "," << std::endl;
+        std::cout << "}\n" << std::endl;
+
+        if (linkStatus != GL_TRUE) {
+            std::stringstream errMsg;
+            errMsg << __func__ << ": Link error in shader program: " << infoLogBuff << ".";
+            throw std::logic_error(errMsg.str());
+        }
     }
 
     class ShaderProgram {

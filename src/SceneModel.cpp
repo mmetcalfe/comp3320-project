@@ -97,12 +97,12 @@ SceneModel SceneModel::loadFromFile(const std::string& fileName) {
     if(!scene) {
         std::stringstream errMsg;
         errMsg << __func__
-                << "Could not import model from '" << fileName << "': "
+                << ": Could not import model from '" << fileName << "': "
                 << importer.GetErrorString() << "'.";
         throw std::invalid_argument(errMsg.str().c_str());
     }
 
-    utility::printAiSceneInfo(scene);
+//    utility::printAiSceneInfo(scene);
 
     SceneModel sceneModel;
 
@@ -184,6 +184,10 @@ void SceneModel::createVertexArrays() {
             program = textureProgram;
         }
 
+        if (mesh.isEnvironmentMapped()) {
+            program = environmentMapProgram;
+        }
+
         mesh.shaderProgram = program;
 
         mesh.shaderProgram->use();
@@ -200,15 +204,27 @@ void SceneModel::draw(glm::mat4& model, Camera& camera) {
 void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 &parentModel, Camera& camera) {
     glm::mat4 model = parentModel * node.transform;
 
-    textureProgram->use();
-    textureProgram->setUniform("model", model);
-    textureProgram->setUniform("view", camera.view);
-    textureProgram->setUniform("proj", camera.proj);
+    // TODO: Find a better way of managing shader programs!
+    if (textureProgram != nullptr) {
+        textureProgram->use();
+        textureProgram->setUniform("model", model);
+        textureProgram->setUniform("view", camera.view);
+        textureProgram->setUniform("proj", camera.proj);
+    }
 
-    flatProgram->use();
-    flatProgram->setUniform("model", model);
-    flatProgram->setUniform("view", camera.view);
-    flatProgram->setUniform("proj", camera.proj);
+    if (flatProgram != nullptr) {
+        flatProgram->use();
+        flatProgram->setUniform("model", model);
+        flatProgram->setUniform("view", camera.view);
+        flatProgram->setUniform("proj", camera.proj);
+    }
+
+    if (environmentMapProgram != nullptr) {
+        environmentMapProgram->use();
+        environmentMapProgram->setUniform("model", model);
+        environmentMapProgram->setUniform("view", camera.view);
+        environmentMapProgram->setUniform("proj", camera.proj);
+    }
 
     checkForAndPrintGLError(__FILE__, __LINE__);
 
@@ -216,7 +232,13 @@ void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 &parentModel, Camera
         auto& mesh = meshes[index];
         mesh.shaderProgram->use();
 
-        if (mesh.isTextured()) {
+        if (mesh.isEnvironmentMapped()) {
+            checkForAndPrintGLError(__FILE__, __LINE__);
+            mesh.material->environmentMap->bind();
+            checkForAndPrintGLError(__FILE__, __LINE__);
+            // TODO: Make setting textures as uniforms cleaner.
+            mesh.shaderProgram->setUniform("environmentMap", mesh.material->environmentMap->unit() - GL_TEXTURE0);
+        } else if (mesh.isTextured()) {
             mesh.material->texDiffuse->bind();
             mesh.shaderProgram->setUniform("tex", mesh.material->texDiffuse->unit() - GL_TEXTURE0);
         } else {
@@ -228,6 +250,7 @@ void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 &parentModel, Camera
         mesh.vertexBuffer->bind(GL_ARRAY_BUFFER);
         mesh.elementBuffer->bind(GL_ELEMENT_ARRAY_BUFFER);
         glDrawElements(GL_TRIANGLES, mesh.elements.size(), GL_UNSIGNED_INT, 0);
+
 
         checkForAndPrintGLError(__FILE__, __LINE__);
     }

@@ -22,6 +22,7 @@ public:
     struct Material {
         glm::vec3 colDiffuse;
         std::unique_ptr<NUGL::Texture> texDiffuse;
+        std::unique_ptr<NUGL::Texture> environmentMap;
     };
 
     struct Mesh {
@@ -41,6 +42,10 @@ public:
         inline bool isTextured() {
             return material->texDiffuse != nullptr && !texCoords.empty();
         }
+
+        inline bool isEnvironmentMapped() {
+            return material->environmentMap != nullptr;
+        }
     };
 
     struct Node {
@@ -55,8 +60,7 @@ public:
 
     std::shared_ptr<NUGL::ShaderProgram> flatProgram;
     std::shared_ptr<NUGL::ShaderProgram> textureProgram;
-
-//    std::unique_ptr<NUGL::VertexArray> vertexArray;
+    std::shared_ptr<NUGL::ShaderProgram> environmentMapProgram;
 
     void createMeshBuffers();
     void createVertexArrays();

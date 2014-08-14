@@ -83,7 +83,7 @@ int main(int argc, char** argv) {
     });
     flatProgram.bindFragDataLocation(0, "outColor");
     flatProgram.link();
-
+    flatProgram.printDebugInfo();
 
     auto textureProgram = NUGL::ShaderProgram::createFromFiles({
             {GL_VERTEX_SHADER, "src/shaders/vs_pos_tex_mvp.gl"},
@@ -91,18 +91,57 @@ int main(int argc, char** argv) {
     });
     textureProgram.bindFragDataLocation(0, "outColor");
     textureProgram.link();
+    textureProgram.printDebugInfo();
+
+    auto environmentMapProgram = NUGL::ShaderProgram::createFromFiles({
+            {GL_VERTEX_SHADER, "src/shaders/vs_pos_map_mvp.gl"},
+            {GL_FRAGMENT_SHADER, "src/shaders/fs_map.gl"},
+    });
+    environmentMapProgram.bindFragDataLocation(0, "outColor");
+    environmentMapProgram.link();
+    environmentMapProgram.printDebugInfo();
+
+    auto sharedFlatProgram = std::make_shared<NUGL::ShaderProgram>(flatProgram);
+    auto sharedTextureProgram = std::make_shared<NUGL::ShaderProgram>(textureProgram);
+    auto sharedEnvironmentMapProgram = std::make_shared<NUGL::ShaderProgram>(environmentMapProgram);
 
 
     // Load assets:
     auto eagle5Model = SceneModel::loadFromFile("assets/eagle 5 transport/eagle 5 transport landed.obj");
-//    auto eagle5Model = SceneModel::loadFromFile("assets/galaxy_cruiser_3ds.3DS");
-//    auto eagle5Model = SceneModel::loadFromFile("assets/cube.obj");
-    eagle5Model.flatProgram = std::make_shared<NUGL::ShaderProgram>(flatProgram);
-    eagle5Model.textureProgram = std::make_shared<NUGL::ShaderProgram>(textureProgram);
+    eagle5Model.flatProgram = sharedFlatProgram;
+    eagle5Model.textureProgram = sharedTextureProgram;
     eagle5Model.createMeshBuffers();
     eagle5Model.createVertexArrays();
     checkForAndPrintGLError(__FILE__, __LINE__);
 
+    auto cubeMap = std::make_unique<NUGL::Texture>(GL_TEXTURE0, GL_TEXTURE_CUBE_MAP);
+    cubeMap->loadCubeMap({
+            "assets/PereaBeach1/posx.jpg",
+            "assets/PereaBeach1/negx.jpg",
+            "assets/PereaBeach1/posy.jpg",
+            "assets/PereaBeach1/negy.jpg",
+            "assets/PereaBeach1/posz.jpg",
+            "assets/PereaBeach1/negz.jpg",
+    });
+    cubeMap->setParam(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    cubeMap->setParam(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    cubeMap->setParam(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    cubeMap->setParam(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    cubeMap->setParam(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    cubeMap->setParam(GL_TEXTURE_BASE_LEVEL, 0);
+    cubeMap->setParam(GL_TEXTURE_MAX_LEVEL, 0);
+//    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+    checkForAndPrintGLError(__func__, __LINE__);
+
+    auto cubeModel = SceneModel::loadFromFile("assets/cube.obj");
+    cubeModel.flatProgram = sharedFlatProgram;
+    cubeModel.textureProgram = sharedTextureProgram;
+    cubeModel.environmentMapProgram = sharedEnvironmentMapProgram;
+    cubeModel.meshes[0].material->environmentMap = std::move(cubeMap);
+    checkForAndPrintGLError(__func__, __LINE__);
+    cubeModel.createMeshBuffers();
+    checkForAndPrintGLError(__func__, __LINE__);
+    cubeModel.createVertexArrays();
 
     // Setup Camera:
     camera->pos = glm::vec3(0.0f, 0.0f, 10.0f);
@@ -123,27 +162,28 @@ int main(int argc, char** argv) {
 //    glFrontFace (GL_CCW); // GL_CCW for counter clock-wise
 
     while (!glfwWindowShouldClose(window)) {
-        /* Render here */
+        // Begin rendering:
         glClearColor(0.5, 0.5, 0.5, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::mat4 model;
-        model = glm::rotate(model, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-//        float scale = 10;
-//        float scale = 1.0;
+        // Draw ship:
         float scale = 0.2;
-        model = glm::scale(model, glm::vec3(scale, scale, scale));
+        glm::mat4 shipModel;
+        shipModel = glm::scale(shipModel, glm::vec3(scale, scale, scale));
+        shipModel = glm::rotate(shipModel, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+        eagle5Model.draw(shipModel, *camera);
 
-        checkForAndPrintGLError(__FILE__, __LINE__);
+        // Draw skybox:
+        glm::mat4 mapModel;
+        mapModel = glm::translate(mapModel, camera->pos);
+        mapModel = glm::rotate(mapModel, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+        cubeModel.draw(mapModel, *camera);
 
-        eagle5Model.draw(model, *camera);
-
-        checkForAndPrintGLError(__FILE__, __LINE__);
-        /* Swap front and back buffers */
+        // Swap front and back buffers:
 //        glfwSwapInterval(1); // v-sync
         glfwSwapBuffers(window);
 
-        /* Poll for and process events */
+        // Poll for and process events:
         glfwPollEvents();
 
         camera->processPlayerInput(window);

@@ -1,6 +1,7 @@
 #pragma once
-#include <exception>
+#include <stdexcept>
 #include <vector>
+#include <sstream>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -29,19 +30,58 @@ namespace NUGL {
 
         inline void bind() {
             glActiveTexture(textureUnit);
+            checkForAndPrintGLError(__FILE__, __LINE__);
             glBindTexture(textureTarget, textureId);
+            checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
-        inline void loadFromImage(const std::string& fileName) {
-            boost::filesystem::path p(fileName);
-            if (p.extension() == "png") {
-                loadFromPNG(fileName);
-            } else {
-                loadFromJPEG(fileName);
+        //! Face order is: +X, -X, +Y, -Y, +Z, -Z.
+        inline void loadCubeMap(std::vector<std::string> faceFileNames) {
+            if (faceFileNames.size() != 6) {
+                std::stringstream errMsg;
+                errMsg << __func__
+                       << ": faceFileNames must have a size of 6. (faceFileNames.size() == "
+                       << faceFileNames.size() << ").";
+                throw std::invalid_argument(errMsg.str());
+            }
+
+            bind();
+            for (int i = 0; i < 6; i++) {
+                loadFromImage(faceFileNames[i], GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
+                checkForAndPrintGLError(__func__, __LINE__);
             }
         }
 
+        inline void loadFromImage(const std::string& fileName) {
+            loadFromImage(fileName, textureTarget);
+        }
+
         inline void loadFromPNG(const std::string& fileName) {
+            loadFromPNG(fileName, textureTarget);
+        }
+
+        inline void loadFromJPEG(const std::string& fileName) {
+            loadFromJPEG(fileName, textureTarget);
+        }
+
+        inline void loadFromImage(const std::string& fileName, GLenum target) {
+            if (!boost::filesystem::exists(fileName)) {
+                std::stringstream errMsg;
+                errMsg << __func__ << ": The file '" << fileName << "' does not exist.";
+                throw std::invalid_argument(errMsg.str());
+            }
+
+            boost::filesystem::path p(fileName);
+            if (p.extension() == "png") {
+                loadFromPNG(fileName, target);
+            } else {
+                loadFromJPEG(fileName, target);
+            }
+
+            checkForAndPrintGLError(__FILE__, __LINE__);
+        }
+
+        inline void loadFromPNG(const std::string& fileName, GLenum target) {
             // Open image
             png::image<png::rgb_pixel> image(fileName.c_str());
 
@@ -59,12 +99,12 @@ namespace NUGL {
 
             // Set texture data
             bind();
-            glTexImage2D(textureTarget, 0, GL_RGB,
+            glTexImage2D(target, 0, GL_RGB,
                     image.get_width(), image.get_height(),
                     0, GL_RGB, GL_UNSIGNED_BYTE, imgData.data());
         }
 
-        inline void loadFromJPEG(const std::string& fileName) {
+        inline void loadFromJPEG(const std::string& fileName, GLenum target) {
             struct jpeg_error_mgr err;
             struct jpeg_decompress_struct cinfo;
             std::memset(&cinfo, 0, sizeof(jpeg_decompress_struct));
@@ -104,9 +144,9 @@ namespace NUGL {
 
             // Set texture data
             bind();
-            glTexImage2D(textureTarget, 0, GL_RGB,
+            glTexImage2D(target, 0, GL_RGB,
                     cinfo.image_width, cinfo.image_height,
-                    0, GL_RGB, GL_UNSIGNED_BYTE, data.data());
+                    0, GL_RGB, GL_UNSIGNED_BYTE, data.data()); // TODO: Check byte formats
         }
 
         inline void setParam(GLenum param, GLint value) {

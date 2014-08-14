@@ -1,4 +1,5 @@
 #pragma once
+#include <stdexcept>
 #include <vector>
 #include <sstream>
 
@@ -20,8 +21,8 @@ namespace NUGL {
             case GL_DOUBLE: return sizeof(GLdouble);
             default: {
                 std::stringstream errMsg;
-                errMsg << __func__ << "Unknown type enum value " << type << ".";
-                throw std::invalid_argument(errMsg.str().c_str());
+                errMsg << __func__ << ": Unknown type enum value " << type << ".";
+                throw std::invalid_argument(errMsg.str());
             }
         }
     }

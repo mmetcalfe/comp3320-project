@@ -1,5 +1,7 @@
 #pragma once
 #include <iostream>
+#include <stdexcept>
+#include <sstream>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -23,21 +25,27 @@ namespace NUGL {
         glGetShaderInfoLog(shaderId, 512, nullptr, infoLogBuff);
         // char srcBuff[512];
         // glGetShaderSource(shaderId, 512, nullptr, srcBuff);
-        printf("printShaderDebugInfo(%d) {\n", shaderId);
-        printf("  GL_SHADER_TYPE: ");
+        std::cout << "printShaderDebugInfo(" << shaderId << ") {" << std::endl;
+        std::cout << "  GL_SHADER_TYPE: ";
         switch (shaderType) {
-            case GL_VERTEX_SHADER: printf("GL_VERTEX_SHADER"); break;
-            case GL_FRAGMENT_SHADER: printf("GL_FRAGMENT_SHADER"); break;
-            default: printf("INVALID (%d)", shaderType); break;
+            case GL_VERTEX_SHADER: std::cout << "GL_VERTEX_SHADER"; break;
+            case GL_FRAGMENT_SHADER: std::cout << "GL_FRAGMENT_SHADER"; break;
+            default: std::cout << "INVALID (" << shaderType << ")"; break;
         }
-        printf(",\n");
-        printf("  GL_DELETE_STATUS: %s,\n", deleteStatus == GL_TRUE ? "Flagged for deletion" : "False");
-        printf("  GL_COMPILE_STATUS: %s,\n", compileStatus == GL_TRUE ? "Success" : "Failure");
-        printf("  GL_INFO_LOG_LENGTH: %d,\n", infoLogLength);
-        printf("  GL_SHADER_SOURCE_LENGTH: %d,\n", sourceLength);
-        printf("  glGetShaderInfoLog: %s,\n", infoLogBuff);
-        // printf("  glGetShaderSource: %s,\n", srcBuff);
-        printf("}\n");
+        std::cout << "," << std::endl;
+        std::cout << "  GL_DELETE_STATUS: " << (deleteStatus == GL_TRUE ? "Flagged for deletion" : "False") << std::endl;
+        std::cout << "  GL_COMPILE_STATUS: " << (compileStatus == GL_TRUE ? "Success" : "Failure") << std::endl;
+        std::cout << "  GL_INFO_LOG_LENGTH: " << infoLogLength << std::endl;
+        std::cout << "  GL_SHADER_SOURCE_LENGTH: " << sourceLength << std::endl;
+        std::cout << "  glGetShaderInfoLog: " << infoLogBuff << std::endl;
+        // std::cout << "  glGetShaderSource: %s,\n", srcBuff << std::endl;
+        std::cout << "}" << std::endl;
+
+        if (compileStatus != GL_TRUE) {
+            std::stringstream errMsg;
+            errMsg << __func__ << ": Compile error in shader: " << infoLogBuff << ".";
+            throw std::logic_error(errMsg.str());
+        }
     }
 
     class Shader {
