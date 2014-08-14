@@ -27,6 +27,7 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
         height = 1;
     }
 
+    glViewport(0, 0, width, height);
     camera->proj = glm::perspective(camera->fov, width / float(height), 1.0f, 100.0f);
 }
 
