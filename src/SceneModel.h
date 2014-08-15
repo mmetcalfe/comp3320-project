@@ -20,7 +20,24 @@ public:
     };
 
     struct Material {
-        glm::vec3 colDiffuse;
+        // Colours.
+        glm::vec3 colAmbient = {0.7, 0.9, 0};
+        glm::vec3 colDiffuse = {0.7, 0.9, 0};
+        glm::vec3 colSpecular = {0.7, 0.9, 0};
+        glm::vec3 colTransparent = {0.7, 0.9, 0};
+
+        // Opacity of material in [0, 1].
+        float opacity = 1;
+
+        // Exponent in phong-shading.
+        float shininess = 1;
+
+        // Scales specular color.
+        float shininessStrength = 1;
+
+        // Indicates whether backface culling must be disabled.
+        bool twoSided = true;
+
         std::shared_ptr<NUGL::Texture> texDiffuse;
         std::shared_ptr<NUGL::Texture> environmentMap;
     };

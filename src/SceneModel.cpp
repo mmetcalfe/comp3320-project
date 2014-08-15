@@ -48,13 +48,66 @@ unsigned int getPostProcessingFlags() {
 SceneModel::Material copyAiMaterial(const std::string& fileName, const aiMaterial* srcMaterial) {
     SceneModel::Material material;
 
-    aiColor3D aiCol;
-    srcMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, aiCol);
-    material.colDiffuse.r = aiCol.r;
-    material.colDiffuse.g = aiCol.g;
-    material.colDiffuse.b = aiCol.b;
+    aiColor3D aiColAmbient;
+    if (!srcMaterial->Get(AI_MATKEY_COLOR_AMBIENT, aiColAmbient)) {
+        material.colAmbient.r = aiColAmbient.r;
+        material.colAmbient.g = aiColAmbient.g;
+        material.colAmbient.b = aiColAmbient.b;
+    }
+
+    aiColor3D aiColDiffuse;
+    if (!srcMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, aiColDiffuse)) {
+        material.colDiffuse.r = aiColDiffuse.r;
+        material.colDiffuse.g = aiColDiffuse.g;
+        material.colDiffuse.b = aiColDiffuse.b;
+    }
+
+    aiColor3D aiColSpecular;
+    if (!srcMaterial->Get(AI_MATKEY_COLOR_SPECULAR, aiColSpecular)) {
+        material.colSpecular.r = aiColSpecular.r;
+        material.colSpecular.g = aiColSpecular.g;
+        material.colSpecular.b = aiColSpecular.b;
+    }
+
+    aiColor3D aiColTransparent;
+    if (!srcMaterial->Get(AI_MATKEY_COLOR_TRANSPARENT, aiColTransparent)) {
+        material.colTransparent.r = aiColTransparent.r;
+        material.colTransparent.g = aiColTransparent.g;
+        material.colTransparent.b = aiColTransparent.b;
+    }
+
+    float aiOpacity;
+    if (!srcMaterial->Get(AI_MATKEY_OPACITY, aiOpacity)) {
+        material.opacity = aiOpacity;
+    }
+
+    float aiShininess;
+    if (!srcMaterial->Get(AI_MATKEY_SHININESS, aiShininess)) {
+        material.shininess = aiShininess;
+    }
+
+    float aiShininessStrength;
+    if (!srcMaterial->Get(AI_MATKEY_SHININESS_STRENGTH, aiShininessStrength)) {
+        material.shininessStrength = aiShininessStrength;
+    }
+
+    int aiTwoSided;
+    if (!srcMaterial->Get(AI_MATKEY_TWOSIDED, aiTwoSided)) {
+        material.twoSided = (aiTwoSided != 0);
+    }
+
+    // TODO: Support multiple illumination models:
+    //  - http://en.wikipedia.org/wiki/List_of_common_shading_algorithms
+    //  - http://www1.cs.columbia.edu/CAVE/projects/oren/
+    //  - http://www1.cs.columbia.edu/CAVE/software/curet/
+    //  - http://renderman.pixar.com/view/cook-torrance-shader
+    aiShadingMode shadingMode;
+    if (!srcMaterial->Get(AI_MATKEY_SHADING_MODEL, shadingMode)) {
+        std::cerr << __func__ << "Shading mode: " << utility::getAiShadingModeName(shadingMode) << std::endl;
+    }
 
     auto diffTexCount = srcMaterial->GetTextureCount(aiTextureType_DIFFUSE);
+
     for (unsigned int t = 0; t < diffTexCount; t++) {
         aiString path;
         srcMaterial->GetTexture(aiTextureType_DIFFUSE, t, &path);
@@ -102,7 +155,7 @@ SceneModel SceneModel::loadFromFile(const std::string& fileName) {
         throw std::invalid_argument(errMsg.str().c_str());
     }
 
-//    utility::printAiSceneInfo(scene);
+    utility::printAiSceneInfo(scene);
 
     SceneModel sceneModel;
 

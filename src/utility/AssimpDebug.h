@@ -49,6 +49,33 @@ namespace utility {
         }
     }
 
+    inline const std::string getAiShadingModeName(aiShadingMode model) {
+        switch (model) {
+            case aiShadingMode_Flat:
+                return "aiShadingMode_Flat";
+            case aiShadingMode_Gouraud:
+                return "aiShadingMode_Gouraud";
+            case aiShadingMode_Phong:
+                return "aiShadingMode_Phong";
+            case aiShadingMode_Blinn:
+                return "aiShadingMode_Blinn";
+            case aiShadingMode_Toon:
+                return "aiShadingMode_Toon";
+            case aiShadingMode_OrenNayar:
+                return "aiShadingMode_OrenNayar";
+            case aiShadingMode_Minnaert:
+                return "aiShadingMode_Minnaert";
+            case aiShadingMode_CookTorrance:
+                return "aiShadingMode_CookTorrance";
+            case aiShadingMode_NoShading:
+                return "aiShadingMode_NoShading";
+            case aiShadingMode_Fresnel:
+                return "aiShadingMode_Fresnel";
+            default:
+                return "Invalid";
+        }
+    }
+
     inline void printAiSceneMeshInfo(const aiScene *scene) {
         std::cout << "  HasMeshes: " << std::boolalpha << scene->HasMeshes() << "," << std::endl;
         std::cout << "  NumMeshes: " << scene->mNumMeshes << "," << std::endl;
@@ -85,32 +112,88 @@ namespace utility {
         for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
             auto *material = scene->mMaterials[i];
             std::cout << "  Material " << i << ": {" << std::endl;
-            std::cout << "    NumProperties: " << material->mNumProperties << "," << std::endl;
-            std::cout << "    Properties " << " {" << std::endl;
-            for (unsigned int p = 0; p < material->mNumProperties; p++) {
-                auto* property = material->mProperties[p];
-                std::cout << "      " << property->mKey.C_Str() << ": {" << std::endl // API_MATKEY_XXX defines
-                          << "        mType: " << getAiPropertyTypeInfoName(property->mType) << "," << std::endl
-                          << "        mSemantic: " << getAiTextureTypeName(aiTextureType(property->mSemantic)) << "," << std::endl
-                          << "        mIndex: " << property->mIndex << "," << std::endl
-                          << "        mDataLength: " << property->mDataLength << "," << std::endl
-                          << "      }," << std::endl;
+//            std::cout << "    NumProperties: " << material->mNumProperties << "," << std::endl;
+//            std::cout << "    Properties " << " {" << std::endl;
+//            for (unsigned int p = 0; p < material->mNumProperties; p++) {
+//                auto* property = material->mProperties[p];
+//                std::cout << "      " << property->mKey.C_Str() << ": {" << std::endl // API_MATKEY_XXX defines
+//                          << "        mType: " << getAiPropertyTypeInfoName(property->mType) << "," << std::endl
+//                          << "        mSemantic: " << getAiTextureTypeName(aiTextureType(property->mSemantic)) << "," << std::endl
+//                          << "        mIndex: " << property->mIndex << "," << std::endl
+//                          << "        mDataLength: " << property->mDataLength << "," << std::endl
+//                          << "      }," << std::endl;
+//            }
+//            std::cout << "    }" << std::endl;
+
+
+
+            aiColor3D aiColAmbient;
+            if (!material->Get(AI_MATKEY_COLOR_AMBIENT, aiColAmbient)) {
+                std::cout << "    ColAmbient: " << "["
+                        << aiColAmbient.r << ", "
+                        << aiColAmbient.g << ", "
+                        << aiColAmbient.b << "]," << std::endl;
             }
-            std::cout << "    }" << std::endl;
+
+            aiColor3D aiColDiffuse;
+            if (!material->Get(AI_MATKEY_COLOR_DIFFUSE, aiColDiffuse)) {
+                std::cout << "    ColDiffuse: " << "["
+                        << aiColDiffuse.r << ", "
+                        << aiColDiffuse.g << ", "
+                        << aiColDiffuse.b << "]," << std::endl;
+            }
+
+            aiColor3D aiColSpecular;
+            if (!material->Get(AI_MATKEY_COLOR_SPECULAR, aiColSpecular)) {
+                std::cout << "    ColSpecular: ["
+                        << aiColSpecular.r << ", "
+                        << aiColSpecular.g << ", "
+                        << aiColSpecular.b << "]," << std::endl;
+            }
+
+            aiColor3D aiColTransparent;
+            if (!material->Get(AI_MATKEY_COLOR_TRANSPARENT, aiColTransparent)) {
+                std::cout << "    ColTransparent: " << "["
+                        << aiColTransparent.r << ", "
+                        << aiColTransparent.g << ", "
+                        << aiColTransparent.b << "]," << std::endl;
+            }
+
+            float aiOpacity;
+            if (!material->Get(AI_MATKEY_OPACITY, aiOpacity)) {
+                std::cout << "    Opacity: " << aiOpacity << "," << std::endl;
+            }
+
+            float aiShininess;
+            if (!material->Get(AI_MATKEY_SHININESS, aiShininess)) {
+                std::cout << "    Shininess: " << aiShininess << "," << std::endl;
+            }
+
+            float aiShininessStrength;
+            if (!material->Get(AI_MATKEY_SHININESS_STRENGTH, aiShininessStrength)) {
+                std::cout << "    ShininessStrength: " << aiShininessStrength << "," << std::endl;
+            }
+
+            int aiTwoSided;
+            if (!material->Get(AI_MATKEY_TWOSIDED, aiTwoSided)) {
+                std::cout << "    TwoSided: " << aiTwoSided << "," << std::endl;
+            }
+
+            aiShadingMode shadingMode;
+            if (!material->Get(AI_MATKEY_SHADING_MODEL, shadingMode)) {
+                std::cout << "    ShadingMode: " << utility::getAiShadingModeName(shadingMode) << "," << std::endl;
+            }
 
             auto diffTexCount = material->GetTextureCount(aiTextureType_DIFFUSE);
             if (diffTexCount > 0) {
-//            std::cout << "  Material " << i << ": {" << std::endl;
-
-                std::cout << "    Num Diffuse Textures: " << diffTexCount << "," << std::endl;
+//                std::cout << "    Num Diffuse Textures: " << diffTexCount << "," << std::endl;
                 std::cout << "    Diffuse Textures: {" << std::endl;
                 for (unsigned int t = 0; t < diffTexCount; t++) {
                     aiString path;
                     material->GetTexture(aiTextureType_DIFFUSE, t, &path);
-                    std::cout << "    Texture " << t << ": " << path.C_Str() << std::endl;
+                    std::cout << "      Texture " << t << ": " << path.C_Str() << "," << std::endl;
                 }
                 std::cout << "    }" << std::endl;
-//            std::cout << "  }," << std::endl;
             }
             std::cout << "  }," << std::endl;
         }
@@ -163,7 +246,7 @@ namespace utility {
 
         printAiSceneMaterialInfo(scene);
 
-        printAiSceneMeshInfo(scene);
+//        printAiSceneMeshInfo(scene);
 
         std::cout << "  HasTextures: " << std::boolalpha << scene->HasTextures() << "," << std::endl;
         std::cout << "  NumTextures: " << scene->mNumTextures << "," << std::endl;
