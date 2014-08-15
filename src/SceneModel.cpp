@@ -292,11 +292,10 @@ void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 &parentModel, Camera
             checkForAndPrintGLError(__FILE__, __LINE__);
             mesh.material->environmentMap->bind();
             checkForAndPrintGLError(__FILE__, __LINE__);
-            // TODO: Make setting textures as uniforms cleaner.
-            mesh.shaderProgram->setUniform("environmentMap", mesh.material->environmentMap->unit() - GL_TEXTURE0);
+            mesh.shaderProgram->setUniform("environmentMap", mesh.material->environmentMap);
         } else if (mesh.isTextured()) {
             mesh.material->texDiffuse->bind();
-            mesh.shaderProgram->setUniform("tex", mesh.material->texDiffuse->unit() - GL_TEXTURE0);
+            mesh.shaderProgram->setUniform("tex", mesh.material->texDiffuse);
         } else {
             mesh.shaderProgram->setUniform("materialColour", mesh.material->colDiffuse);
         }

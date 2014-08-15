@@ -1,12 +1,14 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <memory>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include "utility/debug.h"
 #include "NUGL/Shader.h"
+#include "NUGL/Texture.h"
 
 namespace NUGL {
     inline void printProgramDebugInfo(GLuint programId) {
@@ -125,6 +127,11 @@ namespace NUGL {
 
         inline void setUniform(GLint uniLoc, GLint value) {
             glUniform1i(uniLoc, value);
+            checkForAndPrintGLError(__FILE__, __LINE__);
+        }
+
+        inline void setUniform(GLint uniLoc, std::shared_ptr<NUGL::Texture> value) {
+            glUniform1i(uniLoc, value->unit() - GL_TEXTURE0);
             checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
