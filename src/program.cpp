@@ -94,17 +94,26 @@ int main(int argc, char** argv) {
     textureProgram.link();
     textureProgram.printDebugInfo();
 
-    auto environmentMapProgram = NUGL::ShaderProgram::createFromFiles({
-            {GL_VERTEX_SHADER, "src/shaders/vs_pos_map_mvp.gl"},
-            {GL_FRAGMENT_SHADER, "src/shaders/fs_map.gl"},
+    auto reflectProgram = NUGL::ShaderProgram::createFromFiles({
+            {GL_VERTEX_SHADER, "src/shaders/vs_reflect.gl"},
+            {GL_FRAGMENT_SHADER, "src/shaders/fs_reflect.gl"},
     });
-    environmentMapProgram.bindFragDataLocation(0, "outColor");
-    environmentMapProgram.link();
-    environmentMapProgram.printDebugInfo();
+    reflectProgram.bindFragDataLocation(0, "outColor");
+    reflectProgram.link();
+    reflectProgram.printDebugInfo();
+
+    auto skyboxProgram = NUGL::ShaderProgram::createFromFiles({
+            {GL_VERTEX_SHADER, "src/shaders/vs_skybox.gl"},
+            {GL_FRAGMENT_SHADER, "src/shaders/fs_skybox.gl"},
+    });
+    skyboxProgram.bindFragDataLocation(0, "outColor");
+    skyboxProgram.link();
+    skyboxProgram.printDebugInfo();
 
     auto sharedFlatProgram = std::make_shared<NUGL::ShaderProgram>(flatProgram);
     auto sharedTextureProgram = std::make_shared<NUGL::ShaderProgram>(textureProgram);
-    auto sharedEnvironmentMapProgram = std::make_shared<NUGL::ShaderProgram>(environmentMapProgram);
+    auto sharedReflectProgram = std::make_shared<NUGL::ShaderProgram>(reflectProgram);
+    auto sharedSkyboxProgram = std::make_shared<NUGL::ShaderProgram>(skyboxProgram);
 
 
     // Load assets:
@@ -115,7 +124,7 @@ int main(int argc, char** argv) {
     eagle5Model.createVertexArrays();
     checkForAndPrintGLError(__FILE__, __LINE__);
 
-    auto cubeMap = std::make_unique<NUGL::Texture>(GL_TEXTURE0, GL_TEXTURE_CUBE_MAP);
+    auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE0, GL_TEXTURE_CUBE_MAP);
     cubeMap->loadCubeMap({
             "assets/PereaBeach1/posx.jpg",
             "assets/PereaBeach1/negx.jpg",
@@ -134,15 +143,26 @@ int main(int argc, char** argv) {
 //    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
     checkForAndPrintGLError(__func__, __LINE__);
 
+
     auto cubeModel = SceneModel::loadFromFile("assets/cube.obj");
     cubeModel.flatProgram = sharedFlatProgram;
     cubeModel.textureProgram = sharedTextureProgram;
-    cubeModel.environmentMapProgram = sharedEnvironmentMapProgram;
-    cubeModel.meshes[0].material->environmentMap = std::move(cubeMap);
+    cubeModel.environmentMapProgram = sharedReflectProgram;
+    cubeModel.meshes[0].material->environmentMap = cubeMap;
     checkForAndPrintGLError(__func__, __LINE__);
     cubeModel.createMeshBuffers();
     checkForAndPrintGLError(__func__, __LINE__);
     cubeModel.createVertexArrays();
+
+    auto skyBox = SceneModel::loadFromFile("assets/cube.obj");
+    skyBox.flatProgram = sharedFlatProgram;
+    skyBox.textureProgram = sharedTextureProgram;
+    skyBox.environmentMapProgram = sharedSkyboxProgram;
+    skyBox.meshes[0].material->environmentMap = cubeMap;
+    checkForAndPrintGLError(__func__, __LINE__);
+    skyBox.createMeshBuffers();
+    checkForAndPrintGLError(__func__, __LINE__);
+    skyBox.createVertexArrays();
 
     // Setup Camera:
     camera->pos = glm::vec3(0.0f, 0.0f, 10.0f);
@@ -168,17 +188,24 @@ int main(int argc, char** argv) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Draw ship:
-        float scale = 0.2;
         glm::mat4 shipModel;
-        shipModel = glm::scale(shipModel, glm::vec3(scale, scale, scale));
+        shipModel = glm::scale(shipModel, glm::vec3(0.2));
         shipModel = glm::rotate(shipModel, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
         eagle5Model.draw(shipModel, *camera);
 
-        // Draw skybox:
+        // Draw cube:
         glm::mat4 mapModel;
-        mapModel = glm::translate(mapModel, camera->pos);
+        mapModel = glm::scale(mapModel, glm::vec3(10));
+//        mapModel = glm::translate(mapModel, camera->pos);
         mapModel = glm::rotate(mapModel, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
         cubeModel.draw(mapModel, *camera);
+
+        // Draw skybox:
+        glm::mat4 skyboxModel;
+//        skyboxModel = glm::scale(shipModel, glm::vec3(100));
+        skyboxModel = glm::translate(skyboxModel, camera->pos);
+        skyboxModel = glm::rotate(skyboxModel, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+        skyBox.draw(skyboxModel, *camera);
 
         // Swap front and back buffers:
 //        glfwSwapInterval(1); // v-sync

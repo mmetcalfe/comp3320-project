@@ -21,8 +21,8 @@ public:
 
     struct Material {
         glm::vec3 colDiffuse;
-        std::unique_ptr<NUGL::Texture> texDiffuse;
-        std::unique_ptr<NUGL::Texture> environmentMap;
+        std::shared_ptr<NUGL::Texture> texDiffuse;
+        std::shared_ptr<NUGL::Texture> environmentMap;
     };
 
     struct Mesh {
