@@ -79,32 +79,32 @@ int main(int argc, char** argv) {
 
     // Load shaders:
     auto flatProgram = NUGL::ShaderProgram::createFromFiles({
-            {GL_VERTEX_SHADER, "src/shaders/vs_pos_mvp.gl"},
-            {GL_FRAGMENT_SHADER, "src/shaders/fs_uniform.gl"},
+            {GL_VERTEX_SHADER, "src/shaders/pos_mvp.vert"},
+            {GL_FRAGMENT_SHADER, "src/shaders/uniform.frag"},
     });
     flatProgram.bindFragDataLocation(0, "outColor");
     flatProgram.link();
     flatProgram.printDebugInfo();
 
     auto textureProgram = NUGL::ShaderProgram::createFromFiles({
-            {GL_VERTEX_SHADER, "src/shaders/vs_pos_tex_mvp.gl"},
-            {GL_FRAGMENT_SHADER, "src/shaders/fs_tex.gl"},
+            {GL_VERTEX_SHADER, "src/shaders/pos_tex_mvp.vert"},
+            {GL_FRAGMENT_SHADER, "src/shaders/tex.frag"},
     });
     textureProgram.bindFragDataLocation(0, "outColor");
     textureProgram.link();
     textureProgram.printDebugInfo();
 
     auto reflectProgram = NUGL::ShaderProgram::createFromFiles({
-            {GL_VERTEX_SHADER, "src/shaders/vs_reflect.gl"},
-            {GL_FRAGMENT_SHADER, "src/shaders/fs_reflect.gl"},
+            {GL_VERTEX_SHADER, "src/shaders/reflect.vert"},
+            {GL_FRAGMENT_SHADER, "src/shaders/reflect.frag"},
     });
     reflectProgram.bindFragDataLocation(0, "outColor");
     reflectProgram.link();
     reflectProgram.printDebugInfo();
 
     auto skyboxProgram = NUGL::ShaderProgram::createFromFiles({
-            {GL_VERTEX_SHADER, "src/shaders/vs_skybox.gl"},
-            {GL_FRAGMENT_SHADER, "src/shaders/fs_skybox.gl"},
+            {GL_VERTEX_SHADER, "src/shaders/skybox.vert"},
+            {GL_FRAGMENT_SHADER, "src/shaders/skybox.frag"},
     });
     skyboxProgram.bindFragDataLocation(0, "outColor");
     skyboxProgram.link();
