@@ -188,7 +188,18 @@ int main(int argc, char** argv) {
 //    glCullFace (GL_BACK); // cull back face
 //    glFrontFace (GL_CCW); // GL_CCW for counter clock-wise
 
+    double lastTime = glfwGetTime();
+    int nbFrames = 0;
     while (!glfwWindowShouldClose(window)) {
+        // Measure speed
+        double currentTime = glfwGetTime();
+        nbFrames++;
+        if ( currentTime - lastTime >= 1.0 ){ // If last print was more than 1 sec ago
+            std::cout << (1000.0/double(nbFrames)) << " ms/frame" << std::endl;
+            nbFrames = 0;
+            lastTime += 1.0;
+        }
+
         // Begin rendering:
         glClearColor(0.5, 0.5, 0.5, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
