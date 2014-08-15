@@ -18,6 +18,13 @@ install_manifest.txt
 /game
 /game.exe
 
+# LaTeX
+*.aux
+*.log
+*.out
+*.pdf
+*.synctex.gz
+
 # Miscellaneous
 *.swp
 *~
