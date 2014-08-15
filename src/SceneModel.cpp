@@ -224,6 +224,9 @@ void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 &parentModel, Camera
         environmentMapProgram->setUniform("model", model);
         environmentMapProgram->setUniform("view", camera.view);
         environmentMapProgram->setUniform("proj", camera.proj);
+
+        glm::mat4 modelViewInverse = glm::inverse(camera.view * model);
+        environmentMapProgram->setUniform("modelViewInverse", modelViewInverse);
     }
 
     checkForAndPrintGLError(__FILE__, __LINE__);
