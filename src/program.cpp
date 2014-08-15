@@ -56,8 +56,12 @@ int main(int argc, char** argv) {
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
-    GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL", nullptr, nullptr); // Windowed
-//    GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL", glfwGetPrimaryMonitor(), nullptr); // Fullscreen
+    // Windowed:
+    GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL", nullptr, nullptr);
+
+//    // Fullscreen:
+//    const GLFWvidmode* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+//    GLFWwindow* window = glfwCreateWindow(videoMode->width, videoMode->height, "OpenGL", glfwGetPrimaryMonitor(), nullptr);
 
     glfwMakeContextCurrent(window);
 
@@ -165,12 +169,14 @@ int main(int argc, char** argv) {
     skyBox.createVertexArrays();
 
     // Setup Camera:
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
     camera->pos = glm::vec3(0.0f, 0.0f, 10.0f);
     camera->fov = 45;
     camera->speed = 10;
-    camera->lookSpeed = 0.5;
+    camera->lookSpeed = 0.4;
     camera->up = glm::vec3(0.0f, 0.0f, 1.0f);
-    camera->proj = glm::perspective(camera->fov, 800.0f / 600.0f, 1.0f, 100.0f);
+    camera->proj = glm::perspective(camera->fov, width / float(height), 1.0f, 100.0f);
     camera->lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
     camera->lastUpdateTime = glfwGetTime();
 
@@ -196,13 +202,11 @@ int main(int argc, char** argv) {
         // Draw cube:
         glm::mat4 mapModel;
         mapModel = glm::scale(mapModel, glm::vec3(10));
-//        mapModel = glm::translate(mapModel, camera->pos);
         mapModel = glm::rotate(mapModel, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
         cubeModel.draw(mapModel, *camera);
 
         // Draw skybox:
         glm::mat4 skyboxModel;
-//        skyboxModel = glm::scale(shipModel, glm::vec3(100));
         skyboxModel = glm::translate(skyboxModel, camera->pos);
         skyboxModel = glm::rotate(skyboxModel, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
         skyBox.draw(skyboxModel, *camera);
