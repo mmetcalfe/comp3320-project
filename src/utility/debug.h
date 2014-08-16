@@ -1,41 +1,49 @@
 #pragma once
 
 #include <iomanip>
+#include <sstream>
 
-inline void printGLError(GLenum error) {
-    printf("%s", "GL Error: ");
+inline const std::string getGLErrorName(GLenum error) {
     switch (error) {
-        case GL_NO_ERROR: printf("%s\n", "GL_NO_ERROR"); break;
-        case GL_INVALID_ENUM: printf("%s\n", "GL_INVALID_ENUM"); break;
-        case GL_INVALID_VALUE: printf("%s\n", "GL_INVALID_VALUE"); break;
-        case GL_INVALID_OPERATION: printf("%s\n", "GL_INVALID_OPERATION"); break;
-        case GL_INVALID_FRAMEBUFFER_OPERATION: printf("%s\n", "GL_INVALID_FRAMEBUFFER_OPERATION"); break;
-        case GL_OUT_OF_MEMORY: printf("%s\n", "GL_OUT_OF_MEMORY"); break;
-        default: printf("%s (%d)\n", "Unknown error", error); break;
+        case GL_NO_ERROR: return "GL_NO_ERROR";
+        case GL_INVALID_ENUM: return "GL_INVALID_ENUM";
+        case GL_INVALID_VALUE: return "GL_INVALID_VALUE";
+        case GL_INVALID_OPERATION: return "GL_INVALID_OPERATION";
+        case GL_INVALID_FRAMEBUFFER_OPERATION: return "GL_INVALID_FRAMEBUFFER_OPERATION";
+        case GL_OUT_OF_MEMORY: return "GL_OUT_OF_MEMORY";
+        default:
+            std::stringstream errMsg;
+            errMsg << "Unknown GL Error (" << error << ")";
+            return errMsg.str();
+//            throw std::invalid_argument(errMsg.str());
     }
 }
 
-inline void checkForAndPrintGLError(const std::string label) {
+inline void checkForAndPrintGLError(const std::string& label) {
     auto err = glGetError();
     if (err) {
-        printf("[%s] ", label.c_str());
-        printGLError(err);
+        std::cout << "[" << label << "] GL Error: " << getGLErrorName(err) << std::endl;
     }
 }
 
 inline void checkForAndPrintGLError(int num) {
     auto err = glGetError();
     if (err) {
-        printf("[%d] ", num);
-        printGLError(err);
+        std::cout << "[" << num << "] " << getGLErrorName(err) << std::endl;
     }
 }
 
-inline void checkForAndPrintGLError(const char* file, int line) {
+inline void checkForAndPrintGLError(const std::string& file, int line) {
     auto err = glGetError();
     if (err) {
-        printf("[%s, %d] ", file, line);
-        printGLError(err);
+        std::cout << "[" << file << ", " << line << "] " << getGLErrorName(err) << std::endl;
+    }
+}
+
+inline void checkForAndPrintGLError(const std::string& file, int line, const std::string& info) {
+    auto err = glGetError();
+    if (err) {
+        std::cout << "[" << file << ", " << line << ": " << info << "] " << getGLErrorName(err) << std::endl;
     }
 }
 
