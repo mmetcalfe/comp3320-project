@@ -113,6 +113,12 @@ namespace NUGL {
         template<typename T>
         inline void setUniform(const std::string& name, const T& value) {
             GLint uniLoc = getUniformLocation(name);
+            if (uniLoc == -1) {
+                std::stringstream errMsg;
+                errMsg << __func__ << ": The named uniform '" << name << "' does not exist.";
+                throw std::logic_error(errMsg.str());
+            }
+
             setUniform(uniLoc, value);
         }
         inline void setUniform(GLint uniLoc, const glm::mat4& value, GLboolean transpose = GL_FALSE) {

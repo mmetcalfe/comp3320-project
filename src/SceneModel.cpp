@@ -46,6 +46,7 @@ unsigned int getPostProcessingFlags() {
 }
 
 SceneModel::Material copyAiMaterial(const std::string& fileName, const aiMaterial* srcMaterial) {
+    // TODO: Support remaining material properties from http://assimp.sourceforge.net/lib_html/materials.html
     SceneModel::Material material;
 
     aiColor3D aiColAmbient;
@@ -210,7 +211,6 @@ void SceneModel::createMeshBuffers() {
 
             if (mesh.isTextured()) {
                 auto& texCoord = mesh.texCoords[i];
-//#warning Texcoords are inverted!
 //                vertices.push_back(1 - texCoord.x); // TODO: fix texcoords ??
 //                vertices.push_back(1 - texCoord.y);
                 vertices.push_back(texCoord.x);
@@ -250,6 +250,7 @@ void SceneModel::createVertexArrays() {
     }
 }
 
+// TODO: Derive the model matrix from position + orientation properties instead of passing it as a parameter.
 void SceneModel::draw(glm::mat4& model, Camera& camera) {
     drawNode(rootNode, model, camera);
 }
@@ -278,8 +279,12 @@ void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 &parentModel, Camera
         environmentMapProgram->setUniform("view", camera.view);
         environmentMapProgram->setUniform("proj", camera.proj);
 
-        glm::mat4 modelViewInverse = glm::inverse(camera.view * model);
-        environmentMapProgram->setUniform("modelViewInverse", modelViewInverse);
+        try {
+            glm::mat4 modelViewInverse = glm::inverse(camera.view * model);
+            environmentMapProgram->setUniform("modelViewInverse", modelViewInverse);
+        } catch (std::logic_error e) {
+
+        }
     }
 
     checkForAndPrintGLError(__FILE__, __LINE__);

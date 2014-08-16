@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
     camera->pos = glm::vec3(0.0f, 0.0f, 10.0f);
     camera->fov = 45;
     camera->speed = 10;
-    camera->lookSpeed = 0.4;
+    camera->lookSpeed = 0.005;
     camera->up = glm::vec3(0.0f, 0.0f, 1.0f);
     camera->proj = glm::perspective(camera->fov, width / float(height), 1.0f, 100.0f);
     camera->lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -188,18 +188,19 @@ int main(int argc, char** argv) {
 //    glCullFace (GL_BACK); // cull back face
 //    glFrontFace (GL_CCW); // GL_CCW for counter clock-wise
 
-//    double lastTime = glfwGetTime();
-//    int nbFrames = 0;
+    double lastTime = glfwGetTime();
+    int nbFrames = 0;
     while (!glfwWindowShouldClose(window)) {
         // TODO: Refactor frame timer into a utility class
-//        // Measure speed
-//        double currentTime = glfwGetTime();
-//        nbFrames++;
-//        if ( currentTime - lastTime >= 1.0 ){ // If last print was more than 1 sec ago
-//            std::cout << (1000.0/double(nbFrames)) << " ms/frame" << std::endl;
-//            nbFrames = 0;
-//            lastTime += 1.0;
-//        }
+        // Measure speed
+        double currentTime = glfwGetTime();
+        nbFrames++;
+        if (currentTime - lastTime >= 1.0) { // If last print was more than 1 sec ago
+            double fps = double(nbFrames);
+            std::cout << (1000.0 / fps) << " ms/frame (" << fps << "fps)" << std::endl;
+            nbFrames = 0;
+            lastTime += 1.0;
+        }
 
         // Begin rendering:
         glClearColor(0.5, 0.5, 0.5, 1.0);

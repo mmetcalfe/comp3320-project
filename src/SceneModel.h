@@ -21,10 +21,10 @@ public:
 
     struct Material {
         // Colours.
-        glm::vec3 colAmbient = {0.7, 0.9, 0};
-        glm::vec3 colDiffuse = {0.7, 0.9, 0};
-        glm::vec3 colSpecular = {0.7, 0.9, 0};
-        glm::vec3 colTransparent = {0.7, 0.9, 0};
+        glm::vec3 colAmbient = {0.7, 0, 0.9};
+        glm::vec3 colDiffuse = {0.7, 0, 0.9};
+        glm::vec3 colSpecular = {0.7, 0, 0.9};
+        glm::vec3 colTransparent = {0.7, 0, 0.9};
 
         // Opacity of material in [0, 1].
         float opacity = 1;

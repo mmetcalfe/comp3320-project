@@ -57,8 +57,8 @@ public:
         // As a workaround we have set GLFW_CURSOR_DISABLED.
 //        glfwSetCursorPos(window, windowWidth / 2, windowHeight / 2);
 
-        horizontalAngle -= float(deltaMouse[0]) * lookSpeed * deltaTime;
-        verticalAngle -= float(deltaMouse[1]) * lookSpeed * deltaTime;
+        horizontalAngle -= float(deltaMouse[0]) * lookSpeed;
+        verticalAngle -= float(deltaMouse[1]) * lookSpeed;
         verticalAngle = glm::clamp<float>(verticalAngle, -M_PI_2 * 0.9, M_PI_2 * 0.9);
 
         dir = utility::math::coordinates::sphericalToCartesian(glm::vec3(1, horizontalAngle, verticalAngle));
@@ -87,7 +87,7 @@ public:
     glm::mat4 proj;
 
     float speed = 10;
-    float lookSpeed = 0.5;
+    float lookSpeed = 0.005;
     float lastUpdateTime = 0;
 };
 
