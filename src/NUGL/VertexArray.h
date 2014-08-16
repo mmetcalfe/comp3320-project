@@ -69,7 +69,7 @@ namespace NUGL {
                 checkForAndPrintGLError(__func__, __LINE__);
 
                 glEnableVertexAttribArray(posAttrib);
-                checkForAndPrintGLError(attrib.name.c_str(), __LINE__);
+                checkForAndPrintGLError(__func__, __LINE__, attrib.name);
 
                 glVertexAttribPointer(
                         posAttrib,

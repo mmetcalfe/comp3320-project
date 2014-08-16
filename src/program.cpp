@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
     checkForAndPrintGLError(__FILE__, __LINE__);
 
     // Load shaders:
-    auto flatProgram = NUGL::ShaderProgram::createFromFiles({
+    auto flatProgram = NUGL::ShaderProgram::createFromFiles("flatProgram", {
             {GL_VERTEX_SHADER, "src/shaders/pos_mvp.vert"},
             {GL_FRAGMENT_SHADER, "src/shaders/uniform.frag"},
     });
@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
     flatProgram.link();
     flatProgram.printDebugInfo();
 
-    auto textureProgram = NUGL::ShaderProgram::createFromFiles({
+    auto textureProgram = NUGL::ShaderProgram::createFromFiles("textureProgram", {
             {GL_VERTEX_SHADER, "src/shaders/pos_tex_mvp.vert"},
             {GL_FRAGMENT_SHADER, "src/shaders/tex.frag"},
     });
@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
     textureProgram.link();
     textureProgram.printDebugInfo();
 
-    auto reflectProgram = NUGL::ShaderProgram::createFromFiles({
+    auto reflectProgram = NUGL::ShaderProgram::createFromFiles("reflectProgram", {
             {GL_VERTEX_SHADER, "src/shaders/reflect.vert"},
             {GL_FRAGMENT_SHADER, "src/shaders/reflect.frag"},
     });
@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
     reflectProgram.link();
     reflectProgram.printDebugInfo();
 
-    auto skyboxProgram = NUGL::ShaderProgram::createFromFiles({
+    auto skyboxProgram = NUGL::ShaderProgram::createFromFiles("skyboxProgram", {
             {GL_VERTEX_SHADER, "src/shaders/skybox.vert"},
             {GL_FRAGMENT_SHADER, "src/shaders/skybox.frag"},
     });

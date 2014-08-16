@@ -11,7 +11,7 @@
 #include "NUGL/Texture.h"
 
 namespace NUGL {
-    inline void printProgramDebugInfo(GLuint programId) {
+    inline void printProgramDebugInfo(GLuint programId, const std::string programName) {
         GLint deleteStatus;
         glGetProgramiv(programId, GL_DELETE_STATUS, &deleteStatus);
         GLint linkStatus;
@@ -32,7 +32,7 @@ namespace NUGL {
         glGetProgramiv(programId, GL_ACTIVE_UNIFORM_MAX_LENGTH, &activeUniformMaxLength);
         char infoLogBuff[512];
         glGetProgramInfoLog(programId, 512, nullptr, infoLogBuff);
-        std::cout << "printProgramDebugInfo(" << programId << ") {" << std::endl;
+        std::cout << "printProgramDebugInfo(" << programId << ", " << programName <<  ") {" << std::endl;
         std::cout << "  GL_DELETE_STATUS: " << (deleteStatus == GL_TRUE ? "Flagged for deletion" : "False") << "," << std::endl;
         std::cout << "  GL_LINK_STATUS: " << (linkStatus == GL_TRUE ? "Success" : "Failure") << "," << std::endl;
         std::cout << "  GL_VALIDATE_STATUS: " << (validateStatus == GL_TRUE ? "Success" : "Failure") << "," << std::endl;
@@ -58,8 +58,16 @@ namespace NUGL {
             programId = glCreateProgram();
         }
 
+        ShaderProgram(const std::string& name) : ShaderProgram() {
+            programName = name;
+        }
+
         static inline ShaderProgram createFromFiles(std::vector<std::pair<GLenum, std::string>> shaders) {
-            ShaderProgram program;
+            return createFromFiles("NO_NAME", shaders);
+        }
+
+        static inline ShaderProgram createFromFiles(const std::string& name, std::vector<std::pair<GLenum, std::string>> shaders) {
+            ShaderProgram program(name);
             for (auto& pair : shaders) {
                 auto shader = std::make_shared<Shader>(pair.first, pair.second);
                 shader->compile();
@@ -91,15 +99,33 @@ namespace NUGL {
         }
 
         inline GLint getUniformLocation(const std::string& name) {
-            return glGetUniformLocation(programId, name.c_str());
+            GLint uniLoc = glGetUniformLocation(programId, name.c_str());
+
+            if (uniLoc == -1) {
+                std::stringstream errMsg;
+                errMsg << __func__ << ", " << programName
+                       << ": The named uniform '" << name << "' does not exist.";
+                throw std::logic_error(errMsg.str());
+            }
+
+            return uniLoc;
         }
 
         inline GLint getAttribLocation(const std::string& name) {
-            return glGetAttribLocation(programId, name.c_str());
+            GLint attribLoc = glGetAttribLocation(programId, name.c_str());
+
+            if (attribLoc == -1) {
+                std::stringstream errMsg;
+                errMsg << __func__ << ", " << programName
+                       << ": The named attribute '" << name << "' does not exist.";
+                throw std::logic_error(errMsg.str());
+            }
+
+            return attribLoc;
         }
 
         inline void printDebugInfo() {
-            printProgramDebugInfo(programId);
+            printProgramDebugInfo(programId, programName);
         }
 
         inline GLuint id() {
@@ -113,36 +139,32 @@ namespace NUGL {
         template<typename T>
         inline void setUniform(const std::string& name, const T& value) {
             GLint uniLoc = getUniformLocation(name);
-            if (uniLoc == -1) {
-                std::stringstream errMsg;
-                errMsg << __func__ << ": The named uniform '" << name << "' does not exist.";
-                throw std::logic_error(errMsg.str());
-            }
-
             setUniform(uniLoc, value);
         }
         inline void setUniform(GLint uniLoc, const glm::mat4& value, GLboolean transpose = GL_FALSE) {
             glUniformMatrix4fv(uniLoc, 1, transpose, glm::value_ptr(value));
-            checkForAndPrintGLError(__FILE__, __LINE__);
+            checkForAndPrintGLError(__FILE__, __LINE__, programName);
         }
 
         inline void setUniform(GLint uniLoc, const glm::vec3& value) {
             glUniform3fv(uniLoc, 1, glm::value_ptr(value));
-            checkForAndPrintGLError(__FILE__, __LINE__);
+            checkForAndPrintGLError(__FILE__, __LINE__, programName);
         }
 
         inline void setUniform(GLint uniLoc, GLint value) {
             glUniform1i(uniLoc, value);
-            checkForAndPrintGLError(__FILE__, __LINE__);
+            checkForAndPrintGLError(__FILE__, __LINE__, programName);
         }
 
         inline void setUniform(GLint uniLoc, std::shared_ptr<NUGL::Texture> value) {
             glUniform1i(uniLoc, value->unit() - GL_TEXTURE0);
-            checkForAndPrintGLError(__FILE__, __LINE__);
+            checkForAndPrintGLError(__FILE__, __LINE__, programName);
         }
 
     private:
         GLuint programId;
         std::vector<std::shared_ptr<Shader>> shaders;
+
+        std::string programName; //!< Identifies the program in debug messages
     };
 }

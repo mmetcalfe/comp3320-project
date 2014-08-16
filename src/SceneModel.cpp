@@ -171,10 +171,16 @@ SceneModel SceneModel::loadFromFile(const std::string& fileName) {
         mesh.materialIndex = sceneMesh->mMaterialIndex;
         mesh.material = sceneModel.materials[mesh.materialIndex];
 
-        for (unsigned int v = 0; v < sceneMesh->mNumVertices; v++) {
-            auto& meshVertex = sceneMesh->mVertices[v];
+        for (unsigned int i = 0; i < sceneMesh->mNumVertices; i++) {
+            auto& meshVertex = sceneMesh->mVertices[i];
             glm::vec3 vertex = {meshVertex.x, meshVertex.y, meshVertex.z};
             mesh.vertices.push_back(vertex);
+        }
+
+        for (unsigned int i = 0; i < sceneMesh->mNumVertices; i++) {
+            auto& meshNormal = sceneMesh->mNormals[i];
+            glm::vec3 normal = {meshNormal.x, meshNormal.y, meshNormal.z};
+            mesh.normals.push_back(normal);
         }
 
         if (sceneMesh->HasTextureCoords(0)) {
@@ -209,6 +215,13 @@ void SceneModel::createMeshBuffers() {
             vertices.push_back(vertex.y);
             vertices.push_back(vertex.z);
 
+            if (mesh.hasNormals()) {
+                auto& normal = mesh.normals[i];
+                vertices.push_back(normal.x);
+                vertices.push_back(normal.y);
+                vertices.push_back(normal.y);
+            }
+
             if (mesh.isTextured()) {
                 auto& texCoord = mesh.texCoords[i];
 //                vertices.push_back(1 - texCoord.x); // TODO: fix texcoords ??
@@ -228,8 +241,12 @@ void SceneModel::createMeshBuffers() {
 void SceneModel::createVertexArrays() {
     for (auto& mesh : meshes) {
         std::vector<NUGL::VertexAttribute> attribs = {
-                {"position", 3, GL_FLOAT, GL_FALSE},
+            {"position", 3, GL_FLOAT, GL_FALSE},
         };
+
+        if (mesh.hasNormals()) {
+            attribs.push_back({"normal", 3, GL_FLOAT, GL_FALSE});
+        }
 
         auto program = flatProgram;
         if (mesh.isTextured()) {

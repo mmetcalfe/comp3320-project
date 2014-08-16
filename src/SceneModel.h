@@ -47,6 +47,7 @@ public:
         std::shared_ptr<Material> material;
 
         std::vector<glm::vec3> vertices;
+        std::vector<glm::vec3> normals;
         std::vector<glm::vec2> texCoords;
         std::vector<GLint> elements;
 
@@ -58,6 +59,10 @@ public:
 
         inline bool isTextured() {
             return material->texDiffuse != nullptr && !texCoords.empty();
+        }
+
+        inline bool hasNormals() {
+            return !normals.empty();
         }
 
         inline bool isEnvironmentMapped() {
