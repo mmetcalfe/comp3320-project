@@ -4,7 +4,7 @@ in vec3 position;
 in vec3 normal;
 
 out vec3 eyeSpacePosition;
-out vec4 Normal;
+out vec3 eyeSpaceNormal;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -12,8 +12,12 @@ uniform mat4 proj;
 
 void main() {
     gl_Position = proj * view * model * vec4(position, 1.0);
-    Normal = vec4(normal, 0);
 
-    vec4 tmp = view * model * vec4(position, 1.0);
-    eyeSpacePosition = tmp.xyz;
+    mat4 modelView = view * model;
+
+    vec4 eyeSpacePositionTmp = modelView * vec4(position, 1.0);
+    eyeSpacePosition = eyeSpacePositionTmp.xyz;
+
+    vec4 eyeSpaceNormalTmp = modelView * vec4(normal, 0);
+    eyeSpaceNormal = eyeSpaceNormalTmp.xyz;
 }

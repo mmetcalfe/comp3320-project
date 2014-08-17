@@ -22,14 +22,14 @@ unsigned int getPostProcessingFlags() {
     pFlags |= aiProcess_Triangulate;              // Triangulates all faces of all meshes.
 //    pFlags |= aiProcess_RemoveComponent;          // Removes some parts of the data structure (animations, materials, light sources, cameras, textures, vertex components).
 //    pFlags |= aiProcess_GenNormals;               // Generates normals for all faces of all meshes.
-//    pFlags |= aiProcess_GenSmoothNormals;         // Generates smooth normals for all vertices in the mesh.
+    pFlags |= aiProcess_GenSmoothNormals;         // Generates smooth normals for all vertices in the mesh.
     pFlags |= aiProcess_SplitLargeMeshes;         // Splits large meshes into smaller sub-meshes.
 //    pFlags |= aiProcess_PreTransformVertices;     // Removes the node graph and pre-transforms all vertices with the local transformation matrices of their nodes.
 //    pFlags |= aiProcess_LimitBoneWeights;         // Limits the number of bones simultaneously affecting a single vertex to a maximum value.
     pFlags |= aiProcess_ValidateDataStructure;    // Validates the imported scene data structure. This makes sure that all indices are valid, all animations and bones are linked correctly, all material references are correct .. etc.
 //    pFlags |= aiProcess_ImproveCacheLocality;     // Reorders triangles for better vertex cache locality.
     pFlags |= aiProcess_RemoveRedundantMaterials; // Searches for redundant/unreferenced materials and removes them.
-//    pFlags |= aiProcess_FixInfacingNormals;       // This step tries to determine which meshes have normal vectors that are facing inwards and inverts them.
+    pFlags |= aiProcess_FixInfacingNormals;       // This step tries to determine which meshes have normal vectors that are facing inwards and inverts them.
     pFlags |= aiProcess_SortByPType;              // This step splits meshes with more than one primitive type in homogeneous sub-meshes.
     pFlags |= aiProcess_FindDegenerates;          // This step searches all meshes for degenerate primitives and converts them to proper lines or points.
     pFlags |= aiProcess_FindInvalidData;          // This step searches all meshes for invalid data, such as zeroed normal vectors or invalid UV coords and removes/fixes them. This is intended to get rid of some common exporter errors.
@@ -114,6 +114,7 @@ SceneModel::Material copyAiMaterial(const std::string& fileName, const aiMateria
         srcMaterial->GetTexture(aiTextureType_DIFFUSE, t, &path);
         boost::filesystem::path p(fileName);
         boost::filesystem::path dir = p.parent_path();
+        dir += "/";
         dir += path.C_Str();
 //        std::cout << __FILE__ << ", " << __LINE__ << ": " << dir.string() << std::endl;
 
@@ -219,7 +220,7 @@ void SceneModel::createMeshBuffers() {
                 auto& normal = mesh.normals[i];
                 vertices.push_back(normal.x);
                 vertices.push_back(normal.y);
-                vertices.push_back(normal.y);
+                vertices.push_back(normal.z);
             }
 
             if (mesh.isTextured()) {

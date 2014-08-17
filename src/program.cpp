@@ -98,6 +98,14 @@ int main(int argc, char** argv) {
     textureProgram.link();
     textureProgram.printDebugInfo();
 
+    auto flatReflectProgram = NUGL::ShaderProgram::createFromFiles("flatReflectProgram", {
+            {GL_VERTEX_SHADER, "src/shaders/flat_reflect.vert"},
+            {GL_FRAGMENT_SHADER, "src/shaders/flat_reflect.frag"},
+    });
+    flatReflectProgram.bindFragDataLocation(0, "outColor");
+    flatReflectProgram.link();
+    flatReflectProgram.printDebugInfo();
+
     auto reflectProgram = NUGL::ShaderProgram::createFromFiles("reflectProgram", {
             {GL_VERTEX_SHADER, "src/shaders/reflect.vert"},
             {GL_FRAGMENT_SHADER, "src/shaders/reflect.frag"},
@@ -116,17 +124,10 @@ int main(int argc, char** argv) {
 
     auto sharedFlatProgram = std::make_shared<NUGL::ShaderProgram>(flatProgram);
     auto sharedTextureProgram = std::make_shared<NUGL::ShaderProgram>(textureProgram);
+    auto sharedFlatReflectProgram = std::make_shared<NUGL::ShaderProgram>(flatReflectProgram);
     auto sharedReflectProgram = std::make_shared<NUGL::ShaderProgram>(reflectProgram);
     auto sharedSkyboxProgram = std::make_shared<NUGL::ShaderProgram>(skyboxProgram);
 
-
-    // Load assets:
-    auto eagle5Model = SceneModel::loadFromFile("assets/eagle 5 transport/eagle 5 transport landed.obj");
-    eagle5Model.flatProgram = sharedFlatProgram;
-    eagle5Model.textureProgram = sharedTextureProgram;
-    eagle5Model.createMeshBuffers();
-    eagle5Model.createVertexArrays();
-    checkForAndPrintGLError(__FILE__, __LINE__);
 
     auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE0, GL_TEXTURE_CUBE_MAP);
     cubeMap->loadCubeMap({
@@ -148,10 +149,25 @@ int main(int argc, char** argv) {
     checkForAndPrintGLError(__func__, __LINE__);
 
 
+    // Load assets:
+//    auto eagle5Model = SceneModel::loadFromFile("assets/eagle 5 transport/eagle 5 transport landed.obj");
+    auto eagle5Model = SceneModel::loadFromFile("assets/galaxy_cruiser_3ds.3DS");
+    eagle5Model.flatProgram = sharedFlatProgram;
+    eagle5Model.textureProgram = sharedTextureProgram;
+//    eagle5Model.environmentMapProgram = sharedFlatReflectProgram;
+    eagle5Model.environmentMapProgram = sharedReflectProgram;
+    for (auto& mesh : eagle5Model.meshes) {
+        mesh.material->environmentMap = cubeMap;
+    }
+    eagle5Model.createMeshBuffers();
+    eagle5Model.createVertexArrays();
+    checkForAndPrintGLError(__FILE__, __LINE__);
+
     auto cubeModel = SceneModel::loadFromFile("assets/cube.obj");
     cubeModel.flatProgram = sharedFlatProgram;
     cubeModel.textureProgram = sharedTextureProgram;
-    cubeModel.environmentMapProgram = sharedReflectProgram;
+    cubeModel.environmentMapProgram = sharedFlatReflectProgram;
+//    cubeModel.environmentMapProgram = sharedReflectProgram;
     cubeModel.meshes[0].material->environmentMap = cubeMap;
     checkForAndPrintGLError(__func__, __LINE__);
     cubeModel.createMeshBuffers();
@@ -180,7 +196,6 @@ int main(int argc, char** argv) {
     camera->lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
     camera->lastUpdateTime = glfwGetTime();
 
-
     glEnable(GL_DEPTH_TEST);
 
 //    // Backface culling:
@@ -197,7 +212,10 @@ int main(int argc, char** argv) {
         nbFrames++;
         if (currentTime - lastTime >= 1.0) { // If last print was more than 1 sec ago
             double fps = double(nbFrames);
-            std::cout << (1000.0 / fps) << " ms/frame (" << fps << "fps)" << std::endl;
+            std::stringstream title;
+            title << "OpenGL | " << (1000.0 / fps) << " ms/frame (" << fps << "fps)";
+            glfwSetWindowTitle(window, title.str().c_str());
+//            std::cout << (1000.0 / fps) << " ms/frame (" << fps << "fps)" << std::endl;
             nbFrames = 0;
             lastTime += 1.0;
         }
@@ -214,6 +232,7 @@ int main(int argc, char** argv) {
 
         // Draw cube:
         glm::mat4 mapModel;
+        mapModel = glm::translate(mapModel, glm::vec3(10));
         mapModel = glm::scale(mapModel, glm::vec3(10));
         mapModel = glm::rotate(mapModel, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
         cubeModel.draw(mapModel, *camera);

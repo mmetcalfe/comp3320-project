@@ -85,7 +85,7 @@
 
 \begin{abstract}
 
-Oculus Rift & Motion Tracking:
+Oculus Rift \& Motion Tracking:
     Combine Oculus Rift with 3D motion tracking system to create a 3D virtual
     environment.
 
@@ -94,6 +94,12 @@ Oculus Rift & Motion Tracking:
     room.
 
     A virtual spaceship interior could be ideal.
+
+    Focus on creating a ideal 3D environment for testing the potential impact
+    of the technology on the VR experience.
+
+    Focus on creating an effective sense of space and scale, and avoiding
+    distracting visual artifacts.
 
 Spaceships: 
     Player can move around the interior of a spaceship.
@@ -124,6 +130,7 @@ Spaceships:
 
 
 \section*{Team Description}
+
     \begin{description}
         \item[Mitchell Metcalfe, 3129636:]
 
@@ -137,13 +144,23 @@ Spaceships:
 
 \begin{description}
     \item[Module 1:]
-        - load and display textured 3d models
-        - Skybox rendering
-        - Static reflection mapping
-        - handle single point lights
+        \begin{itemize}
+            \item Load and display textured 3D models
+            \item Skybox rendering
+            \item Static reflection mapping
+            \item Per-pixel diffuse lighting (supporting a single light)
+            \item NUClear based architecture
+        \end{itemize}
     \item[Module 2:]
-        - 
+        \begin{itemize}
+            \item Shadow mapping with soft shadows
+            \item Dynamic reflection mapping on selected models
+        \end{itemize}
     \item[Final submission:]
+        \begin{itemize}
+            \item Add Oculus Rift support
+            \item Integrate motion tracking system
+        \end{itemize}
 \end{description}
 
 \end{document}

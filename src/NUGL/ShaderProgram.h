@@ -118,7 +118,7 @@ namespace NUGL {
                 std::stringstream errMsg;
                 errMsg << __func__ << ", " << programName
                        << ": The named attribute '" << name << "' does not exist.";
-                throw std::logic_error(errMsg.str());
+//                throw std::logic_error(errMsg.str());
             }
 
             return attribLoc;

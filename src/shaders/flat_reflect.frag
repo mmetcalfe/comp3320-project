@@ -12,17 +12,18 @@ out vec4 outColor;
 
 void main() {
     // face normal in eye space:
-    vec3 normal = normalize(eyeSpaceNormal);
+    vec3 face_normal_eye = normalize(cross(dFdx(eyeSpacePosition), dFdy(eyeSpacePosition)));
+
     vec3 incident = normalize(eyeSpacePosition);
 
-    vec3 reflection = reflect(incident, normal);
+    vec3 reflection = reflect(incident, face_normal_eye);
 
     vec4 tmp_sampleCoord = modelViewInverse * vec4(reflection, 0);
     vec3 sampleCoord = tmp_sampleCoord.xyz;
 
     outColor = texture(environmentMap, sampleCoord);
-    // outColor = vec4(normalize(eyeSpaceNormal), 1);
 
-    // vec4 tmp = inverse(view) * vec4(eyeSpaceNormal, 0);
-    // outColor = vec4(normalize(tmp.xyz), 1);
+
+    vec4 tmp = inverse(view) * vec4(face_normal_eye, 0);
+    outColor = vec4(normalize(tmp.xyz), 1);
 }

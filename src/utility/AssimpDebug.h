@@ -246,12 +246,12 @@ namespace utility {
 
         printAiSceneMaterialInfo(scene);
 
-//        printAiSceneMeshInfo(scene);
+        printAiSceneMeshInfo(scene);
 
         std::cout << "  HasTextures: " << std::boolalpha << scene->HasTextures() << "," << std::endl;
         std::cout << "  NumTextures: " << scene->mNumTextures << "," << std::endl;
 
-//    printAiNodeHeirarchy(scene->mRootNode, "  ");
+        printAiNodeHeirarchy(scene->mRootNode, "  ");
 
         std::cout << "}" << std::endl;
     }
