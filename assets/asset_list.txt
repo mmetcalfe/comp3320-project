@@ -3,3 +3,5 @@
 Eagle 5 Transport: "http://www.cgtrader.com/free-3d-models/space/spacecraft-sci-fi/eagle-5-transport"
 
 PereaBeach1: http://www.humus.name/Textures/PereaBeach1.zip
+
+Galaxy Cruiser: http://www.yobi3d.com/v/HS0tNKhx3l/galaxy_cruiser_3ds.3DS
