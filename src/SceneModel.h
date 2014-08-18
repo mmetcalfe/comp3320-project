@@ -84,9 +84,11 @@ public:
     std::shared_ptr<NUGL::ShaderProgram> textureProgram;
     std::shared_ptr<NUGL::ShaderProgram> environmentMapProgram;
 
+    glm::mat4 transform; // TODO: Break this into components (pos, rot, scale)?
+
     void createMeshBuffers();
     void createVertexArrays();
-    void draw(glm::mat4& model, Camera& camera);
+    void draw(Camera& camera);
     void drawNode(SceneModel::Node& node, glm::mat4 &parentModel, Camera &camera);
     static SceneModel loadFromFile(const std::string& fileName);
 };

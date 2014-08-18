@@ -269,12 +269,13 @@ void SceneModel::createVertexArrays() {
 }
 
 // TODO: Derive the model matrix from position + orientation properties instead of passing it as a parameter.
-void SceneModel::draw(glm::mat4& model, Camera& camera) {
-    drawNode(rootNode, model, camera);
+void SceneModel::draw(Camera& camera) {
+
+    drawNode(rootNode, transform, camera);
 }
 
-void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 &parentModel, Camera& camera) {
-    glm::mat4 model = parentModel * node.transform;
+void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 &parentNodeTransform, Camera& camera) {
+    glm::mat4 model = parentNodeTransform * node.transform;
 
     // TODO: Find a better way of managing shader programs!
     if (textureProgram != nullptr) {
@@ -298,7 +299,8 @@ void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 &parentModel, Camera
         environmentMapProgram->setUniform("proj", camera.proj);
 
         try {
-            glm::mat4 modelViewInverse = glm::inverse(camera.view * model);
+            // We don't invert the transforms relating to the model's internal structure.
+            glm::mat4 modelViewInverse = glm::inverse(camera.view * transform);
             environmentMapProgram->setUniform("modelViewInverse", modelViewInverse);
         } catch (std::logic_error e) {
 

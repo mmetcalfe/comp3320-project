@@ -150,18 +150,27 @@ int main(int argc, char** argv) {
 
 
     // Load assets:
-//    auto eagle5Model = SceneModel::loadFromFile("assets/eagle 5 transport/eagle 5 transport landed.obj");
-    auto eagle5Model = SceneModel::loadFromFile("assets/galaxy_cruiser_3ds.3DS");
+    auto eagle5Model = SceneModel::loadFromFile("assets/eagle 5 transport/eagle 5 transport landed.obj");
     eagle5Model.flatProgram = sharedFlatProgram;
     eagle5Model.textureProgram = sharedTextureProgram;
 //    eagle5Model.environmentMapProgram = sharedFlatReflectProgram;
     eagle5Model.environmentMapProgram = sharedReflectProgram;
-    for (auto& mesh : eagle5Model.meshes) {
+    for (auto& mesh : eagle5Model.meshes) { // TODO: Improve environment map management.
         mesh.material->environmentMap = cubeMap;
     }
     eagle5Model.createMeshBuffers();
     eagle5Model.createVertexArrays();
-    checkForAndPrintGLError(__FILE__, __LINE__);
+
+    auto galaxyCruiserModel = SceneModel::loadFromFile("assets/galaxy_cruiser_3ds.3DS");
+    galaxyCruiserModel.flatProgram = sharedFlatProgram;
+    galaxyCruiserModel.textureProgram = sharedTextureProgram;
+//    galaxyCruiserModel.environmentMapProgram = sharedFlatReflectProgram;
+    galaxyCruiserModel.environmentMapProgram = sharedReflectProgram;
+    for (auto& mesh : galaxyCruiserModel.meshes) { // TODO: Improve environment map management.
+        mesh.material->environmentMap = cubeMap;
+    }
+    galaxyCruiserModel.createMeshBuffers();
+    galaxyCruiserModel.createVertexArrays();
 
     auto cubeModel = SceneModel::loadFromFile("assets/cube.obj");
     cubeModel.flatProgram = sharedFlatProgram;
@@ -187,11 +196,12 @@ int main(int argc, char** argv) {
     // Setup Camera:
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
-    camera->pos = glm::vec3(0.0f, 0.0f, 10.0f);
+    camera->pos = glm::vec3(0.0f, 0.0f, 0.0f);
     camera->fov = 45;
     camera->speed = 10;
     camera->lookSpeed = 0.005;
     camera->up = glm::vec3(0.0f, 0.0f, 1.0f);
+//    camera->up = glm::vec3(0.0f, 1.0f, 0.0f);
     camera->proj = glm::perspective(camera->fov, width / float(height), 1.0f, 100.0f);
     camera->lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
     camera->lastUpdateTime = glfwGetTime();
@@ -224,24 +234,35 @@ int main(int argc, char** argv) {
         glClearColor(0.5, 0.5, 0.5, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Draw ship:
-        glm::mat4 shipModel;
-        shipModel = glm::scale(shipModel, glm::vec3(0.2));
-        shipModel = glm::rotate(shipModel, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-        eagle5Model.draw(shipModel, *camera);
+        // Draw Eagle 5:
+        glm::mat4 shipTransform;
+        shipTransform = glm::scale(shipTransform, glm::vec3(0.2));
+        shipTransform = glm::rotate(shipTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+        eagle5Model.transform = shipTransform;
+        eagle5Model.draw(*camera);
+
+        // Draw Galaxy Cruiser:
+        glm::mat4 cruiserTransform;
+//        cruiserTransform = glm::translate(cruiserTransform, glm::vec3(20));
+        cruiserTransform = glm::scale(cruiserTransform, glm::vec3(0.2));
+        cruiserTransform = glm::rotate(cruiserTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+        galaxyCruiserModel.transform = cruiserTransform;
+        galaxyCruiserModel.draw(*camera);
 
         // Draw cube:
-        glm::mat4 mapModel;
-        mapModel = glm::translate(mapModel, glm::vec3(10));
-        mapModel = glm::scale(mapModel, glm::vec3(10));
-        mapModel = glm::rotate(mapModel, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-        cubeModel.draw(mapModel, *camera);
+        glm::mat4 mapTransform;
+        mapTransform = glm::translate(mapTransform, glm::vec3(10));
+        mapTransform = glm::scale(mapTransform, glm::vec3(10));
+        mapTransform = glm::rotate(mapTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+        cubeModel.transform = mapTransform;
+        cubeModel.draw(*camera);
 
         // Draw skybox:
-        glm::mat4 skyboxModel;
-        skyboxModel = glm::translate(skyboxModel, camera->pos);
-        skyboxModel = glm::rotate(skyboxModel, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-        skyBox.draw(skyboxModel, *camera);
+        glm::mat4 skyboxTransform;
+        skyboxTransform = glm::translate(skyboxTransform, camera->pos);
+        skyboxTransform = glm::rotate(skyboxTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+        skyBox.transform = skyboxTransform;
+        skyBox.draw(*camera);
 
         // Swap front and back buffers:
 //        glfwSwapInterval(1); // v-sync
