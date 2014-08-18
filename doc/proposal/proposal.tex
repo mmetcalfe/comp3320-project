@@ -39,6 +39,7 @@
 % These packages are all incorporated in the memoir class to one degree or another...
 
 \usepackage{pgfgantt} % gantt charts
+\usepackage[export]{adjustbox}[2011/08/13] % For centering wide figures
 
 %%% HEADERS & FOOTERS
 \usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
@@ -104,6 +105,9 @@ maximising the user's sense of space and scale.
 \end{abstract}
 
 \section*{Project Description}
+    
+
+
 Oculus Rift \& Motion Tracking:
     Combine Oculus Rift with 3D motion tracking system to create a 3D virtual
     environment.
@@ -156,7 +160,7 @@ Spaceships:
             Name & Student Number \\ \midrule
             Mitchell Metcalfe & 3129636 \\
             James Ross-Gowan & 3102548 \\
-            Matthew Bray &  \\ \bottomrule
+            Matthew Bray & 3129671 \\ \bottomrule
         \end{tabular}
         \caption[Team members]{Names and student numbers of our project team's members.}
         \label{table:teamMembers}
@@ -186,16 +190,10 @@ Spaceships:
         \end{itemize}
 \end{description}
 
-\begin{ganttchart}{1}{12}
-    \gantttitle{2011}{12} \\
-    \gantttitlelist{1,...,12}{1} \\
-    \ganttgroup{Group 1}{1}{7} \\
-    \ganttbar{Task 1}{1}{2} \\
-    \ganttlinkedbar{Task 2}{3}{7} \ganttnewline
-    \ganttmilestone{Milestone}{7} \ganttnewline
-    \ganttbar{Final Task}{8}{12}
-    \ganttlink{elem2}{elem3}
-    \ganttlink{elem3}{elem4}
-\end{ganttchart}
+\begin{figure}
+    \makebox[\textwidth][c]{\resizebox{0.95\paperwidth}{!}{\input{gantt.tex}}}
+    \caption[Project Schedule]{A Gantt chart illustrating the planned project schedule.}
+    \label{gantt:schedule}
+\end{figure}
 \end{document}
 

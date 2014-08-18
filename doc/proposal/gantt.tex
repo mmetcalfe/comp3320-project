@@ -1,0 +1,24 @@
+\begin{ganttchart}[
+        hgrid,
+        vgrid,
+        x unit=1.7cm,
+        % y unit title=.6cm,
+        % y unit chart=1.5cm,
+        ]{4}{15}
+    \gantttitle{}{5} \gantttitle{Semester Break}{2} \gantttitle{}{5} \\
+    % \gantttitlelist{4,...,14}{1} \\
+    \gantttitlelist{4,...,8,  ,  , 9,10,11,12, }{1} \\
+    % \gantttitlelist[
+    %     title list options={var=\y, evaluate=\y as \x using "week \y"}]{0,...,6}{1} \\
+    % \ganttgroup{Group 1}{1}{7} \\
+    % \ganttbar{Task 1}{1}{11} \\
+    % \ganttlinkedbar{Task 2}{3}{7} \ganttnewline
+    \ganttmilestone{Proposal}{4} \ganttnewline
+    \ganttmilestone{Presenation}{6} \ganttnewline
+    \ganttmilestone{Module 1}{8} \ganttnewline
+    \ganttmilestone{Module 2}{12} \ganttnewline
+    \ganttmilestone{Completion}{14} \ganttnewline
+    % \ganttbar{Final Task}{8}{11}
+    % \ganttlink{elem2}{elem3}
+    % \ganttlink{elem3}{elem4}
+\end{ganttchart}
