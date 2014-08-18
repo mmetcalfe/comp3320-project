@@ -171,8 +171,8 @@ int main(int argc, char** argv) {
     auto cubeModel = SceneModel::loadFromFile("assets/cube.obj");
     cubeModel.flatProgram = sharedFlatProgram;
     cubeModel.textureProgram = sharedTextureProgram;
-    cubeModel.environmentMapProgram = sharedFlatReflectProgram;
-//    cubeModel.environmentMapProgram = sharedReflectProgram;
+//    cubeModel.environmentMapProgram = sharedFlatReflectProgram;
+    cubeModel.environmentMapProgram = sharedReflectProgram;
     cubeModel.setEnvironmentMap(cubeMap);
     checkForAndPrintGLError(__func__, __LINE__);
     cubeModel.createMeshBuffers();

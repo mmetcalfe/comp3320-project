@@ -38,6 +38,8 @@
 \usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
 % These packages are all incorporated in the memoir class to one degree or another...
 
+\usepackage{pgfgantt} % gantt charts
+
 %%% HEADERS & FOOTERS
 \usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
 \pagestyle{fancy} % options: empty , plain , fancy
@@ -70,6 +72,7 @@
 
 % TODO: Catchy project title
 \title{Computer Graphics Project Proposal}
+\subtitle{A 3D testing environment for an enhanced virtual reality system}
 \author{Mitchell Metcalfe, James Ross-Gowan, Matthew Bray }
 
 \date{\today} % Activate to display a given date or no date (if empty),
@@ -85,6 +88,22 @@
 
 \begin{abstract}
 
+The Oculus Rift is a head-mounted virtual reality (VR) display developed by
+Oculs VR. It contains a pair of LCD displays and lenses to provide stereoscopic
+vision to the user, and also provides an IMU for tracking the orientation of
+the user's head. Together, these allow an effective VR experience, provided
+that the position of the user's head does not change. If a motion tracking
+system were used instead of just the IMU, the users range of movement could be
+increased to the entire motion tracking volume of the system. This would allow
+for a significantly more realistic VR experience, provided that the 3D
+environment naturally limited the user to the moion tracking volume. This
+project aims to implement an ideal 3D environment for testing this enhanced VR
+setup, by creating a realistic 3D environment that limits the user to a small area, while
+maximising the user's sense of space and scale.
+
+\end{abstract}
+
+\section*{Project Description}
 Oculus Rift \& Motion Tracking:
     Combine Oculus Rift with 3D motion tracking system to create a 3D virtual
     environment.
@@ -124,21 +143,24 @@ Spaceships:
         - Space skybox
         - Planets/asteroids (procedurally generated?)
 
-\end{abstract}
-
-\section*{Project Description}
-
 
 \section*{Team Description}
+    Our team consists of the students listed in table \ref{table:teamMembers}.
+    We have not yet planned specific roles or responsibilities for each team
+    member.
 
-    \begin{description}
-        \item[Mitchell Metcalfe, 3129636:]
-
-        \item[James Ross-Gowan, 3102548:]
-
-        \item[Matthew Bray, :]
-
-    \end{description}
+    \begin{table}[h]
+    \centering
+        \begin{tabular}{@{}ll@{}}
+        \toprule
+            Name & Student Number \\ \midrule
+            Mitchell Metcalfe & 3129636 \\
+            James Ross-Gowan & 3102548 \\
+            Matthew Bray &  \\ \bottomrule
+        \end{tabular}
+        \caption[Team members]{Names and student numbers of our project team's members.}
+        \label{table:teamMembers}
+    \end{table}
     
 \section*{Project Schedule}
 
@@ -155,6 +177,7 @@ Spaceships:
         \begin{itemize}
             \item Shadow mapping with soft shadows
             \item Dynamic reflection mapping on selected models
+            \item Spaceship, planets, 
         \end{itemize}
     \item[Final submission:]
         \begin{itemize}
@@ -163,5 +186,16 @@ Spaceships:
         \end{itemize}
 \end{description}
 
+\begin{ganttchart}{1}{12}
+    \gantttitle{2011}{12} \\
+    \gantttitlelist{1,...,12}{1} \\
+    \ganttgroup{Group 1}{1}{7} \\
+    \ganttbar{Task 1}{1}{2} \\
+    \ganttlinkedbar{Task 2}{3}{7} \ganttnewline
+    \ganttmilestone{Milestone}{7} \ganttnewline
+    \ganttbar{Final Task}{8}{12}
+    \ganttlink{elem2}{elem3}
+    \ganttlink{elem3}{elem4}
+\end{ganttchart}
 \end{document}
 
