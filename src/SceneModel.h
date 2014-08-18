@@ -91,5 +91,7 @@ public:
     void draw(Camera& camera);
     void drawNode(SceneModel::Node& node, glm::mat4 &parentModel, Camera &camera);
     static SceneModel loadFromFile(const std::string& fileName);
+
+    void setEnvironmentMap(std::shared_ptr<NUGL::Texture> envMap);
 };
 

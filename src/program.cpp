@@ -155,9 +155,7 @@ int main(int argc, char** argv) {
     eagle5Model.textureProgram = sharedTextureProgram;
 //    eagle5Model.environmentMapProgram = sharedFlatReflectProgram;
     eagle5Model.environmentMapProgram = sharedReflectProgram;
-    for (auto& mesh : eagle5Model.meshes) { // TODO: Improve environment map management.
-        mesh.material->environmentMap = cubeMap;
-    }
+    eagle5Model.setEnvironmentMap(cubeMap);
     eagle5Model.createMeshBuffers();
     eagle5Model.createVertexArrays();
 
@@ -166,9 +164,7 @@ int main(int argc, char** argv) {
     galaxyCruiserModel.textureProgram = sharedTextureProgram;
 //    galaxyCruiserModel.environmentMapProgram = sharedFlatReflectProgram;
     galaxyCruiserModel.environmentMapProgram = sharedReflectProgram;
-    for (auto& mesh : galaxyCruiserModel.meshes) { // TODO: Improve environment map management.
-        mesh.material->environmentMap = cubeMap;
-    }
+    galaxyCruiserModel.setEnvironmentMap(cubeMap);
     galaxyCruiserModel.createMeshBuffers();
     galaxyCruiserModel.createVertexArrays();
 
@@ -177,7 +173,7 @@ int main(int argc, char** argv) {
     cubeModel.textureProgram = sharedTextureProgram;
     cubeModel.environmentMapProgram = sharedFlatReflectProgram;
 //    cubeModel.environmentMapProgram = sharedReflectProgram;
-    cubeModel.meshes[0].material->environmentMap = cubeMap;
+    cubeModel.setEnvironmentMap(cubeMap);
     checkForAndPrintGLError(__func__, __LINE__);
     cubeModel.createMeshBuffers();
     checkForAndPrintGLError(__func__, __LINE__);
@@ -187,7 +183,7 @@ int main(int argc, char** argv) {
     skyBox.flatProgram = sharedFlatProgram;
     skyBox.textureProgram = sharedTextureProgram;
     skyBox.environmentMapProgram = sharedSkyboxProgram;
-    skyBox.meshes[0].material->environmentMap = cubeMap;
+    skyBox.setEnvironmentMap(cubeMap);
     checkForAndPrintGLError(__func__, __LINE__);
     skyBox.createMeshBuffers();
     checkForAndPrintGLError(__func__, __LINE__);
@@ -237,7 +233,7 @@ int main(int argc, char** argv) {
         // Draw Eagle 5:
         glm::mat4 shipTransform;
         shipTransform = glm::scale(shipTransform, glm::vec3(0.2));
-        shipTransform = glm::rotate(shipTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+        shipTransform = glm::rotate(shipTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f)); // TODO: Make this rotation a boolean switch on SceneModel.
         eagle5Model.transform = shipTransform;
         eagle5Model.draw(*camera);
 

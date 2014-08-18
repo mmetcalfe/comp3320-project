@@ -339,3 +339,10 @@ void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 &parentNodeTransform
         drawNode(child, model, camera);
     }
 }
+
+void SceneModel::setEnvironmentMap(std::shared_ptr<NUGL::Texture> envMap) {
+    // TODO: Improve environment map management.
+    for (auto& mesh : meshes) {
+        mesh.material->environmentMap = envMap;
+    }
+}
