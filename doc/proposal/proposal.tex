@@ -39,7 +39,7 @@
 % These packages are all incorporated in the memoir class to one degree or another...
 
 \usepackage{pgfgantt} % gantt charts
-\usepackage[export]{adjustbox}[2011/08/13] % For centering wide figures
+% \usepackage[export]{adjustbox}[2011/08/13] % For centering wide figures
 
 %%% HEADERS & FOOTERS
 \usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
@@ -92,20 +92,13 @@
     This project aims to implement an ideal virtual environment for testing an
     enhanced virtual reality (VR) setup that utilises an Oculus Rift
     paired with an OptiTrack 3D motion capture system.
-
     The limited motion capture volume of this VR system requires a test scene
     that naturally limits the user to a small area.
-
     To meet this requirement, we propose to create an interactive 3D game that
     allows the player to explore the interior of a small spaceship. The
     spaceship will feature large windows, allowing the player to view a
     procedurally generated space visualisation outside the ship - maximising
     the user's sense of space and scale.
-
-    % It is hoped that our virtual environment will be useful as a test-bed
-    % for an enhanced VR setup, by creating a realistic 3D scene that naturally limits
-    % the user to a small area, while maximising the user's sense of space and
-    % scale.
 
 \end{abstract}
 
@@ -130,28 +123,32 @@
 \section*{Background}
 
     The Oculus Rift is a head-mounted VR display developed by Oculus VR. It
-    contains a pair of LCD displays and lenses to provide stereoscopic vision to
-    the user, and also provides an IMU for tracking the orientation of the user's
-    head. Together, these allow an effective VR experience, provided that the
-    position of the user's head does not change. If an external motion capture
-    system were used (e.g. the University's OptiTrack system) instead of just the
-    built-in IMU, the users range of movement could be increased to the entire
-    motion capture volume of the system. This would allow a significantly more
-    realistic VR experience, provided that the 3D environment naturally limits the
-    user to the motion capture volume.
+    contains a pair of LCD displays and lenses to provide stereoscopic vision
+    to the user, and also provides an IMU for tracking the orientation of the
+    user's head. Together, these allow an effective VR experience, provided
+    that the position of the user's head does not change. If an external motion
+    capture system were used (e.g. the University's OptiTrack system) instead
+    of just the built-in IMU, the users range of movement could be increased to
+    the entire motion capture volume of the system. This would allow a
+    significantly more realistic VR experience, provided that the 3D
+    environment naturally limits the user to the motion capture volume.
 
-    Our project aims to create an interactive 3D environment that could act as an
-    ideal test-bed for this VR system.
+    Our project aims to create an interactive 3D environment that could act as
+    an ideal test-bed for this VR system.
 
 \section*{Project Description}
     
     Our team will create an interactive 3D game that allows the player to
     explore the interior of a small spaceship. The spaceship will feature large
     windows, allowing the player to view a procedurally generated space
-    visualisation outside the ship.
-    The possibility of allowing the player to control the ship will be
-    considered.
-    An animated 3D robot will roam the spaceship to satisfy the robot theme.
+    visualisation outside the ship. The possibility of allowing the player to
+    control the ship will be considered. An animated 3D robot will roam the
+    spaceship to satisfy the robot theme.
+
+    We intend for our game to be used to help test the impact of motion capture
+    technology on the VR experience. To ensure it is effective in doing so, we
+    will focus on creating an effective sense of space and scale, avoiding
+    distracting visual artifacts, and maintaining a high  frame-rate.
 
     \subsection*{Planned visual effects:}
     \begin{itemize}
