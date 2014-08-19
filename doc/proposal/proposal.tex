@@ -89,26 +89,29 @@
 
 \begin{abstract}
 
-    The Oculus Rift is a head-mounted virtual reality (VR) display developed by
-    Oculus VR. It contains a pair of LCD displays and lenses to provide
-    stereoscopic vision to the user, and also provides an IMU for tracking the
-    orientation of the user's head. Together, these allow an effective VR
-    experience, provided that the position of the user's head does not change.
-    If a motion capture system were used instead of just the IMU, the users
-    range of movement could be increased to the entire motion capture volume
-    of the system. This would allow for a significantly more realistic VR
-    experience, provided that the 3D environment naturally limited the user to
-    the motion capture volume. This project aims to implement an ideal 3D
-    environment for testing this enhanced VR setup, by creating a realistic 3D
-    environment that limits the user to a small area, while maximising the
-    user's sense of space and scale.
+    This project aims to implement an ideal virtual environment for testing an
+    enhanced virtual reality (VR) setup that utilises an Oculus Rift
+    paired with an OptiTrack 3D motion capture system.
+
+    The limited motion capture volume of this VR system requires a test scene
+    that naturally limits the user to a small area.
+
+    To meet this requirement, we propose to create an interactive 3D game that
+    allows the player to explore the interior of a small spaceship. The
+    spaceship will feature large windows, allowing the player to view a
+    procedurally generated space visualisation outside the ship - maximising
+    the user's sense of space and scale.
+
+    % It is hoped that our virtual environment will be useful as a test-bed
+    % for an enhanced VR setup, by creating a realistic 3D scene that naturally limits
+    % the user to a small area, while maximising the user's sense of space and
+    % scale.
 
 \end{abstract}
 
 % \pagebreak
 
 % Oculus Rift \& Motion Capture:
-    
 %     Our group wishes to eventually combine the Oculus Rift with an OptiTrack 3D
 %     motion capture system to create a 3D virtual reality environment.
 
@@ -124,17 +127,31 @@
 %     Focus on creating an effective sense of space and scale, and avoiding
 %     distracting visual artifacts.
 
-\section*{Project Description}
+\section*{Background}
 
+    The Oculus Rift is a head-mounted VR display developed by Oculus VR. It
+    contains a pair of LCD displays and lenses to provide stereoscopic vision to
+    the user, and also provides an IMU for tracking the orientation of the user's
+    head. Together, these allow an effective VR experience, provided that the
+    position of the user's head does not change. If an external motion capture
+    system were used (e.g. the University's OptiTrack system) instead of just the
+    built-in IMU, the users range of movement could be increased to the entire
+    motion capture volume of the system. This would allow a significantly more
+    realistic VR experience, provided that the 3D environment naturally limits the
+    user to the motion capture volume.
+
+    Our project aims to create an interactive 3D environment that could act as an
+    ideal test-bed for this VR system.
+
+\section*{Project Description}
+    
     Our team will create an interactive 3D game that allows the player to
-    explore the interior of a small spaceship.
-    The spaceship will feature large
+    explore the interior of a small spaceship. The spaceship will feature large
     windows, allowing the player to view a procedurally generated space
     visualisation outside the ship.
     The possibility of allowing the player to control the ship will be
     considered.
-
-    A 3D, animated robot will roam the spaceship to satisfy the robot theme.
+    An animated 3D robot will roam the spaceship to satisfy the robot theme.
 
     \subsection*{Planned visual effects:}
     \begin{itemize}
@@ -158,7 +175,7 @@
     \end{itemize}
 
 \section*{Team Description}
-    Our team consists of the students listed in table \ref{table:teamMembers}.
+    Our team consists of the students listed in Table \ref{table:teamMembers}.
     We have not yet planned specific roles or responsibilities for each team
     member.
 
@@ -179,34 +196,55 @@
 
 \section*{Project Schedule}
 
-    \begin{itemize}
-        \item[Module 1:]
-            \begin{itemize}
-                \item[]
-                \item Load and display textured 3D models
-                \item Skybox rendering
-                \item Static reflection mapping
-                \item Per-pixel diffuse lighting (supporting a single light)
-                \item NUClear based architecture
-            \end{itemize}
-        \item[Module 2:]
-            \begin{itemize}
-                \item[]
-                \item Shadow mapping with soft shadows
-                \item Dynamic reflection mapping on selected models
-                \item Spaceship, planets,
-            \end{itemize}
-        \item[Final submission:]
-            \begin{itemize}
-                \item[]
-                \item Add Oculus Rift support
-                \item Integrate motion tracking system
-            \end{itemize}
+The following list outlines the project schedule. The program to achieve this
+project schedule is presented in the Gantt chart in
+Figure~\ref{gantt:schedule}.
+
+\begin{itemize}
+    \item[Background research:]
+        \begin{itemize}
+            \item[]
+            \item Load and display textured 3D models
+            \item Skybox rendering
+            \item Static reflection mapping
+            % \item Prepare project proposal
+        \end{itemize}
+    \item[Module 1:]
+        \begin{itemize}
+            \item[]
+            \item Spaceship model (interior and exterior)
+            \item Per-pixel diffuse lighting (supporting a single light)
+            \item Space skybox
+            \item Procedurally generated asteroids and planets
+            \item Asteroids and planets
+            \item Displacement maps
+        \end{itemize}
+    \item[Module 2:]
+        \begin{itemize}
+            \item[]
+            \item Multiple lights
+            \item Shadow mapping with soft shadows
+            \item Dynamic reflection mapping
+            \item Robot model
+        \end{itemize}
+    \item[Final Project:]
+        \begin{itemize}
+            \item[]
+            \item Normal Mapping
+            \item Bloom lighting effects
+            \item Screen-space ambient occlusion
+            \item NUClear based architecture
+            \item Add Oculus Rift support
+            % \item Prepare Project Presenation
+        \end{itemize}
     \end{itemize}
 
     \begin{figure}[H]
         \makebox[\textwidth][c]{\resizebox{0.95\paperwidth}{!}{\input{gantt.tex}}}
-        \caption[Project Schedule]{A Gantt chart illustrating the planned project schedule.}
+        \caption[Project Schedule]{
+            A Gantt chart illustrating the planned project schedule.
+            Patterned grey bars represent optional tasks.
+        }
         \label{gantt:schedule}
     \end{figure}
 \end{document}
