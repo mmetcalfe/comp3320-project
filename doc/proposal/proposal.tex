@@ -89,64 +89,73 @@
 
 \begin{abstract}
 
-The Oculus Rift is a head-mounted virtual reality (VR) display developed by
-Oculus VR. It contains a pair of LCD displays and lenses to provide stereoscopic
-vision to the user, and also provides an IMU for tracking the orientation of
-the user's head. Together, these allow an effective VR experience, provided
-that the position of the user's head does not change. If a motion tracking
-system were used instead of just the IMU, the users range of movement could be
-increased to the entire motion tracking volume of the system. This would allow
-for a significantly more realistic VR experience, provided that the 3D
-environment naturally limited the user to the moion tracking volume. This
-project aims to implement an ideal 3D environment for testing this enhanced VR
-setup, by creating a realistic 3D environment that limits the user to a small area, while
-maximising the user's sense of space and scale.
+    The Oculus Rift is a head-mounted virtual reality (VR) display developed by
+    Oculus VR. It contains a pair of LCD displays and lenses to provide
+    stereoscopic vision to the user, and also provides an IMU for tracking the
+    orientation of the user's head. Together, these allow an effective VR
+    experience, provided that the position of the user's head does not change.
+    If a motion capture system were used instead of just the IMU, the users
+    range of movement could be increased to the entire motion capture volume
+    of the system. This would allow for a significantly more realistic VR
+    experience, provided that the 3D environment naturally limited the user to
+    the motion capture volume. This project aims to implement an ideal 3D
+    environment for testing this enhanced VR setup, by creating a realistic 3D
+    environment that limits the user to a small area, while maximising the
+    user's sense of space and scale.
 
 \end{abstract}
 
-\section*{Project Description}
+% \pagebreak
+
+% Oculus Rift \& Motion Capture:
     
+%     Our group wishes to eventually combine the Oculus Rift with an OptiTrack 3D
+%     motion capture system to create a 3D virtual reality environment.
 
+%     Must be a small, enclosed environment, to discourage the player from
+%     leaving the motion capture range, or walking into walls/obstacles in the
+%     room.
 
-Oculus Rift \& Motion Tracking:
-    Combine Oculus Rift with 3D motion tracking system to create a 3D virtual
-    environment.
+%     A virtual spaceship interior could be ideal.
 
-    Must be a small, enclosed environment, to discourage the player from
-    leaving the motion tracking range, or walking into walls/obstacles in the
-    room.
+%     Focus on creating a ideal 3D environment for testing the potential impact
+%     of the technology on the VR experience.
 
-    A virtual spaceship interior could be ideal.
+%     Focus on creating an effective sense of space and scale, and avoiding
+%     distracting visual artifacts.
 
-    Focus on creating a ideal 3D environment for testing the potential impact
-    of the technology on the VR experience.
+\section*{Project Description}
 
-    Focus on creating an effective sense of space and scale, and avoiding
-    distracting visual artifacts.
+    Our team will create an interactive 3D game that allows the player to
+    explore the interior of a small spaceship.
+    The spaceship will feature large
+    windows, allowing the player to view a procedurally generated space
+    visualisation outside the ship.
+    The possibility of allowing the player to control the ship will be
+    considered.
 
-Spaceships:
-    Player can move around the interior of a spaceship.
-    Also, 3rd person flight controls.
+    A 3D, animated robot will roam the spaceship to satisfy the robot theme.
 
-    Planned visual effects:
-        - Reflection mapping on some objects (possibly dynamic).
-        - Shadow mapping + Soft Shadows
-        - Space
-        - Multiple lights + shadows
-        - Screen-space ambient occlusion (time permitting)
-        - Normal Mapping
-        - Displacement mapping
-        - Hardware tesselation
+    \subsection*{Planned visual effects:}
+    \begin{itemize}
+        % \item[]
+        \item Dynamic reflection mapping on some objects.
+        \item Shadow mapping with soft shadows.
+        \item Per-pixel lighting supporting multiple lights.
+        \item Normal Mapping.
+        \item Bloom lighting effects.
+        \item Screen-space ambient occlusion.
+    \end{itemize}
 
-    Robot Theme:
-        - There will be a robot on the spaceship.
-
-    Required assets:
-        - Spaceship model (interior and exterior).
-        - Robot model
-        - Space skybox
-        - Planets/asteroids (procedurally generated?)
-
+    \subsection*{Required assets:}
+    \begin{itemize}
+        % \item[]
+        \item Spaceship model (interior and exterior).
+        \item Robot model
+        \item Space skybox
+        \item Procedurally generated asteroids and planets.
+        \item Hardware tesselation (for procedurally generated objects).
+    \end{itemize}
 
 \section*{Team Description}
     Our team consists of the students listed in table \ref{table:teamMembers}.
@@ -157,10 +166,12 @@ Spaceships:
     \centering
         \begin{tabular}{@{}ll@{}}
         \toprule
-            Name & Student Number \\ \midrule
-            Mitchell Metcalfe & 3129636 \\
-            James Ross-Gowan & 3102548 \\
-            Matthew Bray & 3129671 \\ \bottomrule
+            Name              & Student Number \\
+        \midrule
+            Mitchell Metcalfe & 3129636        \\
+            James Ross-Gowan  & 3102548        \\
+            Matthew Bray      & 3129671        \\
+        \bottomrule
         \end{tabular}
         \caption[Team members]{Names and student numbers of our project team's members.}
         \label{table:teamMembers}
@@ -168,32 +179,35 @@ Spaceships:
 
 \section*{Project Schedule}
 
-\begin{description}
-    \item[Module 1:]
-        \begin{itemize}
-            \item Load and display textured 3D models
-            \item Skybox rendering
-            \item Static reflection mapping
-            \item Per-pixel diffuse lighting (supporting a single light)
-            \item NUClear based architecture
-        \end{itemize}
-    \item[Module 2:]
-        \begin{itemize}
-            \item Shadow mapping with soft shadows
-            \item Dynamic reflection mapping on selected models
-            \item Spaceship, planets,
-        \end{itemize}
-    \item[Final submission:]
-        \begin{itemize}
-            \item Add Oculus Rift support
-            \item Integrate motion tracking system
-        \end{itemize}
-\end{description}
+    \begin{itemize}
+        \item[Module 1:]
+            \begin{itemize}
+                \item[]
+                \item Load and display textured 3D models
+                \item Skybox rendering
+                \item Static reflection mapping
+                \item Per-pixel diffuse lighting (supporting a single light)
+                \item NUClear based architecture
+            \end{itemize}
+        \item[Module 2:]
+            \begin{itemize}
+                \item[]
+                \item Shadow mapping with soft shadows
+                \item Dynamic reflection mapping on selected models
+                \item Spaceship, planets,
+            \end{itemize}
+        \item[Final submission:]
+            \begin{itemize}
+                \item[]
+                \item Add Oculus Rift support
+                \item Integrate motion tracking system
+            \end{itemize}
+    \end{itemize}
 
-\begin{figure}
-    \makebox[\textwidth][c]{\resizebox{0.95\paperwidth}{!}{\input{gantt.tex}}}
-    \caption[Project Schedule]{A Gantt chart illustrating the planned project schedule.}
-    \label{gantt:schedule}
-\end{figure}
+    \begin{figure}[H]
+        \makebox[\textwidth][c]{\resizebox{0.95\paperwidth}{!}{\input{gantt.tex}}}
+        \caption[Project Schedule]{A Gantt chart illustrating the planned project schedule.}
+        \label{gantt:schedule}
+    \end{figure}
 \end{document}
 
