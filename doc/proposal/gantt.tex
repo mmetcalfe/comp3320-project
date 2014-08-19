@@ -1,24 +1,28 @@
 \begin{ganttchart}[
         hgrid,
         vgrid,
-        x unit=1.7cm,
-        % y unit title=.6cm,
-        % y unit chart=1.5cm,
-        ]{4}{15}
-    \gantttitle{}{5} \gantttitle{Semester Break}{2} \gantttitle{}{5} \\
-    % \gantttitlelist{4,...,14}{1} \\
-    \gantttitlelist{4,...,8,  ,  , 9,10,11,12, }{1} \\
-    % \gantttitlelist[
-    %     title list options={var=\y, evaluate=\y as \x using "week \y"}]{0,...,6}{1} \\
-    % \ganttgroup{Group 1}{1}{7} \\
-    % \ganttbar{Task 1}{1}{11} \\
-    % \ganttlinkedbar{Task 2}{3}{7} \ganttnewline
-    \ganttmilestone{Proposal}{4} \ganttnewline
-    \ganttmilestone{Presenation}{6} \ganttnewline
-    \ganttmilestone{Module 1}{8} \ganttnewline
-    \ganttmilestone{Module 2}{12} \ganttnewline
-    \ganttmilestone{Completion}{14} \ganttnewline
-    % \ganttbar{Final Task}{8}{11}
+        title height = 1,
+        x unit=0.3cm,
+        y unit title=0.75cm,
+        y unit chart=1cm,
+        time slot format=isodate
+        ] {2014-08-18}{2014-11-2}
+    \gantttitlecalendar*{2014-08-18}{2014-10-31}{month=name} \\
+    \gantttitlelist[title list options={var=\y, evaluate=\y as \x using "Week \y"}]{4,...,8}{7}
+    \gantttitle{Mid-semester Break}{14}
+    \gantttitlelist[title list options={var=\y, evaluate=\y as \x using "Week \y"}]{9,...,12}{7} \\
+
+    % \ganttgroup{Group 1}{2014-08-20}{2014-10-5} \\
+    % \ganttlinkedbar{Task 2}{2014-08-20}{2014-10-5} \ganttnewline
+    
+    \ganttmilestone{Proposal}{2014-08-20} \ganttnewline % 2014-08-20
+    \ganttbar{Prepare Background Presenation}{2014-8-23}{2014-8-31} \ganttnewline
+    \ganttmilestone{Presenation}{2014-8-31} \ganttnewline % 2014-09-01
+    \ganttmilestone{Module 1}{2014-09-14} \ganttnewline % 2014-09-15
+    \ganttmilestone{Module 2}{2014-10-12} \ganttnewline % 2014-10-13
+    \ganttbar{Prepare Project Presenation}{2014-10-14}{2014-10-26} \ganttnewline % 
+    \ganttmilestone{Completion}{2014-10-26} \ganttnewline % 2014-10-27
+    
     % \ganttlink{elem2}{elem3}
     % \ganttlink{elem3}{elem4}
 \end{ganttchart}
