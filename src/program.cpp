@@ -81,45 +81,50 @@ int main(int argc, char** argv) {
     glewInit();
     checkForAndPrintGLError(__FILE__, __LINE__);
 
-    // Load shaders:
+    // Load glsl:
     auto flatProgram = NUGL::ShaderProgram::createFromFiles("flatProgram", {
-            {GL_VERTEX_SHADER, "src/shaders/pos_mvp.vert"},
-            {GL_FRAGMENT_SHADER, "src/shaders/uniform.frag"},
+            {GL_VERTEX_SHADER, "src/glsl/pos_mvp.vert"},
+            {GL_FRAGMENT_SHADER, "src/glsl/uniform.frag"},
     });
     flatProgram.bindFragDataLocation(0, "outColor");
     flatProgram.link();
+    flatProgram.updateMaterialInfo();
     flatProgram.printDebugInfo();
 
     auto textureProgram = NUGL::ShaderProgram::createFromFiles("textureProgram", {
-            {GL_VERTEX_SHADER, "src/shaders/pos_tex_mvp.vert"},
-            {GL_FRAGMENT_SHADER, "src/shaders/tex.frag"},
+            {GL_VERTEX_SHADER, "src/glsl/pos_tex_mvp.vert"},
+            {GL_FRAGMENT_SHADER, "src/glsl/tex.frag"},
     });
     textureProgram.bindFragDataLocation(0, "outColor");
     textureProgram.link();
+    textureProgram.updateMaterialInfo();
     textureProgram.printDebugInfo();
 
     auto flatReflectProgram = NUGL::ShaderProgram::createFromFiles("flatReflectProgram", {
-            {GL_VERTEX_SHADER, "src/shaders/flat_reflect.vert"},
-            {GL_FRAGMENT_SHADER, "src/shaders/flat_reflect.frag"},
+            {GL_VERTEX_SHADER, "src/glsl/flat_reflect.vert"},
+            {GL_FRAGMENT_SHADER, "src/glsl/flat_reflect.frag"},
     });
     flatReflectProgram.bindFragDataLocation(0, "outColor");
     flatReflectProgram.link();
+    flatReflectProgram.updateMaterialInfo();
     flatReflectProgram.printDebugInfo();
 
     auto reflectProgram = NUGL::ShaderProgram::createFromFiles("reflectProgram", {
-            {GL_VERTEX_SHADER, "src/shaders/reflect.vert"},
-            {GL_FRAGMENT_SHADER, "src/shaders/reflect.frag"},
+            {GL_VERTEX_SHADER, "src/glsl/reflect.vert"},
+            {GL_FRAGMENT_SHADER, "src/glsl/reflect.frag"},
     });
     reflectProgram.bindFragDataLocation(0, "outColor");
     reflectProgram.link();
+    reflectProgram.updateMaterialInfo();
     reflectProgram.printDebugInfo();
 
     auto skyboxProgram = NUGL::ShaderProgram::createFromFiles("skyboxProgram", {
-            {GL_VERTEX_SHADER, "src/shaders/skybox.vert"},
-            {GL_FRAGMENT_SHADER, "src/shaders/skybox.frag"},
+            {GL_VERTEX_SHADER, "src/glsl/skybox.vert"},
+            {GL_FRAGMENT_SHADER, "src/glsl/skybox.frag"},
     });
     skyboxProgram.bindFragDataLocation(0, "outColor");
     skyboxProgram.link();
+    skyboxProgram.updateMaterialInfo();
     skyboxProgram.printDebugInfo();
 
     auto sharedFlatProgram = std::make_shared<NUGL::ShaderProgram>(flatProgram);

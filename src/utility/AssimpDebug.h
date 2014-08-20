@@ -184,6 +184,16 @@ namespace utility {
                 std::cout << "    ShadingMode: " << utility::getAiShadingModeName(shadingMode) << "," << std::endl;
             }
 
+            aiUVTransform uvTransform;
+            if (!material->Get(AI_MATKEY_UVTRANSFORM(aiTextureType_DIFFUSE,0), uvTransform)) {
+
+                std::cout << "    UVTransform: {" << std::endl;
+                std::cout << "      Rotation: " << uvTransform.mRotation << std::endl;
+                std::cout << "      Scaling: [" << uvTransform.mScaling[0] << ", " << uvTransform.mScaling[1] << "]," << std::endl;
+                std::cout << "      Translation: [" << uvTransform.mTranslation[0] << ", " << uvTransform.mTranslation[1] << "]," << std::endl;
+                std::cout << "    }," << std::endl;
+            }
+
             auto diffTexCount = material->GetTextureCount(aiTextureType_DIFFUSE);
             if (diffTexCount > 0) {
 //                std::cout << "    Num Diffuse Textures: " << diffTexCount << "," << std::endl;

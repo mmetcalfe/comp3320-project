@@ -11,6 +11,28 @@
 #include "NUGL/Texture.h"
 
 namespace NUGL {
+    union MaterialInfo {
+        uint16_t bitSet = 0;
+        struct {
+            uint16_t colorAmbient      : 1;
+            uint16_t colorDiffuse      : 1;
+            uint16_t colorSpecular     : 1;
+            uint16_t colorTransparent  : 1;
+            uint16_t opacity           : 1;
+            uint16_t shininess         : 1;
+            uint16_t shininessStrength : 1;
+            uint16_t reserved_value_1  : 1; // Reserved for future use.
+            uint16_t reserved_value_2  : 1; // Reserved for future use.
+            uint16_t diffuseTexture    : 1;
+            uint16_t specularTexture   : 1;
+            uint16_t ambientTexture    : 1;
+            uint16_t heightTexture     : 1;
+            uint16_t normalsTexture    : 1;
+            uint16_t shininessTexture  : 1;
+            uint16_t opacityTexture    : 1;
+        } has;
+    };
+
     inline void printProgramDebugInfo(GLuint programId, const std::string programName) {
         GLint deleteStatus;
         glGetProgramiv(programId, GL_DELETE_STATUS, &deleteStatus);
@@ -98,13 +120,19 @@ namespace NUGL {
             glUseProgram(programId);
         }
 
+        inline GLint uniformIsActive(const std::string& name) {
+            GLint uniLoc = glGetUniformLocation(programId, name.c_str());
+
+            return (uniLoc == -1);
+        }
+
         inline GLint getUniformLocation(const std::string& name) {
             GLint uniLoc = glGetUniformLocation(programId, name.c_str());
 
             if (uniLoc == -1) {
                 std::stringstream errMsg;
                 errMsg << __func__ << ", " << programName
-                       << ": The named uniform '" << name << "' does not exist.";
+                       << ": The named uniform '" << name << "' does not exist or is not active.";
                 throw std::logic_error(errMsg.str());
             }
 
@@ -161,10 +189,36 @@ namespace NUGL {
             checkForAndPrintGLError(__FILE__, __LINE__, programName);
         }
 
+        //! Populates the program's material info.
+        inline void updateMaterialInfo() {
+            materialInfo.bitSet = 0;
+            materialInfo.has.ambientTexture = uniformIsActive("ambientTexture");
+            materialInfo.has.colorAmbient = uniformIsActive("colorAmbient");
+            materialInfo.has.colorDiffuse = uniformIsActive("colorDiffuse");
+            materialInfo.has.colorSpecular = uniformIsActive("colorSpecular");
+            materialInfo.has.colorTransparent = uniformIsActive("colorTransparent");
+            materialInfo.has.opacity = uniformIsActive("opacity");
+            materialInfo.has.shininess = uniformIsActive("shininess");
+            materialInfo.has.shininessStrength = uniformIsActive("shininessStrength");
+//            materialInfo.has.reserved_value_1 = uniformIsActive("reserved_value_1");
+//            materialInfo.has.reserved_value_2 = uniformIsActive("reserved_value_2");
+            materialInfo.has.diffuseTexture = uniformIsActive("diffuseTexture");
+            materialInfo.has.specularTexture = uniformIsActive("specularTexture");
+            materialInfo.has.ambientTexture = uniformIsActive("ambientTexture");
+            materialInfo.has.heightTexture = uniformIsActive("heightTexture");
+            materialInfo.has.normalsTexture = uniformIsActive("normalsTexture");
+            materialInfo.has.shininessTexture = uniformIsActive("shininessTexture");
+            materialInfo.has.opacityTexture = uniformIsActive("opacityTexture");
+        }
+
     private:
         GLuint programId;
         std::vector<std::shared_ptr<Shader>> shaders;
 
         std::string programName; //!< Identifies the program in debug messages
+
+        // TODO: Consider moving this (and MaterialInfo) outside of ShaderProgram (and NUGL?).
+        //! Describes which uniforms the shader program accepts.
+        MaterialInfo materialInfo;
     };
 }

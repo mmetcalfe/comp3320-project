@@ -22,28 +22,28 @@ inline const std::string getGLErrorName(GLenum error) {
 inline void checkForAndPrintGLError(const std::string& label) {
     auto err = glGetError();
     if (err) {
-        std::cout << "[" << label << "] GL Error: " << getGLErrorName(err) << std::endl;
+        std::cerr << "[" << label << "] GL Error: " << getGLErrorName(err) << std::endl;
     }
 }
 
 inline void checkForAndPrintGLError(int num) {
     auto err = glGetError();
     if (err) {
-        std::cout << "[" << num << "] " << getGLErrorName(err) << std::endl;
+        std::cerr << "[" << num << "] " << getGLErrorName(err) << std::endl;
     }
 }
 
 inline void checkForAndPrintGLError(const std::string& file, int line) {
     auto err = glGetError();
     if (err) {
-        std::cout << "[" << file << ", " << line << "] " << getGLErrorName(err) << std::endl;
+        std::cerr << "[" << file << ", " << line << "] " << getGLErrorName(err) << std::endl;
     }
 }
 
 inline void checkForAndPrintGLError(const std::string& file, int line, const std::string& info) {
     auto err = glGetError();
     if (err) {
-        std::cout << "[" << file << ", " << line << ": " << info << "] " << getGLErrorName(err) << std::endl;
+        std::cerr << "[" << file << ", " << line << ": " << info << "] " << getGLErrorName(err) << std::endl;
     }
 }
 
