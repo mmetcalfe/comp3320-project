@@ -39,7 +39,10 @@ public:
         bool twoSided = true;
 
         std::shared_ptr<NUGL::Texture> texDiffuse;
-        std::shared_ptr<NUGL::Texture> environmentMap;
+        std::shared_ptr<NUGL::Texture> texEnvironmentMap;
+
+        // Summarises the types of data this material offers.
+        NUGL::MaterialInfo materialInfo;
     };
 
     struct Mesh {
@@ -66,7 +69,7 @@ public:
         }
 
         inline bool isEnvironmentMapped() {
-            return material->environmentMap != nullptr;
+            return material->texEnvironmentMap != nullptr;
         }
     };
 
@@ -89,9 +92,13 @@ public:
     void createMeshBuffers();
     void createVertexArrays();
     void draw(Camera& camera);
-    void drawNode(SceneModel::Node& node, glm::mat4 &parentModel, Camera &camera);
+    void drawNode(SceneModel::Node& node, glm::mat4 parentModel, Camera &camera);
     static SceneModel loadFromFile(const std::string& fileName);
 
     void setEnvironmentMap(std::shared_ptr<NUGL::Texture> envMap);
+
+    void setCameraUniformsOnShaderPrograms(Camera &camera, glm::mat4 model);
+
+    void prepareMaterialShaderProgram(std::shared_ptr<Material> material, std::shared_ptr<NUGL::ShaderProgram> shaderProgram);
 };
 

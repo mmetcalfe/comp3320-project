@@ -2,10 +2,10 @@
 
 in vec3 Mapcoord;
 
-uniform samplerCube environmentMap;
+uniform samplerCube texEnvironmentMap;
 
 out vec4 outColor;
 
 void main() {
-    outColor = texture(environmentMap, Mapcoord);
+    outColor = texture(texEnvironmentMap, Mapcoord);
 }

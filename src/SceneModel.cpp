@@ -48,9 +48,11 @@ unsigned int getPostProcessingFlags() {
 SceneModel::Material copyAiMaterial(const std::string& fileName, const aiMaterial* srcMaterial) {
     // TODO: Support remaining material properties from http://assimp.sourceforge.net/lib_html/materials.html
     SceneModel::Material material;
+    material.materialInfo.bitSet = 0;
 
     aiColor3D aiColAmbient;
     if (!srcMaterial->Get(AI_MATKEY_COLOR_AMBIENT, aiColAmbient)) {
+        material.materialInfo.has.colAmbient = true;
         material.colAmbient.r = aiColAmbient.r;
         material.colAmbient.g = aiColAmbient.g;
         material.colAmbient.b = aiColAmbient.b;
@@ -58,6 +60,7 @@ SceneModel::Material copyAiMaterial(const std::string& fileName, const aiMateria
 
     aiColor3D aiColDiffuse;
     if (!srcMaterial->Get(AI_MATKEY_COLOR_DIFFUSE, aiColDiffuse)) {
+        material.materialInfo.has.colDiffuse = true;
         material.colDiffuse.r = aiColDiffuse.r;
         material.colDiffuse.g = aiColDiffuse.g;
         material.colDiffuse.b = aiColDiffuse.b;
@@ -65,6 +68,7 @@ SceneModel::Material copyAiMaterial(const std::string& fileName, const aiMateria
 
     aiColor3D aiColSpecular;
     if (!srcMaterial->Get(AI_MATKEY_COLOR_SPECULAR, aiColSpecular)) {
+        material.materialInfo.has.colSpecular = true;
         material.colSpecular.r = aiColSpecular.r;
         material.colSpecular.g = aiColSpecular.g;
         material.colSpecular.b = aiColSpecular.b;
@@ -72,6 +76,7 @@ SceneModel::Material copyAiMaterial(const std::string& fileName, const aiMateria
 
     aiColor3D aiColTransparent;
     if (!srcMaterial->Get(AI_MATKEY_COLOR_TRANSPARENT, aiColTransparent)) {
+        material.materialInfo.has.colTransparent = true;
         material.colTransparent.r = aiColTransparent.r;
         material.colTransparent.g = aiColTransparent.g;
         material.colTransparent.b = aiColTransparent.b;
@@ -79,16 +84,19 @@ SceneModel::Material copyAiMaterial(const std::string& fileName, const aiMateria
 
     float aiOpacity;
     if (!srcMaterial->Get(AI_MATKEY_OPACITY, aiOpacity)) {
+        material.materialInfo.has.opacity = true;
         material.opacity = aiOpacity;
     }
 
     float aiShininess;
     if (!srcMaterial->Get(AI_MATKEY_SHININESS, aiShininess)) {
+        material.materialInfo.has.shininess = true;
         material.shininess = aiShininess;
     }
 
     float aiShininessStrength;
     if (!srcMaterial->Get(AI_MATKEY_SHININESS_STRENGTH, aiShininessStrength)) {
+        material.materialInfo.has.shininessStrength = true;
         material.shininessStrength = aiShininessStrength;
     }
 
@@ -110,6 +118,8 @@ SceneModel::Material copyAiMaterial(const std::string& fileName, const aiMateria
     auto diffTexCount = srcMaterial->GetTextureCount(aiTextureType_DIFFUSE);
 
     for (unsigned int t = 0; t < diffTexCount; t++) {
+        material.materialInfo.has.texDiffuse = true;
+
         aiString path;
         srcMaterial->GetTexture(aiTextureType_DIFFUSE, t, &path);
         boost::filesystem::path p(fileName);
@@ -268,16 +278,54 @@ void SceneModel::createVertexArrays() {
     }
 }
 
-// TODO: Derive the model matrix from position + orientation properties instead of passing it as a parameter.
 void SceneModel::draw(Camera& camera) {
 
     drawNode(rootNode, transform, camera);
 }
 
-void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 &parentNodeTransform, Camera& camera) {
+void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 parentNodeTransform, Camera& camera) {
     glm::mat4 model = parentNodeTransform * node.transform;
 
     // TODO: Find a better way of managing shader programs!
+    setCameraUniformsOnShaderPrograms(camera, model);
+
+    for (int index : node.meshes) {
+        auto& mesh = meshes[index];
+        mesh.shaderProgram->use();
+
+        prepareMaterialShaderProgram(mesh.material, mesh.shaderProgram);
+
+        mesh.vertexArray->bind();
+
+        mesh.vertexBuffer->bind(GL_ARRAY_BUFFER);
+        mesh.elementBuffer->bind(GL_ELEMENT_ARRAY_BUFFER);
+        glDrawElements(GL_TRIANGLES, mesh.elements.size(), GL_UNSIGNED_INT, 0);
+        checkForAndPrintGLError(__FILE__, __LINE__);
+    }
+
+    for (auto& child : node.children) {
+        drawNode(child, model, camera);
+    }
+}
+
+void SceneModel::prepareMaterialShaderProgram(std::shared_ptr<SceneModel::Material> material,
+                                              std::shared_ptr<NUGL::ShaderProgram> shaderProgram) {
+    if (material->materialInfo.has.texEnvironmentMap && shaderProgram->materialInfo.has.texEnvironmentMap) {
+        material->texEnvironmentMap->bind();
+        shaderProgram->setUniform("texEnvironmentMap", material->texEnvironmentMap);
+    }
+
+    if (material->materialInfo.has.texDiffuse && shaderProgram->materialInfo.has.texDiffuse) {
+        material->texDiffuse->bind();
+        shaderProgram->setUniform("texDiffuse", material->texDiffuse);
+    }
+
+    if (material->materialInfo.has.colDiffuse && shaderProgram->materialInfo.has.colDiffuse) {
+        shaderProgram->setUniform("colDiffuse", material->colDiffuse);
+    }
+}
+
+void SceneModel::setCameraUniformsOnShaderPrograms(Camera &camera, glm::mat4 model) {
     if (textureProgram != nullptr) {
         textureProgram->use();
         textureProgram->setUniform("model", model);
@@ -298,51 +346,18 @@ void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 &parentNodeTransform
         environmentMapProgram->setUniform("view", camera.view);
         environmentMapProgram->setUniform("proj", camera.proj);
 
-        try {
+        if (environmentMapProgram->uniformIsActive("modelViewInverse")) {
             // We don't invert the transforms relating to the model's internal structure.
             glm::mat4 modelViewInverse = glm::inverse(camera.view * transform);
             environmentMapProgram->setUniform("modelViewInverse", modelViewInverse);
-        } catch (std::logic_error e) {
-
         }
-    }
-
-    checkForAndPrintGLError(__FILE__, __LINE__);
-
-    for (int index : node.meshes) {
-        auto& mesh = meshes[index];
-        mesh.shaderProgram->use();
-
-        if (mesh.isEnvironmentMapped()) {
-            checkForAndPrintGLError(__FILE__, __LINE__);
-            mesh.material->environmentMap->bind();
-            checkForAndPrintGLError(__FILE__, __LINE__);
-            mesh.shaderProgram->setUniform("environmentMap", mesh.material->environmentMap);
-        } else if (mesh.isTextured()) {
-            mesh.material->texDiffuse->bind();
-            mesh.shaderProgram->setUniform("tex", mesh.material->texDiffuse);
-        } else {
-            mesh.shaderProgram->setUniform("materialColour", mesh.material->colDiffuse);
-        }
-
-        mesh.vertexArray->bind();
-
-        mesh.vertexBuffer->bind(GL_ARRAY_BUFFER);
-        mesh.elementBuffer->bind(GL_ELEMENT_ARRAY_BUFFER);
-        glDrawElements(GL_TRIANGLES, mesh.elements.size(), GL_UNSIGNED_INT, 0);
-
-
-        checkForAndPrintGLError(__FILE__, __LINE__);
-    }
-
-    for (auto& child : node.children) {
-        drawNode(child, model, camera);
     }
 }
 
 void SceneModel::setEnvironmentMap(std::shared_ptr<NUGL::Texture> envMap) {
     // TODO: Improve environment map management.
     for (auto& mesh : meshes) {
-        mesh.material->environmentMap = envMap;
+        mesh.material->texEnvironmentMap = envMap;
+        mesh.material->materialInfo.has.texEnvironmentMap = true;
     }
 }

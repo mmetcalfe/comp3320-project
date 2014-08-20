@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <memory>
+#include <cstdint>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -14,22 +15,22 @@ namespace NUGL {
     union MaterialInfo {
         uint16_t bitSet = 0;
         struct {
-            uint16_t colorAmbient      : 1;
-            uint16_t colorDiffuse      : 1;
-            uint16_t colorSpecular     : 1;
-            uint16_t colorTransparent  : 1;
+            uint16_t colAmbient        : 1;
+            uint16_t colDiffuse        : 1;
+            uint16_t colSpecular       : 1;
+            uint16_t colTransparent    : 1;
             uint16_t opacity           : 1;
             uint16_t shininess         : 1;
             uint16_t shininessStrength : 1;
-            uint16_t reserved_value_1  : 1; // Reserved for future use.
-            uint16_t reserved_value_2  : 1; // Reserved for future use.
-            uint16_t diffuseTexture    : 1;
-            uint16_t specularTexture   : 1;
-            uint16_t ambientTexture    : 1;
-            uint16_t heightTexture     : 1;
-            uint16_t normalsTexture    : 1;
-            uint16_t shininessTexture  : 1;
-            uint16_t opacityTexture    : 1;
+            uint16_t reserved_value    : 1; // Reserved for future use.
+            uint16_t texEnvironmentMap : 1;
+            uint16_t texDiffuse        : 1;
+            uint16_t texSpecular       : 1;
+            uint16_t texAmbient        : 1;
+            uint16_t texHeight         : 1;
+            uint16_t texNormals        : 1;
+            uint16_t texShininess      : 1;
+            uint16_t texOpacity        : 1;
         } has;
     };
 
@@ -114,16 +115,17 @@ namespace NUGL {
 
         inline void link() {
             glLinkProgram(programId);
+
+            // TODO: After linking, detach all shaders and remove them from the shaders list.
         }
 
         inline void use() {
             glUseProgram(programId);
         }
 
-        inline GLint uniformIsActive(const std::string& name) {
+        inline bool uniformIsActive(const std::string& name) {
             GLint uniLoc = glGetUniformLocation(programId, name.c_str());
-
-            return (uniLoc == -1);
+            return (uniLoc != -1);
         }
 
         inline GLint getUniformLocation(const std::string& name) {
@@ -192,23 +194,22 @@ namespace NUGL {
         //! Populates the program's material info.
         inline void updateMaterialInfo() {
             materialInfo.bitSet = 0;
-            materialInfo.has.ambientTexture = uniformIsActive("ambientTexture");
-            materialInfo.has.colorAmbient = uniformIsActive("colorAmbient");
-            materialInfo.has.colorDiffuse = uniformIsActive("colorDiffuse");
-            materialInfo.has.colorSpecular = uniformIsActive("colorSpecular");
-            materialInfo.has.colorTransparent = uniformIsActive("colorTransparent");
+            materialInfo.has.colAmbient = uniformIsActive("colAmbient");
+            materialInfo.has.colDiffuse = uniformIsActive("colDiffuse");
+            materialInfo.has.colSpecular = uniformIsActive("colSpecular");
+            materialInfo.has.colTransparent = uniformIsActive("colTransparent");
             materialInfo.has.opacity = uniformIsActive("opacity");
             materialInfo.has.shininess = uniformIsActive("shininess");
             materialInfo.has.shininessStrength = uniformIsActive("shininessStrength");
-//            materialInfo.has.reserved_value_1 = uniformIsActive("reserved_value_1");
-//            materialInfo.has.reserved_value_2 = uniformIsActive("reserved_value_2");
-            materialInfo.has.diffuseTexture = uniformIsActive("diffuseTexture");
-            materialInfo.has.specularTexture = uniformIsActive("specularTexture");
-            materialInfo.has.ambientTexture = uniformIsActive("ambientTexture");
-            materialInfo.has.heightTexture = uniformIsActive("heightTexture");
-            materialInfo.has.normalsTexture = uniformIsActive("normalsTexture");
-            materialInfo.has.shininessTexture = uniformIsActive("shininessTexture");
-            materialInfo.has.opacityTexture = uniformIsActive("opacityTexture");
+//            materialInfo.has.reserved_value_1 = uniformIsActive("reserved_value");
+            materialInfo.has.texEnvironmentMap = uniformIsActive("texEnvironmentMap");
+            materialInfo.has.texDiffuse = uniformIsActive("texDiffuse");
+            materialInfo.has.texSpecular = uniformIsActive("texSpecular");
+            materialInfo.has.texAmbient = uniformIsActive("texAmbient");
+            materialInfo.has.texHeight = uniformIsActive("texHeight");
+            materialInfo.has.texNormals = uniformIsActive("texNormals");
+            materialInfo.has.texShininess = uniformIsActive("texShininess");
+            materialInfo.has.texOpacity = uniformIsActive("texOpacity");
         }
 
     private:
@@ -217,6 +218,7 @@ namespace NUGL {
 
         std::string programName; //!< Identifies the program in debug messages
 
+    public:
         // TODO: Consider moving this (and MaterialInfo) outside of ShaderProgram (and NUGL?).
         //! Describes which uniforms the shader program accepts.
         MaterialInfo materialInfo;

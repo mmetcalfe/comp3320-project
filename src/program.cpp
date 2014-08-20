@@ -133,7 +133,6 @@ int main(int argc, char** argv) {
     auto sharedReflectProgram = std::make_shared<NUGL::ShaderProgram>(reflectProgram);
     auto sharedSkyboxProgram = std::make_shared<NUGL::ShaderProgram>(skyboxProgram);
 
-
     auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE0, GL_TEXTURE_CUBE_MAP);
     cubeMap->loadCubeMap({
             "assets/PereaBeach1/posx.jpg",
@@ -151,8 +150,6 @@ int main(int argc, char** argv) {
     cubeMap->setParam(GL_TEXTURE_BASE_LEVEL, 0);
     cubeMap->setParam(GL_TEXTURE_MAX_LEVEL, 0);
 //    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
-    checkForAndPrintGLError(__func__, __LINE__);
-
 
     // Load assets:
     auto eagle5Model = SceneModel::loadFromFile("assets/eagle 5 transport/eagle 5 transport landed.obj");
@@ -179,9 +176,7 @@ int main(int argc, char** argv) {
 //    cubeModel.environmentMapProgram = sharedFlatReflectProgram;
     cubeModel.environmentMapProgram = sharedReflectProgram;
     cubeModel.setEnvironmentMap(cubeMap);
-    checkForAndPrintGLError(__func__, __LINE__);
     cubeModel.createMeshBuffers();
-    checkForAndPrintGLError(__func__, __LINE__);
     cubeModel.createVertexArrays();
 
     auto skyBox = SceneModel::loadFromFile("assets/cube.obj");
@@ -189,9 +184,7 @@ int main(int argc, char** argv) {
     skyBox.textureProgram = sharedTextureProgram;
     skyBox.environmentMapProgram = sharedSkyboxProgram;
     skyBox.setEnvironmentMap(cubeMap);
-    checkForAndPrintGLError(__func__, __LINE__);
     skyBox.createMeshBuffers();
-    checkForAndPrintGLError(__func__, __LINE__);
     skyBox.createVertexArrays();
 
     // Setup Camera:

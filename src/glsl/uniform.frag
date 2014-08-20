@@ -1,10 +1,9 @@
 #version 150
 
-uniform vec3 materialColour;
+uniform vec3 colDiffuse;
 
 out vec4 outColor;
 
-void main()
-{
-    outColor = vec4(materialColour, 1.0);
+void main() {
+    outColor = vec4(colDiffuse, 1.0);
 }
