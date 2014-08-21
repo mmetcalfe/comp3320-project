@@ -85,6 +85,18 @@ namespace NUGL {
             checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
+        inline void setTextureData(GLenum target, GLsizei width, GLsizei height, const GLvoid *pixels) {
+            bind();
+            if ((width % 4) == 0) {
+                glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+            } else {
+                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            }
+            glTexImage2D(target, 0, GL_RGB,
+                    width, height,
+                    0, GL_RGB, GL_UNSIGNED_BYTE, pixels); // TODO: Check byte formats
+        }
+
         inline void loadFromPNG(const std::string& fileName, GLenum target) {
             // Open image
             png::image<png::rgb_pixel> image(fileName.c_str());
@@ -101,11 +113,7 @@ namespace NUGL {
                 }
             }
 
-            // Set texture data
-            bind();
-            glTexImage2D(target, 0, GL_RGB,
-                    image.get_width(), image.get_height(),
-                    0, GL_RGB, GL_UNSIGNED_BYTE, imgData.data());
+            setTextureData(target, image.get_width(), image.get_height(), imgData.data());
         }
 
         inline void loadFromJPEG(const std::string& fileName, GLenum target) {
@@ -140,7 +148,7 @@ namespace NUGL {
             char* samples = data.data();
             while (cinfo.output_scanline < cinfo.output_height) {
                 int numSamples = jpeg_read_scanlines(&cinfo, (JSAMPARRAY)&samples, 1);
-                samples += numSamples * cinfo.image_width * cinfo.num_components;
+                samples += numSamples * cinfo.output_width * cinfo.output_components;
             }
 
             // Clean up
@@ -148,11 +156,7 @@ namespace NUGL {
 
             jpeg_destroy_decompress(&cinfo);
 
-            // Set texture data
-            bind();
-            glTexImage2D(target, 0, GL_RGB,
-                    cinfo.image_width, cinfo.image_height,
-                    0, GL_RGB, GL_UNSIGNED_BYTE, data.data()); // TODO: Check byte formats
+            setTextureData(target, cinfo.image_width, cinfo.image_height, data.data());
         }
 
         inline void setParam(GLenum param, GLint value) {
