@@ -110,8 +110,8 @@ int main(int argc, char** argv) {
     flatReflectProgram.printDebugInfo();
 
     auto reflectProgram = NUGL::ShaderProgram::createFromFiles("reflectProgram", {
-            {GL_VERTEX_SHADER, "src/glsl/reflect.vert"},
-            {GL_FRAGMENT_SHADER, "src/glsl/reflect.frag"},
+            {GL_VERTEX_SHADER, "src/glsl/reflect_tex.vert"},
+            {GL_FRAGMENT_SHADER, "src/glsl/reflect_tex.frag"},
     });
     reflectProgram.bindFragDataLocation(0, "outColor");
     reflectProgram.link();
@@ -133,7 +133,8 @@ int main(int argc, char** argv) {
     auto sharedReflectProgram = std::make_shared<NUGL::ShaderProgram>(reflectProgram);
     auto sharedSkyboxProgram = std::make_shared<NUGL::ShaderProgram>(skyboxProgram);
 
-    auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE0, GL_TEXTURE_CUBE_MAP);
+    // TODO: Find a way to manage texture units!
+    auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE1, GL_TEXTURE_CUBE_MAP);
     cubeMap->loadCubeMap({
             "assets/PereaBeach1/posx.jpg",
             "assets/PereaBeach1/negx.jpg",

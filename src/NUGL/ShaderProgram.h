@@ -186,6 +186,11 @@ namespace NUGL {
             checkForAndPrintGLError(__FILE__, __LINE__, programName);
         }
 
+        inline void setUniform(GLint uniLoc, GLfloat value) {
+            glUniform1f(uniLoc, value);
+            checkForAndPrintGLError(__FILE__, __LINE__, programName);
+        }
+
         inline void setUniform(GLint uniLoc, std::shared_ptr<NUGL::Texture> value) {
             glUniform1i(uniLoc, value->unit() - GL_TEXTURE0);
             checkForAndPrintGLError(__FILE__, __LINE__, programName);
