@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <vector>
 
 namespace utility {
 namespace strutil {
@@ -20,6 +21,24 @@ namespace strutil {
                 (std::istreambuf_iterator<char>()    ) );
 
         return content;
+    }
+
+    inline bool checkFirstBytes(const std::string fileName, const std::string cmpStr) {
+        std::ifstream ifs(fileName);
+
+        if (!ifs.good()) {
+            std::stringstream errMsg;
+            errMsg << __func__ << ": Could not open file '" << fileName << "'.";
+            throw std::invalid_argument(errMsg.str());
+        }
+
+        std::istreambuf_iterator<char> fileIterator(ifs);
+        for (auto c : cmpStr) {
+            if (c != *fileIterator++)
+                return false;
+        }
+
+        return true;
     }
 }
 }

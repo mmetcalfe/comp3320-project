@@ -71,11 +71,15 @@ namespace NUGL {
                 throw std::invalid_argument(errMsg.str());
             }
 
-            boost::filesystem::path p(fileName);
-            if (p.extension() == "png") {
+            if (utility::strutil::checkFirstBytes(fileName, "\xFF\xD8\xFF")) {
+                loadFromJPEG(fileName, target);
+            } else if (utility::strutil::checkFirstBytes(fileName, "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A")) {
                 loadFromPNG(fileName, target);
             } else {
-                loadFromJPEG(fileName, target);
+                std::stringstream errMsg;
+                errMsg << __func__
+                    << ": The file '" << fileName << "' has unrecognised image file type.";
+                throw std::invalid_argument(errMsg.str());
             }
 
             checkForAndPrintGLError(__FILE__, __LINE__);
@@ -120,8 +124,9 @@ namespace NUGL {
 
             // Set source buffer
             FILE* pFile = fopen(fileName.c_str(), "rb");
-            if (!pFile)
+            if (!pFile) {
                 throw std::invalid_argument("loadFromJPEG: Invalid fileName");
+            }
             jpeg_stdio_src(&cinfo, pFile);
 
             // Read jpeg header
@@ -140,6 +145,7 @@ namespace NUGL {
 
             // Clean up
             jpeg_finish_decompress(&cinfo);
+
             jpeg_destroy_decompress(&cinfo);
 
             // Set texture data
