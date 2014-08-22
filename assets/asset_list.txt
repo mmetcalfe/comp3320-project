@@ -5,3 +5,9 @@ Eagle 5 Transport: "http://www.cgtrader.com/free-3d-models/space/spacecraft-sci-
 PereaBeach1: http://www.humus.name/Textures/PereaBeach1.zip
 
 Galaxy Cruiser: http://www.yobi3d.com/v/HS0tNKhx3l/galaxy_cruiser_3ds.3DS
+
+King's Treasure: http://www.3drender.com/challenges/KingsTreasure/KingsTreasure_OBJ.rar
+
+# Victorian Living Room: http://tf3dm.com/download-page.php?url=victorian-living-room-interior-29434
+
+House01: http://tf3dm.com/3d-model/architecture-house01-81348.html

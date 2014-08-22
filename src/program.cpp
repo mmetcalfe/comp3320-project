@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
     auto sharedReflectProgram = std::make_shared<NUGL::ShaderProgram>(reflectProgram);
     auto sharedSkyboxProgram = std::make_shared<NUGL::ShaderProgram>(skyboxProgram);
 
-    // TODO: Find a way to manage texture units!
+//    // TODO: Find a way to manage texture units!
     auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE1, GL_TEXTURE_CUBE_MAP);
     cubeMap->loadCubeMap({
             "assets/PereaBeach1/posx.jpg",
@@ -150,10 +150,14 @@ int main(int argc, char** argv) {
     cubeMap->setParam(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     cubeMap->setParam(GL_TEXTURE_BASE_LEVEL, 0);
     cubeMap->setParam(GL_TEXTURE_MAX_LEVEL, 0);
-//    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+////    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
     // Load assets:
     auto eagle5Model = SceneModel::loadFromFile("assets/eagle 5 transport/eagle 5 transport landed.obj");
+//    auto eagle5Model = SceneModel::loadFromFile("assets/KingsTreasure_OBJ/KingsTreasure.obj");
+//    auto eagle5Model = SceneModel::loadFromFile("assets/rc8c1qtjiygw-O/Organodron City/Organodron City.obj");
+//    auto eagle5Model = SceneModel::loadFromFile("assets/Bedroom.3DS");
+//    auto eagle5Model = SceneModel::loadFromFile("assets/Room 2013 New/Room 2013 New.c4d");
     eagle5Model.flatProgram = sharedFlatProgram;
     eagle5Model.textureProgram = sharedTextureProgram;
 //    eagle5Model.environmentMapProgram = sharedFlatReflectProgram;
@@ -162,23 +166,33 @@ int main(int argc, char** argv) {
     eagle5Model.createMeshBuffers();
     eagle5Model.createVertexArrays();
 
-    auto galaxyCruiserModel = SceneModel::loadFromFile("assets/galaxy_cruiser_3ds.3DS");
-    galaxyCruiserModel.flatProgram = sharedFlatProgram;
-    galaxyCruiserModel.textureProgram = sharedTextureProgram;
-//    galaxyCruiserModel.environmentMapProgram = sharedFlatReflectProgram;
-    galaxyCruiserModel.environmentMapProgram = sharedReflectProgram;
-    galaxyCruiserModel.setEnvironmentMap(cubeMap);
-    galaxyCruiserModel.createMeshBuffers();
-    galaxyCruiserModel.createVertexArrays();
+    auto houseModel = SceneModel::loadFromFile("assets/House01/House01.obj");
+    houseModel.flatProgram = sharedFlatProgram;
+    houseModel.textureProgram = sharedTextureProgram;
+//    houseModel.environmentMapProgram = sharedFlatReflectProgram;
+    houseModel.environmentMapProgram = sharedReflectProgram;
+    houseModel.setEnvironmentMap(cubeMap);
+    houseModel.createMeshBuffers();
+    houseModel.createVertexArrays();
 
-    auto cubeModel = SceneModel::loadFromFile("assets/cube.obj");
-    cubeModel.flatProgram = sharedFlatProgram;
-    cubeModel.textureProgram = sharedTextureProgram;
-//    cubeModel.environmentMapProgram = sharedFlatReflectProgram;
-    cubeModel.environmentMapProgram = sharedReflectProgram;
-    cubeModel.setEnvironmentMap(cubeMap);
-    cubeModel.createMeshBuffers();
-    cubeModel.createVertexArrays();
+//
+//    auto galaxyCruiserModel = SceneModel::loadFromFile("assets/galaxy_cruiser_3ds.3DS");
+//    galaxyCruiserModel.flatProgram = sharedFlatProgram;
+//    galaxyCruiserModel.textureProgram = sharedTextureProgram;
+////    galaxyCruiserModel.environmentMapProgram = sharedFlatReflectProgram;
+//    galaxyCruiserModel.environmentMapProgram = sharedReflectProgram;
+//    galaxyCruiserModel.setEnvironmentMap(cubeMap);
+//    galaxyCruiserModel.createMeshBuffers();
+//    galaxyCruiserModel.createVertexArrays();
+//
+//    auto cubeModel = SceneModel::loadFromFile("assets/cube.obj");
+//    cubeModel.flatProgram = sharedFlatProgram;
+//    cubeModel.textureProgram = sharedTextureProgram;
+////    cubeModel.environmentMapProgram = sharedFlatReflectProgram;
+//    cubeModel.environmentMapProgram = sharedReflectProgram;
+//    cubeModel.setEnvironmentMap(cubeMap);
+//    cubeModel.createMeshBuffers();
+//    cubeModel.createVertexArrays();
 
     auto skyBox = SceneModel::loadFromFile("assets/cube.obj");
     skyBox.flatProgram = sharedFlatProgram;
@@ -231,26 +245,34 @@ int main(int argc, char** argv) {
 
         // Draw Eagle 5:
         glm::mat4 shipTransform;
-        shipTransform = glm::scale(shipTransform, glm::vec3(0.2));
+        shipTransform = glm::scale(shipTransform, glm::vec3(0.3));
         shipTransform = glm::rotate(shipTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f)); // TODO: Make this rotation a boolean switch on SceneModel.
         eagle5Model.transform = shipTransform;
         eagle5Model.draw(*camera);
 
-        // Draw Galaxy Cruiser:
-        glm::mat4 cruiserTransform;
-//        cruiserTransform = glm::translate(cruiserTransform, glm::vec3(20));
-        cruiserTransform = glm::scale(cruiserTransform, glm::vec3(0.2));
-        cruiserTransform = glm::rotate(cruiserTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-        galaxyCruiserModel.transform = cruiserTransform;
-        galaxyCruiserModel.draw(*camera);
 
-        // Draw cube:
-        glm::mat4 mapTransform;
-        mapTransform = glm::translate(mapTransform, glm::vec3(10));
-        mapTransform = glm::scale(mapTransform, glm::vec3(10));
-        mapTransform = glm::rotate(mapTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-        cubeModel.transform = mapTransform;
-        cubeModel.draw(*camera);
+        // Draw House:
+        glm::mat4 houseTransform;
+        houseTransform = glm::scale(houseTransform, glm::vec3(3));
+        houseTransform = glm::rotate(houseTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+        houseModel.transform = houseTransform;
+        houseModel.draw(*camera);
+
+//        // Draw Galaxy Cruiser:
+//        glm::mat4 cruiserTransform;
+////        cruiserTransform = glm::translate(cruiserTransform, glm::vec3(20));
+//        cruiserTransform = glm::scale(cruiserTransform, glm::vec3(0.2));
+//        cruiserTransform = glm::rotate(cruiserTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+//        galaxyCruiserModel.transform = cruiserTransform;
+//        galaxyCruiserModel.draw(*camera);
+//
+//        // Draw cube:
+//        glm::mat4 mapTransform;
+//        mapTransform = glm::translate(mapTransform, glm::vec3(10));
+//        mapTransform = glm::scale(mapTransform, glm::vec3(10));
+//        mapTransform = glm::rotate(mapTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+//        cubeModel.transform = mapTransform;
+//        cubeModel.draw(*camera);
 
         // Draw skybox:
         glm::mat4 skyboxTransform;
