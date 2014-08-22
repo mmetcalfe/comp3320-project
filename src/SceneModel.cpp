@@ -45,6 +45,21 @@ unsigned int getPostProcessingFlags() {
     return pFlags;
 }
 
+GLenum getGLTextureWrapForAiTextureMapMode(aiTextureMapMode mapMode) {
+    switch (mapMode) {
+        case aiTextureMapMode_Wrap: return GL_REPEAT;
+        case aiTextureMapMode_Clamp: return GL_CLAMP_TO_EDGE;
+        case aiTextureMapMode_Decal: return GL_CLAMP_TO_BORDER;
+        case aiTextureMapMode_Mirror: return GL_MIRRORED_REPEAT;
+        default: {
+            std::stringstream errMsg;
+            errMsg << __func__
+                    << ": Invaid mapMode " << mapMode << ".";
+            throw std::invalid_argument(errMsg.str().c_str());
+        };
+    }
+}
+
 SceneModel::Material copyAiMaterial(const std::string& fileName, const aiMaterial* srcMaterial) {
     // TODO: Support remaining material properties from http://assimp.sourceforge.net/lib_html/materials.html
     SceneModel::Material material;
@@ -121,7 +136,9 @@ SceneModel::Material copyAiMaterial(const std::string& fileName, const aiMateria
         material.materialInfo.has.texDiffuse = true;
 
         aiString path;
-        srcMaterial->GetTexture(aiTextureType_DIFFUSE, t, &path);
+        auto mapModes = std::vector<aiTextureMapMode>(3);
+        srcMaterial->GetTexture(aiTextureType_DIFFUSE, t, &path, nullptr, nullptr, nullptr, nullptr,
+                mapModes.data());
         boost::filesystem::path p(fileName);
         boost::filesystem::path dir = p.parent_path();
         dir += "/";
@@ -130,8 +147,11 @@ SceneModel::Material copyAiMaterial(const std::string& fileName, const aiMateria
 
         material.texDiffuse = std::make_unique<NUGL::Texture>(GL_TEXTURE0 + t, GL_TEXTURE_2D);
         material.texDiffuse->loadFromImage(dir.string());
-        material.texDiffuse->setParam(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        material.texDiffuse->setParam(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+//      TODO: Read texture settings from Assimp (+ Check for other texture types/layers).
+//      TODO: Support 3D textures.
+        material.texDiffuse->setParam(GL_TEXTURE_WRAP_S, getGLTextureWrapForAiTextureMapMode(mapModes[0]));
+        material.texDiffuse->setParam(GL_TEXTURE_WRAP_T, getGLTextureWrapForAiTextureMapMode(mapModes[1]));
+//        material.texDiffuse->setParam(GL_TEXTURE_WRAP_R, getGLTextureWrapForAiTextureMapMode(mapModes[2]));
         material.texDiffuse->setParam(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         material.texDiffuse->setParam(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         break; // Only use first texture. TODO: Support multiple textures.
