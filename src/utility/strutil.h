@@ -9,7 +9,7 @@
 namespace utility {
 namespace strutil {
     inline std::string getFileString(const std::string fileName) {
-        std::ifstream ifs(fileName);
+        std::ifstream ifs(fileName, std::ifstream::binary);
 
         if (!ifs.good()) {
             std::stringstream errMsg;
@@ -24,7 +24,7 @@ namespace strutil {
     }
 
     inline bool checkFirstBytes(const std::string fileName, const std::string cmpStr) {
-        std::ifstream ifs(fileName);
+        std::ifstream ifs(fileName, std::ifstream::binary);
 
         if (!ifs.good()) {
             std::stringstream errMsg;
