@@ -16,7 +16,24 @@
 class SceneModel {
 public:
     struct Light {
-        glm::vec3 position;
+        enum class Type {
+            undefined,
+            directional,
+            point,
+            spot,
+        };
+
+        Type type;
+        glm::vec3 pos;
+        glm::vec3 dir;
+        float attenuationConstant;
+        float attenuationLinear;
+        float attenuationQuadratic;
+        glm::vec3 colDiffuse;
+        glm::vec3 colSpecular;
+        glm::vec3 colAmbient;
+        float angleConeInner;
+        float angleConeOuter;
     };
 
     struct Material {
@@ -80,6 +97,7 @@ public:
     };
 
     std::vector<Mesh> meshes;
+    std::vector<std::shared_ptr<Light>> lights;
     std::vector<std::shared_ptr<Material>> materials;
     Node rootNode;
 

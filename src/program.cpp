@@ -28,7 +28,7 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
     }
 
     glViewport(0, 0, width, height);
-    camera->proj = glm::perspective(camera->fov, width / float(height), 1.0f, 100.0f);
+    camera->proj = glm::perspective(camera->fov, width / float(height), 1.0f, 300.0f);
 }
 
 //void cursorPositionCallback(GLFWwindow* window, double x, double y) {
@@ -211,7 +211,7 @@ int main(int argc, char** argv) {
     camera->lookSpeed = 0.005;
     camera->up = glm::vec3(0.0f, 0.0f, 1.0f);
 //    camera->up = glm::vec3(0.0f, 1.0f, 0.0f);
-    camera->proj = glm::perspective(camera->fov, width / float(height), 1.0f, 100.0f);
+    camera->proj = glm::perspective(camera->fov, width / float(height), 1.0f, 300.0f);
     camera->lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
     camera->lastUpdateTime = glfwGetTime();
 
@@ -280,6 +280,8 @@ int main(int argc, char** argv) {
         skyboxTransform = glm::rotate(skyboxTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
         skyBox.transform = skyboxTransform;
         skyBox.draw(*camera);
+
+        // TODO: Add Framebuffer objects to NUGL and refactor rendering loop
 
         // Swap front and back buffers:
 //        glfwSwapInterval(1); // v-sync

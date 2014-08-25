@@ -60,6 +60,45 @@ GLenum getGLTextureWrapForAiTextureMapMode(aiTextureMapMode mapMode) {
     }
 }
 
+SceneModel::Light copyAiLight(const std::string& fileName, const aiLight* srcLight) {
+    SceneModel::Light light;
+    switch (srcLight->mType) {
+        case aiLightSource_SPOT:        light.type = SceneModel::Light::Type::spot;        break;
+        case aiLightSource_DIRECTIONAL: light.type = SceneModel::Light::Type::directional; break;
+        case aiLightSource_POINT:       light.type = SceneModel::Light::Type::point;       break;
+        default: light.type = SceneModel::Light::Type::undefined; break;
+    }
+
+    light.pos.x = srcLight->mPosition.x;
+    light.pos.y = srcLight->mPosition.y;
+    light.pos.z = srcLight->mPosition.z;
+
+    light.dir.x = srcLight->mDirection.x;
+    light.dir.y = srcLight->mDirection.y;
+    light.dir.z = srcLight->mDirection.z;
+
+    light.colAmbient.r = srcLight->mColorAmbient.r;
+    light.colAmbient.g = srcLight->mColorAmbient.g;
+    light.colAmbient.b = srcLight->mColorAmbient.b;
+
+    light.colDiffuse.r = srcLight->mColorDiffuse.r;
+    light.colDiffuse.g = srcLight->mColorDiffuse.g;
+    light.colDiffuse.b = srcLight->mColorDiffuse.b;
+
+    light.colSpecular.r = srcLight->mColorSpecular.r;
+    light.colSpecular.g = srcLight->mColorSpecular.g;
+    light.colSpecular.b = srcLight->mColorSpecular.b;
+
+    light.attenuationConstant = srcLight->mAttenuationConstant;
+    light.attenuationLinear = srcLight->mAttenuationLinear;
+    light.attenuationQuadratic = srcLight->mAttenuationQuadratic;
+
+    light.angleConeInner = srcLight->mAngleInnerCone;
+    light.angleConeOuter = srcLight->mAngleOuterCone;
+
+    return light;
+}
+
 SceneModel::Material copyAiMaterial(const std::string& fileName, const aiMaterial* srcMaterial) {
     // TODO: Support remaining material properties from http://assimp.sourceforge.net/lib_html/materials.html
     SceneModel::Material material;
@@ -194,6 +233,11 @@ SceneModel SceneModel::loadFromFile(const std::string& fileName) {
     for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
         auto* material = scene->mMaterials[i];
         sceneModel.materials.push_back(std::make_shared<Material>(copyAiMaterial(fileName, material)));
+    }
+
+    for (unsigned int i = 0; i < scene->mNumLights; i++) {
+        auto* light = scene->mLights[i];
+        sceneModel.lights.push_back(std::make_shared<Light>(copyAiLight(fileName, light)));
     }
 
     for (unsigned int m = 0; m < scene->mNumMeshes; m++) {

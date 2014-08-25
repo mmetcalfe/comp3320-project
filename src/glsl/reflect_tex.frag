@@ -39,4 +39,8 @@ void main() {
 
     vec4 outSpecular = vec4(colSpecular, 1.0) * reflectCol * phongSpecularReflectFactor; // * shininessStrength;
     outColor = outAmbient + outDiffuse + outSpecular;
+//    outColor = outSpecular + outDiffuse;
+//    outColor = outAmbient;
+//    outColor = outDiffuse;
+//    outColor = outSpecular;
 }
