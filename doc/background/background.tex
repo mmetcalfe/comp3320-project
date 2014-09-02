@@ -1,6 +1,8 @@
 \documentclass{beamer}
 \usepackage{graphicx, epstopdf}
 \usepackage{amsmath, amssymb, amsbsy, amstext}
+\usepackage{ upgreek }
+
 % \usepackage{xcolor}
 
 % \definecolor{darkgreen}{rgb}{0,0.6,0}
@@ -32,9 +34,70 @@
 	\section{Motivation}
 
 		\subsection{The Rendering Equation}
-			\begin{frame}{Single Integral}\end{frame}
-			\begin{frame}{Split into terms}\end{frame}
-			\begin{frame}{What does it mean?}\end{frame}
+
+			\begin{frame}{Single Integral}
+				% From Wikipedia: http://en.wikipedia.org/wiki/Rendering_equation
+				\[
+					L_{\text{s}}(\mathbf x,\, \omega_{\text{r}}) \,=\,%
+						L_e(\mathbf x,\, \omega_{\text{r}}) \ +\, %
+						\int_\Omega %
+							f_r(\mathbf x,\, \omega_{\text{i}},\, \omega_{\text{r}})\, %
+								L_{\text{i}}(\mathbf x,\, \omega_{\text{i}})\, %
+							(\omega_{\text{i}}\,\cdot\,\mathbf n)\,
+						\operatorname d \omega_{\text{i}}
+				\, \]
+
+				\pause
+				Emitted and reflected components:
+				\[
+					L_{\text{s}}(\mathbf x,\, \omega_{\text{r}}) \,=\,%
+						L_e(\mathbf x,\, \omega_{\text{r}}) \ +\, %
+						L_r(\mathbf x,\, \omega_{\text{r}})
+				\]
+			\end{frame}
+
+			\begin{frame}{Split into terms}
+				\begin{equation*}
+				\begin{split}
+					L_{\text{r}} \,=\,%
+						&\int_\Omega %
+							f_r\, %
+								L_{i,l}\, %
+							(\omega_{\text{i}}\,\cdot\,\mathbf n)\,
+						\operatorname d \omega_{\text{i}}%
+						\, +\\%
+						&\int_\Omega %
+							f_{r, s}\, %
+								(L_{i,c} + L_{i,d})\, %
+							(\omega_{\text{i}}\,\cdot\,\mathbf n)\,
+						\operatorname d \omega_{\text{i}}
+						\, +\\%
+						&\int_\Omega %
+							f_{r, d}\, %
+								L_{i,c}\, %
+							(\omega_{\text{i}}\,\cdot\,\mathbf n)\,
+						\operatorname d \omega_{\text{i}}
+						\, +\\%
+						&\int_\Omega %
+							f_{r, d}\, %
+								L_{i,d}\, %
+							(\omega_{\text{i}}\,\cdot\,\mathbf n)\,
+						\operatorname d \omega_{\text{i}}
+				\, \end{split}
+				\end{equation*}
+				where
+				\[
+					f_r = f_{r, s} + f_{r, d}%
+					\, \text{and} \,%
+					L_i = L_{i,l} + L_{i,c} + L_{i,d}
+				\]
+			\end{frame}
+
+			\begin{frame}{What does it mean?}
+				\[
+					L_r = L_{direct} + L_{specular} + L_{caustics} + L_{indirect}
+				\]
+			\end{frame}
 
 		\subsection{How does photography work}
 			\begin{frame}{Light}\end{frame}
@@ -112,7 +175,8 @@
 					\item<3-> Low photon energy
 				\end{itemize}
 
-				Use a second photon map just for caustics and render it directly.
+				\pause Use a second photon map just for caustics and render it directly.
+				\pause Only shoot caustics photons at highly specular/translucent objects.
 			\end{frame}
 
 	\section{Discussion}
