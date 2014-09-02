@@ -24,6 +24,9 @@ install_manifest.txt
 *.out
 *.pdf
 *.synctex.gz
+*.nav
+*.snm
+*.toc
 
 # Miscellaneous
 *.swp

@@ -1,13 +1,85 @@
-% link to project can be pretty weak.
-% Could show a movie as part of the presentation
-% slides not submitted, just marked in class
-% 15 mins max
+\documentclass{beamer}
+\usepackage{graphicx, epstopdf}
+\usepackage{amsmath, amssymb, amsbsy, amstext}
+% \usepackage{xcolor}
 
-% Marking points:
-%   - structure
-%   - clarity
-%   - correctnes
-%   - quality
-%   - volume/substance of work
-%   - questions
-%   - exciting/beautiful/useful
+% \definecolor{darkgreen}{rgb}{0,0.6,0}
+% \usepackage{pgf}
+% \logo{\pgfputat{\pgfxy(-2,6)}{\pgfbox[center,base]{\includegraphics[height=2cm]{amsilogo.jpg}}}}
+
+\usetheme{Dresden} %Dresden, Darmstadt, Warsaw
+% \usecolortheme{dove}
+\title[COMP3320 Background Presentation]{Global Illumination through Photon Mapping}
+\subtitle{An overview}
+\author{Mitchell Metcalfe, James Ross-Gowan,\\ Matthew Bray}
+\institute{University of Newcastle}
+\date{\today}
+
+% \newenvironment{changemargin}[2]{% 
+%   \begin{list}{}{% 
+%     \setlength{\topsep}{0pt}% 
+%     \setlength{\leftmargin}{#1}% 
+%     \setlength{\rightmargin}{#2}% 
+%     \setlength{\listparindent}{\parindent}% 
+%     \setlength{\itemindent}{\parindent}% 
+%     \setlength{\parsep}{\parskip}% 
+%   }% 
+%   \item[]}{\end{list}} 
+
+\begin{document}
+	\maketitle
+	
+	\section{Motivation}
+
+		\subsection{The Rendering Equation}
+			\begin{frame}{Single Integral}\end{frame}
+			\begin{frame}{Split into terms}\end{frame}
+			\begin{frame}{What does it mean?}\end{frame}
+
+		\subsection{How does photography work}
+			\begin{frame}{Light}\end{frame}
+			\begin{frame}{Taking a photo}\end{frame}
+			\begin{frame}{Why not just simulate that?}
+				\begin{itemize}
+					\item<2-> Lens is very small
+					\item<3-> Many photons never reach it
+				\end{itemize}
+			\end{frame}
+
+	\section{Photon mapping}
+		\begin{frame}{Method}
+			\begin{itemize}
+				\item<2-> Cast many photons
+				\item<3-> Simulate a few photon bounces
+				\item<4-> Keep all of the resulting photon positions
+			\end{itemize}
+		\end{frame}
+		
+		\subsection{Photon simulation}
+			\begin{frame}{Assumptions}
+				\begin{itemize}
+					\item<2-> All photons start with the same energy
+					\item<3-> When a photon hits a surface, it has a probability of bouncing off
+					\item<4-> Photons change based on the surfaces they hit
+				\end{itemize}
+			\end{frame}
+			\begin{frame}{The Photons}\end{frame}
+			\begin{frame}{Illustration}\end{frame}
+
+		\subsection{Rendering the scene}
+			\begin{frame}{The photon map}\end{frame}
+			\begin{frame}{The \(L_{indirect}\) term}\end{frame}
+			\begin{frame}{Using the photon map}\end{frame}
+			\begin{frame}{Other concerns}\end{frame}
+			\begin{frame}{Representation}\end{frame}
+			\begin{frame}{Caustics}\end{frame}
+
+	\section{Discussion}
+		\subsection{Pros \& Cons}
+		\subsection{Examples}
+		\subsection{Alternatives}
+
+	\section{Ambient Occlusion}
+
+\end{document}
+
