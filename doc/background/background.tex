@@ -63,21 +63,96 @@
 					\item<4-> Photons change based on the surfaces they hit
 				\end{itemize}
 			\end{frame}
-			\begin{frame}{The Photons}\end{frame}
+			\begin{frame}{The Photons}
+				Photon properties are:
+				\begin{itemize}
+					\item<2-> Colour
+					\item<3-> Energy
+					\item<4-> Direction
+					\item<4-> Position
+				\end{itemize}
+			\end{frame}
 			\begin{frame}{Illustration}\end{frame}
 
 		\subsection{Rendering the scene}
-			\begin{frame}{The photon map}\end{frame}
-			\begin{frame}{The \(L_{indirect}\) term}\end{frame}
-			\begin{frame}{Using the photon map}\end{frame}
-			\begin{frame}{Other concerns}\end{frame}
-			\begin{frame}{Representation}\end{frame}
-			\begin{frame}{Caustics}\end{frame}
+			\begin{frame}{The photon map}
+				\begin{itemize}
+					\item<2-> Huge number of photons
+					\item<3-> Invariant of camera position
+					\item<4-> Still need to render the scene
+				\end{itemize}
+			\end{frame}
+			\begin{frame}{The \(L_{indirect}\) term}
+				Highlight the Lindirect term in the rendering equation
+			\end{frame}
+			\begin{frame}{Using the photon map}
+				Image/Animation showing the `final gathering' step
+			\end{frame}
+			\begin{frame}{Representation}
+				The photon map is huge and contains a complex distribution of photons.
+
+				Use an acceleration structure:
+				\begin{itemize}
+					\item<2-> KD-tree
+					\item<3-> Octree
+					\item<4-> Spatial hashing
+				\end{itemize}
+			\end{frame}
+			\begin{frame}{Other concerns}
+				\begin{itemize}
+					\item<2-> Very glossy surfaces
+					\item<3-> Perfect reflectors
+					\item<4-> Translucent objects
+				\end{itemize}
+				\pause Don't use the photon map. Just compute reflected rays (with importance sampling) as normal.
+			\end{frame}
+			\begin{frame}{Caustics}
+				\begin{itemize}
+					\item<2-> High photon density
+					\item<3-> Low photon energy
+				\end{itemize}
+
+				Use a second photon map just for caustics and render it directly.
+			\end{frame}
 
 	\section{Discussion}
-		\subsection{Pros \& Cons}
+		\begin{frame}{Pros \& Cons}
+				\begin{itemize}
+					\item<2-> Traditionally not a realtime method
+						\begin{itemize}
+							\item<3-> Must generate photon map each frame for dynamic scenes
+							\item<4-> GPU implementations do exist
+						\end{itemize}
+					\item<5-> Biased
+						\begin{itemize}
+							\item<6-> More photons increases image quality, but averaging many renders with a lower photon count does not converge to the same image
+							\item<7-> Modifications exist to correct this
+						\end{itemize}
+				\end{itemize}
+		\end{frame}
+
+		\begin{frame}{Alternatives}
+			\begin{itemize}
+				\item<2-> Path Tracing
+					\begin{itemize}
+						\item<3-> Simple
+						\item<4-> Unbiased
+						\item<4-> Easier to parallelize
+					\end{itemize}
+				\item<5-> Radiosity
+					\begin{itemize}
+						\item<6-> Patch-based
+						\item<7-> Point/Surfel based (Pixar's Renderman)
+					\end{itemize}
+				\item<5-> Ambient Occlusion
+					\begin{itemize}
+						\item<6-> A dirty hack
+						\item<7-> Captures some important qualitative features of GI
+					\end{itemize}
+			\end{itemize}
+		\end{frame}
+
 		\subsection{Examples}
-		\subsection{Alternatives}
 
 	\section{Ambient Occlusion}
 
