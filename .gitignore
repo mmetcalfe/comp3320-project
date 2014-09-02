@@ -4,6 +4,9 @@
 # Assets aren't stored in git
 /assets/
 
+# Images
+*.jpg
+
 # Build and CMake files
 build/
 CMakeCache.txt

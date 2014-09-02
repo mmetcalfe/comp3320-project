@@ -5,7 +5,7 @@ import os.path
 def next_file_name():
     num = 1
     while True:
-        file_name = 'image%03d.png' % num
+        file_name = 'image%03d.jpg' % num
         if not os.path.exists(file_name):
             return file_name
         num += 1
@@ -21,7 +21,7 @@ print("Initializing camera...")
 # Now we can initialize the camera capture object with the cv2.VideoCapture class.
 # All it needs is the index to a camera port.
 camera = cv2.VideoCapture(camera_port)
- 
+
 # Captures a single image from the camera and returns it in PIL format
 def get_image():
  # read is the easiest way to get a full image out of a VideoCapture object.
