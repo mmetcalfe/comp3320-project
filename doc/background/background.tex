@@ -3,6 +3,22 @@
 \usepackage{amsmath, amssymb, amsbsy, amstext}
 \usepackage{ upgreek }
 
+\usepackage{pgf}
+\usepackage{tikz}
+
+
+%==================================
+% Signed quote macro:
+\def\signed #1{{\leavevmode\unskip\nobreak\hfil\penalty50\hskip2em
+  \hbox{}\nobreak\hfil(#1)%
+  \parfillskip=0pt \finalhyphendemerits=0 \endgraf}}
+
+\newsavebox\mybox
+\newenvironment{aquote}[1]
+  {\savebox\mybox{#1}\begin{quote}}
+  {\signed{\usebox\mybox}\end{quote}}
+%==================================
+
 % \usepackage{xcolor}
 
 % \definecolor{darkgreen}{rgb}{0,0.6,0}
@@ -100,8 +116,17 @@
 			\end{frame}
 
 		\subsection{How does photography work}
-			\begin{frame}{Light}\end{frame}
-			\begin{frame}{Taking a photo}\end{frame}
+			\begin{frame}{Light}
+				\begin{aquote}{Wikipedia, \href{http://en.wikipedia.org/wiki/Light}{Light}}
+					In common with all types of EMR, visible light is emitted and absorbed in \textbf{tiny `packets' called photons}, and exhibits properties of both waves and particles. This property is referred to as the wave–particle duality.
+				\end{aquote}
+				% - Wikipedia, http://en.wikipedia.org/wiki/Light
+			\end{frame}
+
+			\begin{frame}{Taking a photo}
+				% TODO: Animation
+			\end{frame}
+
 			\begin{frame}{Why not just simulate that?}
 				\begin{itemize}
 					\item<2-> Lens is very small
@@ -126,6 +151,7 @@
 					\item<4-> Photons change based on the surfaces they hit
 				\end{itemize}
 			\end{frame}
+
 			\begin{frame}{The Photons}
 				Photon properties are:
 				\begin{itemize}
@@ -145,12 +171,16 @@
 					\item<4-> Still need to render the scene
 				\end{itemize}
 			\end{frame}
+
 			\begin{frame}{The \(L_{indirect}\) term}
 				Highlight the Lindirect term in the rendering equation
+				% TODO: Drawing
 			\end{frame}
+
 			\begin{frame}{Using the photon map}
-				Image/Animation showing the `final gathering' step
+				% TODO: Image/Animation showing the `final gathering' step
 			\end{frame}
+
 			\begin{frame}{Representation}
 				The photon map is huge and contains a complex distribution of photons.
 
@@ -161,6 +191,7 @@
 					\item<4-> Spatial hashing
 				\end{itemize}
 			\end{frame}
+
 			\begin{frame}{Other concerns}
 				\begin{itemize}
 					\item<2-> Very glossy surfaces
@@ -169,6 +200,7 @@
 				\end{itemize}
 				\pause Don't use the photon map. Just compute reflected rays (with importance sampling) as normal.
 			\end{frame}
+			
 			\begin{frame}{Caustics}
 				\begin{itemize}
 					\item<2-> High photon density
