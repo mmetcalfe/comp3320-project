@@ -6,7 +6,6 @@
 \usepackage{pgf}
 \usepackage{tikz}
 
-
 %==================================
 % Signed quote macro:
 \def\signed #1{{\leavevmode\unskip\nobreak\hfil\penalty50\hskip2em
@@ -55,6 +54,7 @@
 
       \begin{frame}{Single integral}
         % From Wikipedia: http://en.wikipedia.org/wiki/Rendering_equation
+
         \[
           L_{\text{s}}(\mathbf x,\, \omega_{\text{r}}) \,=\,%
             L_e(\mathbf x,\, \omega_{\text{r}}) \ +\, %
@@ -63,7 +63,7 @@
                 L_{\text{i}}(\mathbf x,\, \omega_{\text{i}})\, %
               (\omega_{\text{i}}\,\cdot\,\mathbf n)\,
             \operatorname d \omega_{\text{i}}
-        \, \]
+        \]
 
         \pause
         Emitted and reflected components:
@@ -106,7 +106,7 @@
         where
         \[
           f_r = f_{r, s} + f_{r, d}%
-          \, \text{and} \,%
+          \, \text{ and } \, %
           L_i = L_{i,l} + L_{i,c} + L_{i,d}
         \]
       \end{frame}
@@ -120,7 +120,7 @@
     \subsection{How does Photography Work?}
       \begin{frame}{Light}
         \begin{aquote}{Wikipedia, \href{http://en.wikipedia.org/wiki/Light}{Light}}
-          In common with all types of EMR, visible light is emitted and absorbed in \textbf{tiny `packets' called photons}, and exhibits properties of both waves and particles. This property is referred to as the wave–particle duality.
+          In common with all types of EMR, visible light is emitted and absorbed in \textbf{tiny `packets' called photons}, and exhibits properties of both waves and particles.
         \end{aquote}
         % - Wikipedia, http://en.wikipedia.org/wiki/Light
       \end{frame}
@@ -191,28 +191,28 @@
         Photon properties are:
         \begin{itemize}
           \item<2-> Colour
-          \item<3-> Energy
-          \item<4-> Direction
+          \item<3-> Power
           \item<4-> Position
+          \item<5-> Direction
         \end{itemize}
 
-        \slideframe{1}{image035}
-        \slideframe{2}{image036}
-        \slideframe{3}{image037}
-        \slideframe{4}{image038}
+        \slideframe{2}{image035}
+        \slideframe{3}{image036}
+        \slideframe{4}{image037}
+        % \slideframe{5}{image038}
         \slideframe{5}{image039}
       \end{frame}
 
       \begin{frame}{Illustration}
-        \slideframe{1}{image040}
-        \slideframe{2}{image041}
-        \slideframe{3}{image042}
-        \slideframe{4}{image043}
-        \slideframe{5}{image044}
-        \slideframe{6}{image045}
-        \slideframe{7}{image046}
-        \slideframe{8}{image047}
-        \slideframe{9}{image048}
+        % \slideframe{1}{image040}
+        \slideframe{1}{image041}
+        \slideframe{2}{image042}
+        \slideframe{3}{image043}
+        \slideframe{4}{image044}
+        \slideframe{5}{image045}
+        \slideframe{6}{image046}
+        \slideframe{7}{image047}
+        \slideframe{8}{image048}
       \end{frame}
 
     \subsection{Rendering the Scene}
@@ -225,8 +225,9 @@
       \end{frame}
 
       \begin{frame}{The \(L_{indirect}\) term}
-        Highlight the Lindirect term in the rendering equation
-        % TODO: Drawing
+        \[
+          L_r = L_{direct} + L_{specular} + L_{caustics} + \color{red} L_{indirect}
+        \]
       \end{frame}
 
       \begin{frame}{Using the photon map}
@@ -257,17 +258,21 @@
           \item<3-> Perfect reflectors
           \item<4-> Translucent objects
         \end{itemize}
-        \uncover<5-> Don't use the photon map. Just compute reflected rays (with importance sampling) as normal.
+        \uncover<5->{Don't use the photon map. Just compute reflected rays (with importance sampling) as normal.}
       \end{frame}
       
       \begin{frame}{Caustics}
+        \[
+          L_r = L_{direct} + L_{specular} + {\color{red} L_{caustics}} + L_{indirect}
+        \]
+
         \begin{itemize}
           \item<2-> High photon density
           \item<3-> Low photon energy
         \end{itemize}
 
-        \uncover<4-> Use a second photon map just for caustics and render it directly.
-        \uncover<5-> Only shoot caustics photons at highly specular/translucent objects.
+        \uncover<4->{Use a second photon map just for caustics and render it directly.}
+        \uncover<5->{Only shoot caustics photons at highly specular/translucent objects.}
       \end{frame}
 
   \section{Discussion}
@@ -280,8 +285,8 @@
             \end{itemize}
           \item<5-> Biased
             \begin{itemize}
-              \item<6-> More photons increases image quality, but averaging many renders with a lower photon count does not converge to the same image
-              \item<7-> Modifications exist to correct this
+              \item<6-> Rendering with more photons increase image quality, but averaging many renders with a lower photon count does not converge to a correct image
+              \item<7-> Modifications exist to correct this (e.g. Progressive Photon Mapping)
             \end{itemize}
         \end{itemize}
     \end{frame}
@@ -292,17 +297,17 @@
           \begin{itemize}
             \item<3-> Simple
             \item<4-> Unbiased
-            \item<4-> Easier to parallelize
+            \item<5-> Easier to parallelize
           \end{itemize}
-        \item<5-> Radiosity
+        \item<6-> Radiosity
           \begin{itemize}
-            \item<6-> Patch-based
-            \item<7-> Point/Surfel based (Pixar's Renderman)
+            \item<7-> Patch-based
+            \item<8-> Point/Surfel based (Pixar's Renderman)
           \end{itemize}
-        \item<5-> Ambient Occlusion
+        \item<9-> Ambient Occlusion
           \begin{itemize}
-            \item<6-> A dirty hack
-            \item<7-> Captures some important qualitative features of GI
+            \item<10-> A dirty hack
+            \item<11-> Captures some important qualitative features of GI
           \end{itemize}
       \end{itemize}
     \end{frame}
@@ -310,6 +315,7 @@
     \subsection{Examples}
 
   \section{Ambient Occlusion}
+
 
 \end{document}
 
