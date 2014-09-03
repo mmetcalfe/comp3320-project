@@ -1,15 +1,15 @@
 #! /bin/bash
 
-file=$1
+inputfile=$1
 outputfile=$2
 
 autotrace \
-	--background-color A6A6A6 \
-	--color-count 6 \
-	--despeckle-level 19 \
+	--background-color FFFFFF \
+	--color-count 10 \
+	--despeckle-level 2 \
 	--output-file $outputfile \
-	--output-format eps \
-	$file
+	--output-format pdf \
+	$inputfile
 
 
 # Usage: autotrace [options] <input_name>.

@@ -211,7 +211,7 @@ int main(int argc, char** argv) {
     camera->lookSpeed = 0.005;
     camera->up = glm::vec3(0.0f, 0.0f, 1.0f);
 //    camera->up = glm::vec3(0.0f, 1.0f, 0.0f);
-    camera->proj = glm::perspective(camera->fov, width / float(height), 1.0f, 300.0f);
+    camera->proj = glm::perspective(camera->fov, width / float(height), 0.1f, 300.0f);
     camera->lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
     camera->lastUpdateTime = glfwGetTime();
 

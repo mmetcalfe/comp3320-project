@@ -3,9 +3,11 @@
 
 # Assets aren't stored in git
 /assets/
+/doc/background/photonMapping/
 
 # Images
 *.jpg
+*.png
 
 # Build and CMake files
 build/

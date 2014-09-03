@@ -18,7 +18,8 @@
   {\signed{\usebox\mybox}\end{quote}}
 %==================================
 
-\newcommand{\slideframe}[2]{\only<#1>{\begin{center} \includegraphics[width=\textwidth]{images/#2.jpg} \end{center}}}
+% \newcommand{\slideframe}[2]{\only<#1>{\begin{center} \includegraphics[width=\textwidth]{images/#2.jpg} \end{center}}}
+\newcommand{\slideframe}[2]{\only<#1>{\begin{center} \includegraphics[width=0.8\textwidth]{images/#2_adjusted.png} \end{center}}}
 
 % \usepackage{xcolor}
 
@@ -157,9 +158,9 @@
         \slideframe{24}{image029}
         \slideframe{25}{image030}
         \slideframe{26}{image031}
-        \slideframe{27}{image032}
-        \slideframe{28}{image033}
-        \slideframe{29}{image034}
+        % \slideframe{27}{image032}
+        % \slideframe{28}{image033}
+        % \slideframe{29}{image034}
       \end{frame}
 
       \begin{frame}{Why not just simulate that?}
@@ -259,6 +260,10 @@
           \item<4-> Translucent objects
         \end{itemize}
         \uncover<5->{Don't use the photon map. Just compute reflected rays (with importance sampling) as normal.}
+      \end{frame}
+      
+      \begin{frame}{Caustics}
+        \begin{center} \includegraphics[width=0.8\textwidth]{images/caustic.jpg} \end{center}
       \end{frame}
       
       \begin{frame}{Caustics}
