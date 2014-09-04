@@ -116,7 +116,7 @@ namespace scene {
 
         void drawNode(Model::Node &node, glm::mat4 parentModel, Camera &camera);
 
-        static Model loadFromFile(const std::string &fileName);
+        static std::shared_ptr<Model>  loadFromFile(const std::string &fileName);
 
         void setEnvironmentMap(std::shared_ptr<NUGL::Texture> envMap);
 

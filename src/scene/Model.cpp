@@ -1,15 +1,13 @@
 #include "scene/Model.h"
 #include <iostream>
+#include <memory>
 
 #include <boost/filesystem.hpp>
-
-// assimp (asset importer library)
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>           // Output data structure
 #include <assimp/postprocess.h>     // Post processing flags
 
 #include "NUGL/ShaderProgram.h"
-
 #include "utility/make_unique.h"
 #include "utility/debug.h"
 #include "utility/AssimpDebug.h"
@@ -228,7 +226,7 @@ void copyAiNode(const aiNode *pNode, Model::Node &node) {
     }
 }
 
-Model Model::loadFromFile(const std::string &fileName) {
+std::shared_ptr<Model> Model::loadFromFile(const std::string &fileName) {
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(fileName, getPostProcessingFlags());
 
@@ -242,23 +240,23 @@ Model Model::loadFromFile(const std::string &fileName) {
 
     utility::printAiSceneInfo(scene);
 
-    Model sceneModel;
+    std::shared_ptr<Model> sceneModel = std::make_shared<Model>();
 
     for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
         auto *material = scene->mMaterials[i];
-        sceneModel.materials.push_back(std::make_shared<Material>(copyAiMaterial(fileName, material)));
+        sceneModel->materials.push_back(std::make_shared<Material>(copyAiMaterial(fileName, material)));
     }
 
     for (unsigned int i = 0; i < scene->mNumLights; i++) {
         auto *light = scene->mLights[i];
-        sceneModel.lights.push_back(std::make_shared<Light>(copyAiLight(fileName, light)));
+        sceneModel->lights.push_back(std::make_shared<Light>(copyAiLight(fileName, light)));
     }
 
     for (unsigned int m = 0; m < scene->mNumMeshes; m++) {
         auto *sceneMesh = scene->mMeshes[m];
         Mesh mesh;
         mesh.materialIndex = sceneMesh->mMaterialIndex;
-        mesh.material = sceneModel.materials[mesh.materialIndex];
+        mesh.material = sceneModel->materials[mesh.materialIndex];
 
         for (unsigned int i = 0; i < sceneMesh->mNumVertices; i++) {
             auto &meshVertex = sceneMesh->mVertices[i];
@@ -286,10 +284,10 @@ Model Model::loadFromFile(const std::string &fileName) {
                 mesh.elements.push_back(meshFace.mIndices[i]);
         }
 
-        sceneModel.meshes.push_back(std::move(mesh));
+        sceneModel->meshes.push_back(std::move(mesh));
     }
 
-    copyAiNode(scene->mRootNode, sceneModel.rootNode);
+    copyAiNode(scene->mRootNode, sceneModel->rootNode);
 
     return sceneModel;
 }

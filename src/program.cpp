@@ -16,8 +16,9 @@
 #include "NUGL/VertexArray.h"
 #include "NUGL/Texture.h"
 #include "scene/Model.h"
+#include "scene/Scene.h"
 
-static auto camera = std::make_unique<Camera>();
+static auto mainScene = std::make_unique<scene::Scene>();
 
 void errorCallback(int error, const char* description) {
     std::cerr << "GLFW ERROR: " << description << std::endl;
@@ -29,11 +30,11 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
     }
 
     glViewport(0, 0, width, height);
-    camera->proj = glm::perspective(camera->fov, width / float(height), 1.0f, 300.0f);
+    mainScene->camera->proj = glm::perspective(mainScene->camera->fov, width / float(height), 1.0f, 300.0f);
 }
 
 //void cursorPositionCallback(GLFWwindow* window, double x, double y) {
-////    camera->processMouseInput(window, x, y);
+////    mainScene->camera->processMouseInput(window, x, y);
 //    std::cout << __func__ << ": [" << x << ", " << y << "]" << std::endl;
 //}
 
@@ -159,22 +160,32 @@ int main(int argc, char** argv) {
 //    auto eagle5Model = scene::Model::loadFromFile("assets/rc8c1qtjiygw-O/Organodron City/Organodron City.obj");
 //    auto eagle5Model = scene::Model::loadFromFile("assets/Bedroom.3DS");
 //    auto eagle5Model = scene::Model::loadFromFile("assets/Room 2013 New/Room 2013 New.c4d");
-    eagle5Model.flatProgram = sharedFlatProgram;
-    eagle5Model.textureProgram = sharedTextureProgram;
-//    eagle5Model.environmentMapProgram = sharedFlatReflectProgram;
-    eagle5Model.environmentMapProgram = sharedReflectProgram;
-    eagle5Model.setEnvironmentMap(cubeMap);
-    eagle5Model.createMeshBuffers();
-    eagle5Model.createVertexArrays();
+    eagle5Model->flatProgram = sharedFlatProgram;
+    eagle5Model->textureProgram = sharedTextureProgram;
+//    eagle5Model->environmentMapProgram = sharedFlatReflectProgram;
+    eagle5Model->environmentMapProgram = sharedReflectProgram;
+    eagle5Model->setEnvironmentMap(cubeMap);
+    eagle5Model->createMeshBuffers();
+    eagle5Model->createVertexArrays();
+    mainScene->models.push_back(eagle5Model);
+    glm::mat4 shipTransform;
+    shipTransform = glm::scale(shipTransform, glm::vec3(0.3));
+    shipTransform = glm::rotate(shipTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f)); // TODO: Make this rotation a boolean switch on Model.
+    eagle5Model->transform = shipTransform;
 
     auto houseModel = scene::Model::loadFromFile("assets/House01/House01.obj");
-    houseModel.flatProgram = sharedFlatProgram;
-    houseModel.textureProgram = sharedTextureProgram;
-//    houseModel.environmentMapProgram = sharedFlatReflectProgram;
-    houseModel.environmentMapProgram = sharedReflectProgram;
-    houseModel.setEnvironmentMap(cubeMap);
-    houseModel.createMeshBuffers();
-    houseModel.createVertexArrays();
+    houseModel->flatProgram = sharedFlatProgram;
+    houseModel->textureProgram = sharedTextureProgram;
+//    houseModel->environmentMapProgram = sharedFlatReflectProgram;
+    houseModel->environmentMapProgram = sharedReflectProgram;
+    houseModel->setEnvironmentMap(cubeMap);
+    houseModel->createMeshBuffers();
+    houseModel->createVertexArrays();
+    mainScene->models.push_back(houseModel);
+    glm::mat4 houseTransform;
+    houseTransform = glm::scale(houseTransform, glm::vec3(3));
+    houseTransform = glm::rotate(houseTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+    houseModel->transform = houseTransform;
 
 //
 //    auto galaxyCruiserModel = scene::Model::loadFromFile("assets/galaxy_cruiser_3ds.3DS");
@@ -185,7 +196,12 @@ int main(int argc, char** argv) {
 //    galaxyCruiserModel.setEnvironmentMap(cubeMap);
 //    galaxyCruiserModel.createMeshBuffers();
 //    galaxyCruiserModel.createVertexArrays();
-//
+//        glm::mat4 cruiserTransform;
+////        cruiserTransform = glm::translate(cruiserTransform, glm::vec3(20));
+//        cruiserTransform = glm::scale(cruiserTransform, glm::vec3(0.2));
+//        cruiserTransform = glm::rotate(cruiserTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+//        galaxyCruiserModel->transform = cruiserTransform;
+
 //    auto cubeModel = scene::Model::loadFromFile("assets/cube.obj");
 //    cubeModel.flatProgram = sharedFlatProgram;
 //    cubeModel.textureProgram = sharedTextureProgram;
@@ -194,27 +210,33 @@ int main(int argc, char** argv) {
 //    cubeModel.setEnvironmentMap(cubeMap);
 //    cubeModel.createMeshBuffers();
 //    cubeModel.createVertexArrays();
+//        glm::mat4 mapTransform;
+//        mapTransform = glm::translate(mapTransform, glm::vec3(10));
+//        mapTransform = glm::scale(mapTransform, glm::vec3(10));
+//        mapTransform = glm::rotate(mapTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+//        cubeModel->transform = mapTransform;
 
     auto skyBox = scene::Model::loadFromFile("assets/cube.obj");
-    skyBox.flatProgram = sharedFlatProgram;
-    skyBox.textureProgram = sharedTextureProgram;
-    skyBox.environmentMapProgram = sharedSkyboxProgram;
-    skyBox.setEnvironmentMap(cubeMap);
-    skyBox.createMeshBuffers();
-    skyBox.createVertexArrays();
+    skyBox->flatProgram = sharedFlatProgram;
+    skyBox->textureProgram = sharedTextureProgram;
+    skyBox->environmentMapProgram = sharedSkyboxProgram;
+    skyBox->setEnvironmentMap(cubeMap);
+    skyBox->createMeshBuffers();
+    skyBox->createVertexArrays();
+    mainScene->models.push_back(skyBox);
 
     // Setup Camera:
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
-    camera->pos = glm::vec3(0.0f, 0.0f, 0.0f);
-    camera->fov = 45;
-    camera->speed = 10;
-    camera->lookSpeed = 0.005;
-    camera->up = glm::vec3(0.0f, 0.0f, 1.0f);
-//    camera->up = glm::vec3(0.0f, 1.0f, 0.0f);
-    camera->proj = glm::perspective(camera->fov, width / float(height), 0.1f, 300.0f);
-    camera->lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
-    camera->lastUpdateTime = glfwGetTime();
+    mainScene->camera->pos = glm::vec3(0.0f, 0.0f, 0.0f);
+    mainScene->camera->fov = 45;
+    mainScene->camera->speed = 10;
+    mainScene->camera->lookSpeed = 0.005;
+    mainScene->camera->up = glm::vec3(0.0f, 0.0f, 1.0f);
+//    mainScene->camera->up = glm::vec3(0.0f, 1.0f, 0.0f);
+    mainScene->camera->proj = glm::perspective(mainScene->camera->fov, width / float(height), 0.1f, 300.0f);
+    mainScene->camera->lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
+    mainScene->camera->lastUpdateTime = glfwGetTime();
 
     glEnable(GL_DEPTH_TEST);
 
@@ -244,43 +266,12 @@ int main(int argc, char** argv) {
         glClearColor(0.5, 0.5, 0.5, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Draw Eagle 5:
-        glm::mat4 shipTransform;
-        shipTransform = glm::scale(shipTransform, glm::vec3(0.3));
-        shipTransform = glm::rotate(shipTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f)); // TODO: Make this rotation a boolean switch on Model.
-        eagle5Model.transform = shipTransform;
-        eagle5Model.draw(*camera);
-
-
-        // Draw House:
-        glm::mat4 houseTransform;
-        houseTransform = glm::scale(houseTransform, glm::vec3(3));
-        houseTransform = glm::rotate(houseTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-        houseModel.transform = houseTransform;
-        houseModel.draw(*camera);
-
-//        // Draw Galaxy Cruiser:
-//        glm::mat4 cruiserTransform;
-////        cruiserTransform = glm::translate(cruiserTransform, glm::vec3(20));
-//        cruiserTransform = glm::scale(cruiserTransform, glm::vec3(0.2));
-//        cruiserTransform = glm::rotate(cruiserTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-//        galaxyCruiserModel.transform = cruiserTransform;
-//        galaxyCruiserModel.draw(*camera);
-//
-//        // Draw cube:
-//        glm::mat4 mapTransform;
-//        mapTransform = glm::translate(mapTransform, glm::vec3(10));
-//        mapTransform = glm::scale(mapTransform, glm::vec3(10));
-//        mapTransform = glm::rotate(mapTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-//        cubeModel.transform = mapTransform;
-//        cubeModel.draw(*camera);
-
-        // Draw skybox:
         glm::mat4 skyboxTransform;
-        skyboxTransform = glm::translate(skyboxTransform, camera->pos);
+        skyboxTransform = glm::translate(skyboxTransform, mainScene->camera->pos);
         skyboxTransform = glm::rotate(skyboxTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-        skyBox.transform = skyboxTransform;
-        skyBox.draw(*camera);
+        skyBox->transform = skyboxTransform;
+
+        mainScene->render();
 
         // TODO: Add Framebuffer objects to NUGL and refactor rendering loop
 
@@ -291,7 +282,7 @@ int main(int argc, char** argv) {
         // Poll for and process events:
         glfwPollEvents();
 
-        camera->processPlayerInput(window);
+        mainScene->camera->processPlayerInput(window);
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, GL_TRUE);
