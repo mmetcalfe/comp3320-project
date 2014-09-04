@@ -13,8 +13,7 @@
 #include "NUGL/VertexArray.h"
 #include "Camera.h"
 
-class SceneModel {
-public:
+namespace scene {
     struct Light {
         enum class Type {
             undefined,
@@ -90,33 +89,40 @@ public:
         }
     };
 
-    struct Node {
-        std::vector<int> meshes;
-        std::vector<Node> children;
-        glm::mat4 transform;
+    class Model {
+    public:
+        struct Node {
+            std::vector<int> meshes;
+            std::vector<Node> children;
+            glm::mat4 transform;
+        };
+
+        std::vector<Mesh> meshes;
+        std::vector<std::shared_ptr<Light>> lights;
+        std::vector<std::shared_ptr<Material>> materials;
+        Node rootNode;
+
+        std::shared_ptr<NUGL::ShaderProgram> flatProgram;
+        std::shared_ptr<NUGL::ShaderProgram> textureProgram;
+        std::shared_ptr<NUGL::ShaderProgram> environmentMapProgram;
+
+        glm::mat4 transform; // TODO: Break this into components (pos, rot, scale)?
+
+        void createMeshBuffers();
+
+        void createVertexArrays();
+
+        void draw(Camera &camera);
+
+        void drawNode(Model::Node &node, glm::mat4 parentModel, Camera &camera);
+
+        static Model loadFromFile(const std::string &fileName);
+
+        void setEnvironmentMap(std::shared_ptr<NUGL::Texture> envMap);
+
+        void setCameraUniformsOnShaderPrograms(Camera &camera, glm::mat4 model);
+
+        void prepareMaterialShaderProgram(std::shared_ptr<Material> material, std::shared_ptr<NUGL::ShaderProgram> shaderProgram);
     };
 
-    std::vector<Mesh> meshes;
-    std::vector<std::shared_ptr<Light>> lights;
-    std::vector<std::shared_ptr<Material>> materials;
-    Node rootNode;
-
-    std::shared_ptr<NUGL::ShaderProgram> flatProgram;
-    std::shared_ptr<NUGL::ShaderProgram> textureProgram;
-    std::shared_ptr<NUGL::ShaderProgram> environmentMapProgram;
-
-    glm::mat4 transform; // TODO: Break this into components (pos, rot, scale)?
-
-    void createMeshBuffers();
-    void createVertexArrays();
-    void draw(Camera& camera);
-    void drawNode(SceneModel::Node& node, glm::mat4 parentModel, Camera &camera);
-    static SceneModel loadFromFile(const std::string& fileName);
-
-    void setEnvironmentMap(std::shared_ptr<NUGL::Texture> envMap);
-
-    void setCameraUniformsOnShaderPrograms(Camera &camera, glm::mat4 model);
-
-    void prepareMaterialShaderProgram(std::shared_ptr<Material> material, std::shared_ptr<NUGL::ShaderProgram> shaderProgram);
-};
-
+}

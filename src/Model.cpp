@@ -1,4 +1,4 @@
-#include "SceneModel.h"
+#include "Model.h"
 #include <iostream>
 
 #include <boost/filesystem.hpp>
@@ -13,6 +13,8 @@
 #include "utility/make_unique.h"
 #include "utility/debug.h"
 #include "utility/AssimpDebug.h"
+
+namespace scene {
 
 unsigned int getPostProcessingFlags() {
     unsigned int pFlags = 0x0000;
@@ -47,10 +49,14 @@ unsigned int getPostProcessingFlags() {
 
 GLenum getGLTextureWrapForAiTextureMapMode(aiTextureMapMode mapMode) {
     switch (mapMode) {
-        case aiTextureMapMode_Wrap: return GL_REPEAT;
-        case aiTextureMapMode_Clamp: return GL_CLAMP_TO_EDGE;
-        case aiTextureMapMode_Decal: return GL_CLAMP_TO_BORDER;
-        case aiTextureMapMode_Mirror: return GL_MIRRORED_REPEAT;
+        case aiTextureMapMode_Wrap:
+            return GL_REPEAT;
+        case aiTextureMapMode_Clamp:
+            return GL_CLAMP_TO_EDGE;
+        case aiTextureMapMode_Decal:
+            return GL_CLAMP_TO_BORDER;
+        case aiTextureMapMode_Mirror:
+            return GL_MIRRORED_REPEAT;
         default: {
             std::stringstream errMsg;
             errMsg << __func__
@@ -60,13 +66,21 @@ GLenum getGLTextureWrapForAiTextureMapMode(aiTextureMapMode mapMode) {
     }
 }
 
-SceneModel::Light copyAiLight(const std::string& fileName, const aiLight* srcLight) {
-    SceneModel::Light light;
+Light copyAiLight(const std::string &fileName, const aiLight *srcLight) {
+    Light light;
     switch (srcLight->mType) {
-        case aiLightSource_SPOT:        light.type = SceneModel::Light::Type::spot;        break;
-        case aiLightSource_DIRECTIONAL: light.type = SceneModel::Light::Type::directional; break;
-        case aiLightSource_POINT:       light.type = SceneModel::Light::Type::point;       break;
-        default: light.type = SceneModel::Light::Type::undefined; break;
+        case aiLightSource_SPOT:
+            light.type = Light::Type::spot;
+            break;
+        case aiLightSource_DIRECTIONAL:
+            light.type = Light::Type::directional;
+            break;
+        case aiLightSource_POINT:
+            light.type = Light::Type::point;
+            break;
+        default:
+            light.type = Light::Type::undefined;
+            break;
     }
 
     light.pos.x = srcLight->mPosition.x;
@@ -99,9 +113,9 @@ SceneModel::Light copyAiLight(const std::string& fileName, const aiLight* srcLig
     return light;
 }
 
-SceneModel::Material copyAiMaterial(const std::string& fileName, const aiMaterial* srcMaterial) {
+Material copyAiMaterial(const std::string &fileName, const aiMaterial *srcMaterial) {
     // TODO: Support remaining material properties from http://assimp.sourceforge.net/lib_html/materials.html
-    SceneModel::Material material;
+    Material material;
     material.materialInfo.bitSet = 0;
 
     aiColor3D aiColAmbient;
@@ -199,7 +213,7 @@ SceneModel::Material copyAiMaterial(const std::string& fileName, const aiMateria
     return std::move(material);
 }
 
-void copyAiNode(const aiNode *pNode, SceneModel::Node& node) {
+void copyAiNode(const aiNode *pNode, Model::Node &node) {
     node.meshes.assign(pNode->mMeshes, pNode->mMeshes + pNode->mNumMeshes);
 
     for (int row = 0; row < 4; row++) {
@@ -214,11 +228,11 @@ void copyAiNode(const aiNode *pNode, SceneModel::Node& node) {
     }
 }
 
-SceneModel SceneModel::loadFromFile(const std::string& fileName) {
+Model Model::loadFromFile(const std::string &fileName) {
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(fileName, getPostProcessingFlags());
+    const aiScene *scene = importer.ReadFile(fileName, getPostProcessingFlags());
 
-    if(!scene) {
+    if (!scene) {
         std::stringstream errMsg;
         errMsg << __func__
                 << ": Could not import model from '" << fileName << "': "
@@ -228,46 +242,46 @@ SceneModel SceneModel::loadFromFile(const std::string& fileName) {
 
     utility::printAiSceneInfo(scene);
 
-    SceneModel sceneModel;
+    Model sceneModel;
 
     for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
-        auto* material = scene->mMaterials[i];
+        auto *material = scene->mMaterials[i];
         sceneModel.materials.push_back(std::make_shared<Material>(copyAiMaterial(fileName, material)));
     }
 
     for (unsigned int i = 0; i < scene->mNumLights; i++) {
-        auto* light = scene->mLights[i];
+        auto *light = scene->mLights[i];
         sceneModel.lights.push_back(std::make_shared<Light>(copyAiLight(fileName, light)));
     }
 
     for (unsigned int m = 0; m < scene->mNumMeshes; m++) {
-        auto* sceneMesh = scene->mMeshes[m];
+        auto *sceneMesh = scene->mMeshes[m];
         Mesh mesh;
         mesh.materialIndex = sceneMesh->mMaterialIndex;
         mesh.material = sceneModel.materials[mesh.materialIndex];
 
         for (unsigned int i = 0; i < sceneMesh->mNumVertices; i++) {
-            auto& meshVertex = sceneMesh->mVertices[i];
+            auto &meshVertex = sceneMesh->mVertices[i];
             glm::vec3 vertex = {meshVertex.x, meshVertex.y, meshVertex.z};
             mesh.vertices.push_back(vertex);
         }
 
         for (unsigned int i = 0; i < sceneMesh->mNumVertices; i++) {
-            auto& meshNormal = sceneMesh->mNormals[i];
+            auto &meshNormal = sceneMesh->mNormals[i];
             glm::vec3 normal = {meshNormal.x, meshNormal.y, meshNormal.z};
             mesh.normals.push_back(normal);
         }
 
         if (sceneMesh->HasTextureCoords(0)) {
             for (unsigned int i = 0; i < sceneMesh->mNumVertices; i++) {
-                auto& meshTexCoord = sceneMesh->mTextureCoords[0][i];
+                auto &meshTexCoord = sceneMesh->mTextureCoords[0][i];
                 glm::vec2 texCoord = {meshTexCoord.x, meshTexCoord.y};
                 mesh.texCoords.push_back(texCoord);
             }
         }
 
         for (unsigned int f = 0; f < sceneMesh->mNumFaces; f++) {
-            auto& meshFace = sceneMesh->mFaces[f];
+            auto &meshFace = sceneMesh->mFaces[f];
             for (unsigned int i = 0; i < meshFace.mNumIndices; i++)
                 mesh.elements.push_back(meshFace.mIndices[i]);
         }
@@ -280,25 +294,25 @@ SceneModel SceneModel::loadFromFile(const std::string& fileName) {
     return sceneModel;
 }
 
-void SceneModel::createMeshBuffers() {
-    for (auto& mesh : meshes) {
+void Model::createMeshBuffers() {
+    for (auto &mesh : meshes) {
         std::vector<GLfloat> vertices;
 //        for (auto& vertex : mesh.vertices) {
         for (unsigned int i = 0; i < mesh.vertices.size(); i++) {
-            auto& vertex = mesh.vertices[i];
+            auto &vertex = mesh.vertices[i];
             vertices.push_back(vertex.x);
             vertices.push_back(vertex.y);
             vertices.push_back(vertex.z);
 
             if (mesh.hasNormals()) {
-                auto& normal = mesh.normals[i];
+                auto &normal = mesh.normals[i];
                 vertices.push_back(normal.x);
                 vertices.push_back(normal.y);
                 vertices.push_back(normal.z);
             }
 
             if (mesh.isTextured()) {
-                auto& texCoord = mesh.texCoords[i];
+                auto &texCoord = mesh.texCoords[i];
 //                vertices.push_back(1 - texCoord.x); // TODO: fix texcoords ??
 //                vertices.push_back(1 - texCoord.y);
                 vertices.push_back(texCoord.x);
@@ -313,10 +327,10 @@ void SceneModel::createMeshBuffers() {
     }
 }
 
-void SceneModel::createVertexArrays() {
-    for (auto& mesh : meshes) {
+void Model::createVertexArrays() {
+    for (auto &mesh : meshes) {
         std::vector<NUGL::VertexAttribute> attribs = {
-            {"position", 3, GL_FLOAT, GL_FALSE},
+                {"position", 3, GL_FLOAT, GL_FALSE},
         };
 
         if (mesh.hasNormals()) {
@@ -342,19 +356,19 @@ void SceneModel::createVertexArrays() {
     }
 }
 
-void SceneModel::draw(Camera& camera) {
+void Model::draw(Camera &camera) {
 
     drawNode(rootNode, transform, camera);
 }
 
-void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 parentNodeTransform, Camera& camera) {
+void Model::drawNode(Model::Node &node, glm::mat4 parentNodeTransform, Camera &camera) {
     glm::mat4 model = parentNodeTransform * node.transform;
 
     // TODO: Find a better way of managing shader programs!
     setCameraUniformsOnShaderPrograms(camera, model);
 
     for (int index : node.meshes) {
-        auto& mesh = meshes[index];
+        auto &mesh = meshes[index];
         mesh.shaderProgram->use();
 
         prepareMaterialShaderProgram(mesh.material, mesh.shaderProgram);
@@ -367,13 +381,13 @@ void SceneModel::drawNode(SceneModel::Node &node, glm::mat4 parentNodeTransform,
         checkForAndPrintGLError(__FILE__, __LINE__);
     }
 
-    for (auto& child : node.children) {
+    for (auto &child : node.children) {
         drawNode(child, model, camera);
     }
 }
 
-void SceneModel::prepareMaterialShaderProgram(std::shared_ptr<SceneModel::Material> material,
-                                              std::shared_ptr<NUGL::ShaderProgram> shaderProgram) {
+void Model::prepareMaterialShaderProgram(std::shared_ptr<Material> material,
+        std::shared_ptr<NUGL::ShaderProgram> shaderProgram) {
     if (material->materialInfo.has.colAmbient && shaderProgram->materialInfo.has.colAmbient) {
         shaderProgram->setUniform("colAmbient", material->colAmbient);
     }
@@ -448,7 +462,7 @@ void SceneModel::prepareMaterialShaderProgram(std::shared_ptr<SceneModel::Materi
 
 }
 
-void SceneModel::setCameraUniformsOnShaderPrograms(Camera &camera, glm::mat4 model) {
+void Model::setCameraUniformsOnShaderPrograms(Camera &camera, glm::mat4 model) {
     if (textureProgram != nullptr) {
         textureProgram->use();
         textureProgram->setUniform("model", model);
@@ -477,10 +491,12 @@ void SceneModel::setCameraUniformsOnShaderPrograms(Camera &camera, glm::mat4 mod
     }
 }
 
-void SceneModel::setEnvironmentMap(std::shared_ptr<NUGL::Texture> envMap) {
+void Model::setEnvironmentMap(std::shared_ptr<NUGL::Texture> envMap) {
     // TODO: Improve environment map management.
-    for (auto& mesh : meshes) {
+    for (auto &mesh : meshes) {
         mesh.material->texEnvironmentMap = envMap;
         mesh.material->materialInfo.has.texEnvironmentMap = true;
     }
+}
+
 }

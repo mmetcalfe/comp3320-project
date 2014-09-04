@@ -14,7 +14,7 @@
 #include "NUGL/Buffer.h"
 #include "NUGL/VertexArray.h"
 #include "NUGL/Texture.h"
-#include "SceneModel.h"
+#include "Model.h"
 
 static auto camera = std::make_unique<Camera>();
 
@@ -153,11 +153,11 @@ int main(int argc, char** argv) {
 ////    glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
     // Load assets:
-    auto eagle5Model = SceneModel::loadFromFile("assets/eagle 5 transport/eagle 5 transport landed.obj");
-//    auto eagle5Model = SceneModel::loadFromFile("assets/KingsTreasure_OBJ/KingsTreasure.obj");
-//    auto eagle5Model = SceneModel::loadFromFile("assets/rc8c1qtjiygw-O/Organodron City/Organodron City.obj");
-//    auto eagle5Model = SceneModel::loadFromFile("assets/Bedroom.3DS");
-//    auto eagle5Model = SceneModel::loadFromFile("assets/Room 2013 New/Room 2013 New.c4d");
+    auto eagle5Model = scene::Model::loadFromFile("assets/eagle 5 transport/eagle 5 transport landed.obj");
+//    auto eagle5Model = scene::Model::loadFromFile("assets/KingsTreasure_OBJ/KingsTreasure.obj");
+//    auto eagle5Model = scene::Model::loadFromFile("assets/rc8c1qtjiygw-O/Organodron City/Organodron City.obj");
+//    auto eagle5Model = scene::Model::loadFromFile("assets/Bedroom.3DS");
+//    auto eagle5Model = scene::Model::loadFromFile("assets/Room 2013 New/Room 2013 New.c4d");
     eagle5Model.flatProgram = sharedFlatProgram;
     eagle5Model.textureProgram = sharedTextureProgram;
 //    eagle5Model.environmentMapProgram = sharedFlatReflectProgram;
@@ -166,7 +166,7 @@ int main(int argc, char** argv) {
     eagle5Model.createMeshBuffers();
     eagle5Model.createVertexArrays();
 
-    auto houseModel = SceneModel::loadFromFile("assets/House01/House01.obj");
+    auto houseModel = scene::Model::loadFromFile("assets/House01/House01.obj");
     houseModel.flatProgram = sharedFlatProgram;
     houseModel.textureProgram = sharedTextureProgram;
 //    houseModel.environmentMapProgram = sharedFlatReflectProgram;
@@ -176,7 +176,7 @@ int main(int argc, char** argv) {
     houseModel.createVertexArrays();
 
 //
-//    auto galaxyCruiserModel = SceneModel::loadFromFile("assets/galaxy_cruiser_3ds.3DS");
+//    auto galaxyCruiserModel = scene::Model::loadFromFile("assets/galaxy_cruiser_3ds.3DS");
 //    galaxyCruiserModel.flatProgram = sharedFlatProgram;
 //    galaxyCruiserModel.textureProgram = sharedTextureProgram;
 ////    galaxyCruiserModel.environmentMapProgram = sharedFlatReflectProgram;
@@ -185,7 +185,7 @@ int main(int argc, char** argv) {
 //    galaxyCruiserModel.createMeshBuffers();
 //    galaxyCruiserModel.createVertexArrays();
 //
-//    auto cubeModel = SceneModel::loadFromFile("assets/cube.obj");
+//    auto cubeModel = scene::Model::loadFromFile("assets/cube.obj");
 //    cubeModel.flatProgram = sharedFlatProgram;
 //    cubeModel.textureProgram = sharedTextureProgram;
 ////    cubeModel.environmentMapProgram = sharedFlatReflectProgram;
@@ -194,7 +194,7 @@ int main(int argc, char** argv) {
 //    cubeModel.createMeshBuffers();
 //    cubeModel.createVertexArrays();
 
-    auto skyBox = SceneModel::loadFromFile("assets/cube.obj");
+    auto skyBox = scene::Model::loadFromFile("assets/cube.obj");
     skyBox.flatProgram = sharedFlatProgram;
     skyBox.textureProgram = sharedTextureProgram;
     skyBox.environmentMapProgram = sharedSkyboxProgram;
@@ -246,7 +246,7 @@ int main(int argc, char** argv) {
         // Draw Eagle 5:
         glm::mat4 shipTransform;
         shipTransform = glm::scale(shipTransform, glm::vec3(0.3));
-        shipTransform = glm::rotate(shipTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f)); // TODO: Make this rotation a boolean switch on SceneModel.
+        shipTransform = glm::rotate(shipTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f)); // TODO: Make this rotation a boolean switch on Model.
         eagle5Model.transform = shipTransform;
         eagle5Model.draw(*camera);
 
