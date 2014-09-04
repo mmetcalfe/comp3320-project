@@ -11,7 +11,7 @@
 #include "NUGL/Texture.h"
 #include "NUGL/Buffer.h"
 #include "NUGL/VertexArray.h"
-#include "Camera.h"
+#include "scene/Camera.h"
 
 namespace scene {
     struct Light {
@@ -124,5 +124,4 @@ namespace scene {
 
         void prepareMaterialShaderProgram(std::shared_ptr<Material> material, std::shared_ptr<NUGL::ShaderProgram> shaderProgram);
     };
-
 }

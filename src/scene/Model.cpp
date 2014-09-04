@@ -1,4 +1,4 @@
-#include "Model.h"
+#include "scene/Model.h"
 #include <iostream>
 
 #include <boost/filesystem.hpp>

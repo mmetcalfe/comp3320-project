@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -14,7 +15,7 @@
 #include "NUGL/Buffer.h"
 #include "NUGL/VertexArray.h"
 #include "NUGL/Texture.h"
-#include "Model.h"
+#include "scene/Model.h"
 
 static auto camera = std::make_unique<Camera>();
 

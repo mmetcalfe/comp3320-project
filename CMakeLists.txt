@@ -40,11 +40,7 @@ INCLUDE_DIRECTORIES(${Boost_INCLUDE_DIR} REQUIRED)
 # Include directories
 INCLUDE_DIRECTORIES("src/")
 
-#FILE(GLOB_RECURSE inc_files
-#    "util/**.h"
-#    )
-
-FILE(GLOB src_files
+FILE(GLOB_RECURSE src_files
       "src/**.cpp" ,
     )
 
