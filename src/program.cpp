@@ -57,6 +57,12 @@ int main(int argc, char** argv) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+//    glfwWindowHint(GLFW_RED_BITS, 8);
+//    glfwWindowHint(GLFW_GREEN_BITS, 8);
+//    glfwWindowHint(GLFW_BLUE_BITS, 8);
+//    glfwWindowHint(GLFW_ALPHA_BITS, 8);
+//    glfwWindowHint(GLFW_DEPTH_BITS, 24);
+//    glfwWindowHint(GLFW_STENCIL_BITS, 8);
 
     // Windowed:
     GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL", nullptr, nullptr);
@@ -129,11 +135,21 @@ int main(int argc, char** argv) {
     skyboxProgram.updateMaterialInfo();
     skyboxProgram.printDebugInfo();
 
+    auto screenProgram = NUGL::ShaderProgram::createFromFiles("screenProgram", {
+            {GL_VERTEX_SHADER, "src/glsl/pos2_tex.vert"},
+            {GL_FRAGMENT_SHADER, "src/glsl/tex.frag"},
+    });
+    screenProgram.bindFragDataLocation(0, "outColor");
+    screenProgram.link();
+    screenProgram.updateMaterialInfo();
+    screenProgram.printDebugInfo();
+
     auto sharedFlatProgram = std::make_shared<NUGL::ShaderProgram>(flatProgram);
     auto sharedTextureProgram = std::make_shared<NUGL::ShaderProgram>(textureProgram);
     auto sharedFlatReflectProgram = std::make_shared<NUGL::ShaderProgram>(flatReflectProgram);
     auto sharedReflectProgram = std::make_shared<NUGL::ShaderProgram>(reflectProgram);
     auto sharedSkyboxProgram = std::make_shared<NUGL::ShaderProgram>(skyboxProgram);
+    auto sharedScreenProgram = std::make_shared<NUGL::ShaderProgram>(screenProgram);
 
 //    // TODO: Find a way to manage texture units!
     auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE1, GL_TEXTURE_CUBE_MAP);
@@ -167,7 +183,7 @@ int main(int argc, char** argv) {
     eagle5Model->setEnvironmentMap(cubeMap);
     eagle5Model->createMeshBuffers();
     eagle5Model->createVertexArrays();
-    mainScene->models.push_back(eagle5Model);
+    mainScene->addModel(eagle5Model);
     glm::mat4 shipTransform;
     shipTransform = glm::scale(shipTransform, glm::vec3(0.3));
     shipTransform = glm::rotate(shipTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f)); // TODO: Make this rotation a boolean switch on Model.
@@ -181,7 +197,7 @@ int main(int argc, char** argv) {
     houseModel->setEnvironmentMap(cubeMap);
     houseModel->createMeshBuffers();
     houseModel->createVertexArrays();
-    mainScene->models.push_back(houseModel);
+    mainScene->addModel(houseModel);
     glm::mat4 houseTransform;
     houseTransform = glm::scale(houseTransform, glm::vec3(3));
     houseTransform = glm::rotate(houseTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -223,7 +239,7 @@ int main(int argc, char** argv) {
     skyBox->setEnvironmentMap(cubeMap);
     skyBox->createMeshBuffers();
     skyBox->createVertexArrays();
-    mainScene->models.push_back(skyBox);
+    mainScene->addModel(skyBox);
 
     // Setup Camera:
     int width, height;
@@ -262,16 +278,12 @@ int main(int argc, char** argv) {
             lastTime += 1.0;
         }
 
-        // Begin rendering:
-        glClearColor(0.5, 0.5, 0.5, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         glm::mat4 skyboxTransform;
         skyboxTransform = glm::translate(skyboxTransform, mainScene->camera->pos);
         skyboxTransform = glm::rotate(skyboxTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
         skyBox->transform = skyboxTransform;
 
-        mainScene->render();
+        mainScene->render(sharedScreenProgram);
 
         // TODO: Add Framebuffer objects to NUGL and refactor rendering loop
 

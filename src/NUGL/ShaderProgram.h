@@ -196,6 +196,12 @@ namespace NUGL {
             checkForAndPrintGLError(__FILE__, __LINE__, programName);
         }
 
+        inline void setUniform(GLint uniLoc, NUGL::Texture value) {
+            glUniform1i(uniLoc, value.unit() - GL_TEXTURE0);
+//            std::cout << uniLoc << " " << (value.unit() - GL_TEXTURE0);
+            checkForAndPrintGLError(__FILE__, __LINE__, programName);
+        }
+
         //! Populates the program's material info.
         inline void updateMaterialInfo() {
             materialInfo.bitSet = 0;
