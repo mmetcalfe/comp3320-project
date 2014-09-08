@@ -198,12 +198,12 @@ int main(int argc, char** argv) {
 //    // TODO: Find a way to manage texture units!
     auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE1, GL_TEXTURE_CUBE_MAP);
     cubeMap->loadCubeMap({
-            "assets/PereaBeach1/posx.jpg",
-            "assets/PereaBeach1/negx.jpg",
-            "assets/PereaBeach1/posy.jpg",
-            "assets/PereaBeach1/negy.jpg",
-            "assets/PereaBeach1/posz.jpg",
-            "assets/PereaBeach1/negz.jpg",
+           "assets/skybox_right1.png",
+           "assets/skybox_left2.png",
+           "assets/skybox_top3.png",
+           "assets/skybox_bottom4.png",
+           "assets/skybox_front5.png",
+           "assets/skybox_back6.png"
     });
     cubeMap->setParam(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     cubeMap->setParam(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);

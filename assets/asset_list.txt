@@ -11,3 +11,5 @@ King's Treasure: http://www.3drender.com/challenges/KingsTreasure/KingsTreasure_
 # Victorian Living Room: http://tf3dm.com/download-page.php?url=victorian-living-room-interior-29434
 
 House01: http://tf3dm.com/3d-model/architecture-house01-81348.html
+
+Skybox: skybox.txt
