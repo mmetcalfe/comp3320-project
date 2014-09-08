@@ -9,6 +9,7 @@
 
 #include "utility/debug.h"
 #include "utility/make_unique.h"
+#include "utility/FrameTimer.h"
 
 #include "NUGL/Shader.h"
 #include "NUGL/ShaderProgram.h"
@@ -261,21 +262,10 @@ int main(int argc, char** argv) {
 //    glCullFace (GL_BACK); // cull back face
 //    glFrontFace (GL_CCW); // GL_CCW for counter clock-wise
 
-    double lastTime = glfwGetTime();
-    int nbFrames = 0;
+    utility::FrameTimer frameTimer(glfwGetTime());
     while (!glfwWindowShouldClose(window)) {
-        // TODO: Refactor frame timer into a utility class
-        // Measure speed
-        double currentTime = glfwGetTime();
-        nbFrames++;
-        if (currentTime - lastTime >= 1.0) { // If last print was more than 1 sec ago
-            double fps = double(nbFrames);
-            std::stringstream title;
-            title << "OpenGL | " << (1000.0 / fps) << " ms/frame (" << fps << "fps)";
-            glfwSetWindowTitle(window, title.str().c_str());
-//            std::cout << (1000.0 / fps) << " ms/frame (" << fps << "fps)" << std::endl;
-            nbFrames = 0;
-            lastTime += 1.0;
+        if (frameTimer.frameUpdate(glfwGetTime())) {
+            glfwSetWindowTitle(window, frameTimer.timeStr.c_str());
         }
 
         glm::mat4 skyboxTransform;
@@ -284,8 +274,6 @@ int main(int argc, char** argv) {
         skyBox->transform = skyboxTransform;
 
         mainScene->render(sharedScreenProgram);
-
-        // TODO: Add Framebuffer objects to NUGL and refactor rendering loop
 
         // Swap front and back buffers:
 //        glfwSwapInterval(1); // v-sync
