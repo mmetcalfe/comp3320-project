@@ -12,10 +12,12 @@ namespace NUGL {
     public:
         Framebuffer() {
             glGenFramebuffers(1, &bufferId);
+//            checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
         ~Framebuffer() {
             glDeleteFramebuffers(1, &bufferId);
+//            checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
         inline void bind(GLenum target = GL_FRAMEBUFFER) {
@@ -34,16 +36,21 @@ namespace NUGL {
         inline void attach(std::shared_ptr<Texture> tex) {
             bind(GL_FRAMEBUFFER);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex->id(), 0);
+            textureAttachment = tex;
             checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
-        inline void attach(Renderbuffer rbo) {
+        inline void attach(std::shared_ptr<Renderbuffer> rbo) {
             bind(GL_FRAMEBUFFER);
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo.id());
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo->id());
+            renderbufferAttachment = rbo;
             checkForAndPrintGLError(__FILE__, __LINE__);
+
         }
 
     private:
         GLuint bufferId;
+        std::shared_ptr<Texture> textureAttachment;
+        std::shared_ptr<Renderbuffer> renderbufferAttachment;
     };
 }

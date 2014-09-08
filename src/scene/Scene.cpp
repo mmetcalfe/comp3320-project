@@ -16,8 +16,8 @@ namespace scene {
 
         fbo.attach(tex);
 
-        NUGL::Renderbuffer rbo;
-        rbo.setStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
+        std::shared_ptr<NUGL::Renderbuffer> rbo  = std::make_shared<NUGL::Renderbuffer>();
+        rbo->setStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800, 600);
 
         fbo.attach(rbo);
 
