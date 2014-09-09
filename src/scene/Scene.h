@@ -17,7 +17,7 @@ namespace scene {
         void render();
         void addModel(std::shared_ptr<Model>);
 
-        void prepareFramebuffer();
+        void prepareFramebuffer(int width, int height);
 
         std::vector<std::shared_ptr<Model>> models;
         /**
