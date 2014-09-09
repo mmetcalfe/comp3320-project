@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
 
     // Load glsl:
     auto flatProgram = NUGL::ShaderProgram::createFromFiles("flatProgram", {
-            {GL_VERTEX_SHADER, "src/glsl/pos_mvp.vert"},
+            {GL_VERTEX_SHADER, "src/glsl/position.vert"},
             {GL_FRAGMENT_SHADER, "src/glsl/uniform.frag"},
     });
     flatProgram.bindFragDataLocation(0, "outColor");
@@ -102,26 +102,17 @@ int main(int argc, char** argv) {
     flatProgram.printDebugInfo();
 
     auto textureProgram = NUGL::ShaderProgram::createFromFiles("textureProgram", {
-            {GL_VERTEX_SHADER, "src/glsl/pos_tex_mvp.vert"},
-            {GL_FRAGMENT_SHADER, "src/glsl/tex.frag"},
+            {GL_VERTEX_SHADER, "src/glsl/textured.vert"},
+            {GL_FRAGMENT_SHADER, "src/glsl/textured.frag"},
     });
     textureProgram.bindFragDataLocation(0, "outColor");
     textureProgram.link();
     textureProgram.updateMaterialInfo();
     textureProgram.printDebugInfo();
 
-    auto flatReflectProgram = NUGL::ShaderProgram::createFromFiles("flatReflectProgram", {
-            {GL_VERTEX_SHADER, "src/glsl/flat_reflect.vert"},
-            {GL_FRAGMENT_SHADER, "src/glsl/flat_reflect.frag"},
-    });
-    flatReflectProgram.bindFragDataLocation(0, "outColor");
-    flatReflectProgram.link();
-    flatReflectProgram.updateMaterialInfo();
-    flatReflectProgram.printDebugInfo();
-
     auto reflectProgram = NUGL::ShaderProgram::createFromFiles("reflectProgram", {
             {GL_VERTEX_SHADER, "src/glsl/reflect_tex.vert"},
-            {GL_FRAGMENT_SHADER, "src/glsl/reflect_tex.frag"},
+            {GL_FRAGMENT_SHADER, "src/glsl/lit_rfl_tex.frag"},
     });
     reflectProgram.bindFragDataLocation(0, "outColor");
     reflectProgram.link();
@@ -138,8 +129,8 @@ int main(int argc, char** argv) {
     skyboxProgram.printDebugInfo();
 
     auto screenProgram = NUGL::ShaderProgram::createFromFiles("screenProgram", {
-            {GL_VERTEX_SHADER, "src/glsl/pos2_tex.vert"},
-            {GL_FRAGMENT_SHADER, "src/glsl/tex.frag"},
+            {GL_VERTEX_SHADER, "src/glsl/screen.vert"},
+            {GL_FRAGMENT_SHADER, "src/glsl/textured.frag"},
     });
     screenProgram.bindFragDataLocation(0, "outColor");
     screenProgram.link();
@@ -148,15 +139,28 @@ int main(int argc, char** argv) {
 
     auto sharedFlatProgram = std::make_shared<NUGL::ShaderProgram>(flatProgram);
     auto sharedTextureProgram = std::make_shared<NUGL::ShaderProgram>(textureProgram);
-    auto sharedFlatReflectProgram = std::make_shared<NUGL::ShaderProgram>(flatReflectProgram);
     auto sharedReflectProgram = std::make_shared<NUGL::ShaderProgram>(reflectProgram);
     auto sharedSkyboxProgram = std::make_shared<NUGL::ShaderProgram>(skyboxProgram);
     auto sharedScreenProgram = std::make_shared<NUGL::ShaderProgram>(screenProgram);
 
-
     // Create Scene:
     mainScene = std::make_unique<scene::Scene>(sharedScreenProgram);
 
+    auto lightModel = std::make_shared<scene::Model>();
+    auto light = std::make_shared<scene::Light>();
+    light->type = scene::Light::Type::point;
+    light->pos = {0, 0, 30};
+    light->dir = {1, 0, 0};
+    light->attenuationConstant = 1;
+    light->attenuationLinear = 0.1;
+    light->attenuationQuadratic = 0;
+    light->colDiffuse = {1, 1, 1};
+    light->colSpecular = {1, 1, 1};
+    light->colAmbient = {0.1, 0.1, 0.1};
+    light->angleConeInner = 1;
+    light->angleConeOuter = 1;
+    lightModel->lights.push_back(light);
+    mainScene->addModel(lightModel);
 
 //    // TODO: Find a way to manage texture units!
     auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE1, GL_TEXTURE_CUBE_MAP);

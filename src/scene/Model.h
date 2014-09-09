@@ -112,15 +112,17 @@ namespace scene {
 
         void createVertexArrays();
 
-        void draw(Camera &camera);
+        void draw(Camera &camera, std::shared_ptr<Light> light);
 
-        void drawNode(Model::Node &node, glm::mat4 parentModel, Camera &camera);
+        void drawNode(Model::Node &node, glm::mat4 parentModel, Camera &camera, std::shared_ptr<Light> light);
 
         static std::shared_ptr<Model>  loadFromFile(const std::string &fileName);
 
         void setEnvironmentMap(std::shared_ptr<NUGL::Texture> envMap);
 
         void setCameraUniformsOnShaderPrograms(Camera &camera, glm::mat4 model);
+
+        void setLightUniformsOnShaderPrograms(std::shared_ptr<Light> light);
 
         void prepareMaterialShaderProgram(std::shared_ptr<Material> material, std::shared_ptr<NUGL::ShaderProgram> shaderProgram);
     };

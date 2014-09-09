@@ -354,16 +354,16 @@ void Model::createVertexArrays() {
     }
 }
 
-void Model::draw(Camera &camera) {
-
-    drawNode(rootNode, transform, camera);
+void Model::draw(Camera &camera, std::shared_ptr<Light> light) {
+    drawNode(rootNode, transform, camera, light);
 }
 
-void Model::drawNode(Model::Node &node, glm::mat4 parentNodeTransform, Camera &camera) {
+void Model::drawNode(Model::Node &node, glm::mat4 parentNodeTransform, Camera &camera, std::shared_ptr<Light> light) {
     glm::mat4 model = parentNodeTransform * node.transform;
 
     // TODO: Find a better way of managing shader programs!
     setCameraUniformsOnShaderPrograms(camera, model);
+    setLightUniformsOnShaderPrograms(light);
 
     for (int index : node.meshes) {
         auto &mesh = meshes[index];
@@ -380,7 +380,7 @@ void Model::drawNode(Model::Node &node, glm::mat4 parentNodeTransform, Camera &c
     }
 
     for (auto &child : node.children) {
-        drawNode(child, model, camera);
+        drawNode(child, model, camera, light);
     }
 }
 
@@ -476,15 +476,45 @@ void Model::setCameraUniformsOnShaderPrograms(Camera &camera, glm::mat4 model) {
     }
 
     if (environmentMapProgram != nullptr) {
-        environmentMapProgram->use();
-        environmentMapProgram->setUniform("model", model);
-        environmentMapProgram->setUniform("view", camera.view);
-        environmentMapProgram->setUniform("proj", camera.proj);
+        if (environmentMapProgram != nullptr) {
+            environmentMapProgram->use();
+            environmentMapProgram->setUniform("model", model);
+            environmentMapProgram->setUniform("view", camera.view);
+            environmentMapProgram->setUniform("proj", camera.proj);
 
-        if (environmentMapProgram->uniformIsActive("modelViewInverse")) {
-            // We don't invert the transforms relating to the model's internal structure.
-            glm::mat4 modelViewInverse = glm::inverse(camera.view * transform);
-            environmentMapProgram->setUniform("modelViewInverse", modelViewInverse);
+            if (environmentMapProgram->uniformIsActive("modelViewInverse")) {
+                // We don't invert the transforms relating to the model's internal structure.
+                glm::mat4 modelViewInverse = glm::inverse(camera.view * transform);
+                environmentMapProgram->setUniform("modelViewInverse", modelViewInverse);
+            }
+        }
+    }
+}
+
+void Model::setLightUniformsOnShaderPrograms(std::shared_ptr<Light> light) {
+//    if (textureProgram != nullptr) {
+//        textureProgram->use();
+//        textureProgram->setUniform("model", model);
+//    }
+//
+//    if (flatProgram != nullptr) {
+//        flatProgram->use();
+//        flatProgram->setUniform("model", model);
+//    }
+
+    if (environmentMapProgram != nullptr) {
+        if (environmentMapProgram->uniformIsActive("light.pos")) {
+            environmentMapProgram->use();
+            environmentMapProgram->setUniform("light.pos", light->pos);
+            environmentMapProgram->setUniform("light.dir", light->dir);
+            environmentMapProgram->setUniform("light.attenuationConstant", light->attenuationConstant);
+            environmentMapProgram->setUniform("light.attenuationLinear", light->attenuationLinear);
+            environmentMapProgram->setUniform("light.attenuationQuadratic", light->attenuationQuadratic);
+            environmentMapProgram->setUniform("light.colDiffuse", light->colDiffuse);
+            environmentMapProgram->setUniform("light.colSpecular", light->colSpecular);
+            environmentMapProgram->setUniform("light.colAmbient", light->colAmbient);
+            environmentMapProgram->setUniform("light.angleConeInner", light->angleConeInner);
+            environmentMapProgram->setUniform("light.angleConeOuter", light->angleConeOuter);
         }
     }
 }
