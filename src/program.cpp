@@ -229,19 +229,20 @@ int main(int argc, char** argv) {
 //        cruiserTransform = glm::rotate(cruiserTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
 //        galaxyCruiserModel->transform = cruiserTransform;
 
-//    auto cubeModel = scene::Model::loadFromFile("assets/cube.obj");
-//    cubeModel.flatProgram = sharedFlatProgram;
-//    cubeModel.textureProgram = sharedTextureProgram;
-////    cubeModel.environmentMapProgram = sharedFlatReflectProgram;
-//    cubeModel.environmentMapProgram = sharedReflectProgram;
-//    cubeModel.setEnvironmentMap(cubeMap);
-//    cubeModel.createMeshBuffers();
-//    cubeModel.createVertexArrays();
-//        glm::mat4 mapTransform;
-//        mapTransform = glm::translate(mapTransform, glm::vec3(10));
-//        mapTransform = glm::scale(mapTransform, glm::vec3(10));
-//        mapTransform = glm::rotate(mapTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-//        cubeModel->transform = mapTransform;
+    auto cubeModel = scene::Model::loadFromFile("assets/cube.obj");
+    cubeModel->flatProgram = sharedFlatProgram;
+    cubeModel->textureProgram = sharedTextureProgram;
+//    cubeModel->environmentMapProgram = sharedFlatReflectProgram;
+    cubeModel->environmentMapProgram = sharedReflectProgram;
+    cubeModel->setEnvironmentMap(cubeMap);
+    cubeModel->createMeshBuffers();
+    cubeModel->createVertexArrays();
+    glm::mat4 mapTransform;
+    mapTransform = glm::translate(mapTransform, glm::vec3(-10));
+    mapTransform = glm::scale(mapTransform, glm::vec3(10));
+    mapTransform = glm::rotate(mapTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+    cubeModel->transform = mapTransform;
+    mainScene->addModel(cubeModel);
 
     auto skyBox = scene::Model::loadFromFile("assets/cube.obj");
     skyBox->flatProgram = sharedFlatProgram;

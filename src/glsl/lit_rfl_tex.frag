@@ -51,30 +51,31 @@ void main() {
     // face normal in eye space:
     vec3 normal = normalize(eyeSpaceNormal);
     vec3 incident = normalize(eyeSpacePosition);
-    vec3 reflection = reflect(incident, normal);
-    vec3 lightVec = eyeSpacePosition - (view * vec4(light.pos, 1)).xyz;
+    vec3 lightVecRaw = eyeSpacePosition - (view * vec4(light.pos, 1)).xyz;
+    vec3 lightVec = normalize(lightVecRaw);
+    vec3 lightReflect = reflect(lightVec, normal);
+    vec3 viewReflect = reflect(incident, normal);
 //    vec3 halfAngleReflection = mix(incident, reflection, 0.5);
 
-    float intensity = calculateIntensity(length(lightVec.xyz));
+    float intensity = calculateIntensity(length(lightVecRaw.xyz));
 
 //    // Environment map reflection:
-//    float phongSpecular = phong(incident, reflection, shininess);
+//    float phongSpecular = phong(incident, viewReflect, shininess);
 //    vec4 tmp_sampleCoord = modelViewInverse * vec4(reflection, 0);
 //    vec3 sampleCoord = tmp_sampleCoord.xyz;
 //    vec4 reflectCol = texture(texEnvironmentMap, sampleCoord);
 //    vec4 outSpecular = vec4(colSpecular, 1.0) * reflectCol * phongSpecular; // * shininessStrength;
 
-    // Environment map reflection:
-    float phongSpecular = phong(incident, reflection, shininess);
-    vec4 tmp_sampleCoord = modelViewInverse * vec4(reflection, 0);
-    vec3 sampleCoord = tmp_sampleCoord.xyz;
-    vec4 reflectCol = texture(texEnvironmentMap, sampleCoord);
-    vec4 outSpecular = vec4(colSpecular, 1.0) * reflectCol * phongSpecular; // * shininessStrength;
+    // Specular reflection:
+    float phongSpecular = phong(incident, lightReflect, shininess);
+    vec3 outSpecular = colSpecular * light.colSpecular * phongSpecular; // * shininessStrength;
 
     vec4 texCol = texture(texDiffuse, Texcoord);
-    vec4 outDiffuse = texCol * vec4(colDiffuse, 1.0);
+    vec3 outDiffuse = texCol.rgb * colDiffuse;
 
-    vec4 outAmbient = vec4(colAmbient * light.colAmbient, 1.0);
+    vec3 outAmbient = colAmbient * light.colAmbient;
 
-    outColor = (outAmbient + outDiffuse + outSpecular) * intensity;
+    outColor = vec4(outAmbient + (outDiffuse + outSpecular) * intensity, 1.0);
+//    outColor = vec4(outSpecular, 1.0);
+//    outColor = vec4(phongSpecular);
 }
