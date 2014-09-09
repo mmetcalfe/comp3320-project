@@ -18,13 +18,13 @@ namespace NUGL {
     public:
         Texture() = delete;
 
-        Texture(GLenum unit, GLenum target) {
+        inline Texture(GLenum unit, GLenum target) {
             glGenTextures(1, &textureId);
             textureUnit = unit;
             textureTarget = target;
         }
 
-        ~Texture() {
+        inline ~Texture() {
             glDeleteTextures(1, &textureId);
         }
 

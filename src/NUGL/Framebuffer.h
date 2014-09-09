@@ -33,24 +33,24 @@ namespace NUGL {
             return bufferId;
         }
 
-        inline void attach(std::shared_ptr<Texture> tex) {
+        inline void attach(std::unique_ptr<Texture> tex) {
             bind(GL_FRAMEBUFFER);
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex->id(), 0);
-            textureAttachment = tex;
+            textureAttachment = std::move(tex);
             checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
-        inline void attach(std::shared_ptr<Renderbuffer> rbo) {
+        inline void attach(std::unique_ptr<Renderbuffer> rbo) {
             bind(GL_FRAMEBUFFER);
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo->id());
-            renderbufferAttachment = rbo;
+            renderbufferAttachment = std::move(rbo);
             checkForAndPrintGLError(__FILE__, __LINE__);
 
         }
 
+        std::unique_ptr<Texture> textureAttachment;
     private:
         GLuint bufferId;
-        std::shared_ptr<Texture> textureAttachment;
-        std::shared_ptr<Renderbuffer> renderbufferAttachment;
+        std::unique_ptr<Renderbuffer> renderbufferAttachment;
     };
 }

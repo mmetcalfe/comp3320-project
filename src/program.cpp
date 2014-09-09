@@ -19,7 +19,7 @@
 #include "scene/Model.h"
 #include "scene/Scene.h"
 
-static auto mainScene = std::make_unique<scene::Scene>();
+static std::unique_ptr<scene::Scene> mainScene;
 
 void errorCallback(int error, const char* description) {
     std::cerr << "GLFW ERROR: " << description << std::endl;
@@ -89,6 +89,11 @@ int main(int argc, char** argv) {
     glewExperimental = GL_TRUE;
     glewInit();
     checkForAndPrintGLError(__FILE__, __LINE__);
+
+
+    // Create Scene:
+    mainScene = std::make_unique<scene::Scene>();
+
 
     // Load glsl:
     auto flatProgram = NUGL::ShaderProgram::createFromFiles("flatProgram", {

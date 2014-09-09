@@ -7,11 +7,11 @@
 namespace NUGL {
     class Renderbuffer {
     public:
-        Renderbuffer() {
+        inline Renderbuffer() {
             glGenRenderbuffers(1, &bufferId);
         }
 
-        ~Renderbuffer() {
+        inline ~Renderbuffer() {
             glDeleteRenderbuffers(1, &bufferId);
         }
 
