@@ -65,14 +65,14 @@ namespace NUGL {
 
             size_t offset = 0;
             for (auto& attrib : attribs) {
-                GLint posAttrib = program.getAttribLocation(attrib.name);
+                GLint location = program.getAttribLocation(attrib.name);
                 checkForAndPrintGLError(__func__, __LINE__);
 
-                glEnableVertexAttribArray(posAttrib);
+                glEnableVertexAttribArray(location);
                 checkForAndPrintGLError(__func__, __LINE__, attrib.name);
 
                 glVertexAttribPointer(
-                        posAttrib,
+                        location,
                         attrib.size,
                         attrib.type,
                         attrib.normalized,

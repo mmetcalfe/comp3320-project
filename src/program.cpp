@@ -91,10 +91,6 @@ int main(int argc, char** argv) {
     checkForAndPrintGLError(__FILE__, __LINE__);
 
 
-    // Create Scene:
-    mainScene = std::make_unique<scene::Scene>();
-
-
     // Load glsl:
     auto flatProgram = NUGL::ShaderProgram::createFromFiles("flatProgram", {
             {GL_VERTEX_SHADER, "src/glsl/pos_mvp.vert"},
@@ -156,6 +152,11 @@ int main(int argc, char** argv) {
     auto sharedReflectProgram = std::make_shared<NUGL::ShaderProgram>(reflectProgram);
     auto sharedSkyboxProgram = std::make_shared<NUGL::ShaderProgram>(skyboxProgram);
     auto sharedScreenProgram = std::make_shared<NUGL::ShaderProgram>(screenProgram);
+
+
+    // Create Scene:
+    mainScene = std::make_unique<scene::Scene>(sharedScreenProgram);
+
 
 //    // TODO: Find a way to manage texture units!
     auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE1, GL_TEXTURE_CUBE_MAP);
@@ -278,7 +279,7 @@ int main(int argc, char** argv) {
         skyboxTransform = glm::rotate(skyboxTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
         skyBox->transform = skyboxTransform;
 
-        mainScene->render(sharedScreenProgram);
+        mainScene->render();
 
         // Swap front and back buffers:
 //        glfwSwapInterval(1); // v-sync

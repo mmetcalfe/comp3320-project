@@ -1,11 +1,14 @@
 #include "scene/Scene.h"
 #include "NUGL/Framebuffer.h"
 #include "NUGL/Renderbuffer.h"
+#include "utility/PostprocessingScreen.h"
 
 namespace scene {
 
-    Scene::Scene() : camera(std::make_unique<Camera>()) {
+    Scene::Scene(std::shared_ptr<NUGL::ShaderProgram> screenProgram) : camera(std::make_unique<Camera>()) {
         prepareFramebuffer();
+
+        screen = std::make_unique<utility::PostprocessingScreen>(screenProgram);
     }
 
     void Scene::prepareFramebuffer() {
@@ -23,9 +26,7 @@ namespace scene {
         framebuffer->attach(std::move(rbo));
     }
 
-    void Scene::render(std::shared_ptr<NUGL::ShaderProgram> screenProgram) {
-//        prepareFramebuffer();
-
+    void Scene::render() {
         NUGL::Framebuffer::useDefault();
 
         glClearColor(0.5, 0.5, 0.5, 1.0);
@@ -46,41 +47,9 @@ namespace scene {
 
         NUGL::Framebuffer::useDefault();
 
-        std::vector<GLfloat> quadVertices = {
-            -1.0f,  1.0f,  0.0f, 1.0f,
-            1.0f,  1.0f,  1.0f, 1.0f,
-            1.0f, -1.0f,  1.0f, 0.0f,
-
-            1.0f, -1.0f,  1.0f, 0.0f,
-            -1.0f, -1.0f,  0.0f, 0.0f,
-            -1.0f,  1.0f,  0.0f, 1.0f
-        };
-        NUGL::Buffer quadBuffer;
-        quadBuffer.setData(GL_ARRAY_BUFFER, quadVertices, GL_STATIC_DRAW);
-
-        std::vector<NUGL::VertexAttribute> attribs = {
-            {"position", 2, GL_FLOAT, GL_FALSE},
-            {"texcoord", 2, GL_FLOAT, GL_FALSE},
-        };
-//        checkForAndPrintGLError(__FILE__, __LINE__);
-
-
+        // Render the screen:
         framebuffer->textureAttachment->bind();
-        checkForAndPrintGLError(__FILE__, __LINE__);
-
-//        screenProgram->setUniform("texDiffuse", tex);
-        screenProgram->use();
-
-        auto vertexArray = std::make_unique<NUGL::VertexArray>();
-        vertexArray->bind();
-        vertexArray->setAttributePointers(*screenProgram, quadBuffer, GL_ARRAY_BUFFER, attribs);
-
-        screenProgram->use();
-        vertexArray->bind();
-        quadBuffer.bind(GL_ARRAY_BUFFER);
-        glDisable(GL_DEPTH_TEST);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glEnable(GL_DEPTH_TEST);
+        screen->render();
     }
 
     void Scene::addModel(std::shared_ptr<Model> model) {
