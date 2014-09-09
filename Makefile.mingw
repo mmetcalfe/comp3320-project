@@ -11,8 +11,8 @@ DEP = $(SRC:.cpp=.d)
 
 GLEW_CFLAGS = -DGLEW_STATIC
 GLEW_LIBS = -lglew32 -lglu32
-GLFW3_CFLAGS =
-GLFW3_LIBS = -lglfw3
+GLFW3_CFLAGS != pkg-config --cflags glfw3
+GLFW3_LIBS != pkg-config --libs glfw3
 GLM_CFLAGS =
 GLM_LIBS =
 JPEG_CFLAGS =
