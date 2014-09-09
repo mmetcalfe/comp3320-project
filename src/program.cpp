@@ -58,12 +58,12 @@ int main(int argc, char** argv) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-//    glfwWindowHint(GLFW_RED_BITS, 8);
-//    glfwWindowHint(GLFW_GREEN_BITS, 8);
-//    glfwWindowHint(GLFW_BLUE_BITS, 8);
+    glfwWindowHint(GLFW_RED_BITS, 8);
+    glfwWindowHint(GLFW_GREEN_BITS, 8);
+    glfwWindowHint(GLFW_BLUE_BITS, 8);
 //    glfwWindowHint(GLFW_ALPHA_BITS, 8);
-//    glfwWindowHint(GLFW_DEPTH_BITS, 24);
-//    glfwWindowHint(GLFW_STENCIL_BITS, 8);
+    glfwWindowHint(GLFW_DEPTH_BITS, 24);
+    glfwWindowHint(GLFW_STENCIL_BITS, 8);
 
     // Windowed:
     GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL", nullptr, nullptr);
@@ -146,17 +146,47 @@ int main(int argc, char** argv) {
     // Create Scene:
     mainScene = std::make_unique<scene::Scene>(sharedScreenProgram);
 
+    // Add some lights:
     auto lightModel = std::make_shared<scene::Model>();
     auto light = std::make_shared<scene::Light>();
     light->type = scene::Light::Type::point;
-    light->pos = {0, 0, 30};
-    light->dir = {1, 0, 0};
-    light->attenuationConstant = 1;
-    light->attenuationLinear = 0.1;
+    light->pos = {0, 0, 35};
+    light->attenuationConstant = 0;
+    light->attenuationLinear = 0.5;
     light->attenuationQuadratic = 0;
     light->colDiffuse = {1, 1, 1};
     light->colSpecular = {1, 1, 1};
-    light->colAmbient = {0.1, 0.1, 0.1};
+    light->colAmbient = {0, 0, 0};
+    lightModel->lights.push_back(light);
+    mainScene->addModel(lightModel);
+
+    lightModel = std::make_shared<scene::Model>();
+    light = std::make_shared<scene::Light>();
+    light->type = scene::Light::Type::point;
+    light->pos = {60, 60, 30};
+    light->dir = {1, 0, 0};
+    light->attenuationConstant = 0;
+    light->attenuationLinear = 0.5;
+    light->attenuationQuadratic = 0;
+    light->colDiffuse = {1, 1, 1};
+    light->colSpecular = {1, 1, 1};
+    light->colAmbient = {0, 0, 0};
+    light->angleConeInner = 1;
+    light->angleConeOuter = 1;
+    lightModel->lights.push_back(light);
+    mainScene->addModel(lightModel);
+
+    lightModel = std::make_shared<scene::Model>();
+    light = std::make_shared<scene::Light>();
+    light->type = scene::Light::Type::point;
+    light->pos = {0, 200, 60};
+    light->dir = {1, 0, 0};
+    light->attenuationConstant = 0;
+    light->attenuationLinear = 0.05;
+    light->attenuationQuadratic = 0;
+    light->colDiffuse = {1, 1, 1};
+    light->colSpecular = {1, 1, 1};
+    light->colAmbient = {0, 0, 0};
     light->angleConeInner = 1;
     light->angleConeOuter = 1;
     lightModel->lights.push_back(light);
@@ -184,9 +214,6 @@ int main(int argc, char** argv) {
     // Load assets:
     auto eagle5Model = scene::Model::loadFromFile("assets/eagle 5 transport/eagle 5 transport landed.obj");
 //    auto eagle5Model = scene::Model::loadFromFile("assets/KingsTreasure_OBJ/KingsTreasure.obj");
-//    auto eagle5Model = scene::Model::loadFromFile("assets/rc8c1qtjiygw-O/Organodron City/Organodron City.obj");
-//    auto eagle5Model = scene::Model::loadFromFile("assets/Bedroom.3DS");
-//    auto eagle5Model = scene::Model::loadFromFile("assets/Room 2013 New/Room 2013 New.c4d");
     eagle5Model->flatProgram = sharedFlatProgram;
     eagle5Model->textureProgram = sharedTextureProgram;
 //    eagle5Model->environmentMapProgram = sharedFlatReflectProgram;
@@ -214,20 +241,19 @@ int main(int argc, char** argv) {
     houseTransform = glm::rotate(houseTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
     houseModel->transform = houseTransform;
 
-//
-//    auto galaxyCruiserModel = scene::Model::loadFromFile("assets/galaxy_cruiser_3ds.3DS");
-//    galaxyCruiserModel.flatProgram = sharedFlatProgram;
-//    galaxyCruiserModel.textureProgram = sharedTextureProgram;
-////    galaxyCruiserModel.environmentMapProgram = sharedFlatReflectProgram;
-//    galaxyCruiserModel.environmentMapProgram = sharedReflectProgram;
-//    galaxyCruiserModel.setEnvironmentMap(cubeMap);
-//    galaxyCruiserModel.createMeshBuffers();
-//    galaxyCruiserModel.createVertexArrays();
-//        glm::mat4 cruiserTransform;
-////        cruiserTransform = glm::translate(cruiserTransform, glm::vec3(20));
-//        cruiserTransform = glm::scale(cruiserTransform, glm::vec3(0.2));
-//        cruiserTransform = glm::rotate(cruiserTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-//        galaxyCruiserModel->transform = cruiserTransform;
+    auto cityModel = scene::Model::loadFromFile("assets/rc8c1qtjiygw-O/Organodron City/Organodron City.obj");
+    cityModel->flatProgram = sharedFlatProgram;
+    cityModel->textureProgram = sharedTextureProgram;
+//    cityModel->environmentMapProgram = sharedFlatReflectProgram;
+    cityModel->environmentMapProgram = sharedReflectProgram;
+    cityModel->setEnvironmentMap(cubeMap);
+    cityModel->createMeshBuffers();
+    cityModel->createVertexArrays();
+    mainScene->addModel(cityModel);
+    glm::mat4 cityTransform;
+    cityTransform = glm::scale(cityTransform, glm::vec3(1));
+    cityTransform = glm::rotate(cityTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+    cityModel->transform = cityTransform;
 
     auto cubeModel = scene::Model::loadFromFile("assets/cube.obj");
     cubeModel->flatProgram = sharedFlatProgram;
@@ -268,7 +294,7 @@ int main(int argc, char** argv) {
 
     glEnable(GL_DEPTH_TEST);
 
-//    // Backface culling:
+    // Backface culling:
 //    glEnable (GL_CULL_FACE); // cull face
 //    glCullFace (GL_BACK); // cull back face
 //    glFrontFace (GL_CCW); // GL_CCW for counter clock-wise

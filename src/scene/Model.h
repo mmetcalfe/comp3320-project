@@ -22,17 +22,17 @@ namespace scene {
             spot,
         };
 
-        Type type;
-        glm::vec3 pos;
-        glm::vec3 dir;
-        float attenuationConstant;
-        float attenuationLinear;
-        float attenuationQuadratic;
-        glm::vec3 colDiffuse;
-        glm::vec3 colSpecular;
-        glm::vec3 colAmbient;
-        float angleConeInner;
-        float angleConeOuter;
+        Type type = Type::undefined;
+        glm::vec3 pos = {0, 0, 0};
+        glm::vec3 dir = {1, 0, 0};
+        float attenuationConstant = 1;
+        float attenuationLinear = 0;
+        float attenuationQuadratic = 0;
+        glm::vec3 colDiffuse = {1 , 1, 1};
+        glm::vec3 colSpecular = {1 , 1, 1};
+        glm::vec3 colAmbient = {0 , 0, 0};
+        float angleConeInner = 1;
+        float angleConeOuter = 2;
     };
 
     struct Material {

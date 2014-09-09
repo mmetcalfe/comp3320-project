@@ -57,7 +57,7 @@ void main() {
     vec3 viewReflect = reflect(incident, normal);
 //    vec3 halfAngleReflection = mix(incident, reflection, 0.5);
 
-    float intensity = calculateIntensity(length(lightVecRaw.xyz));
+    float intensity = calculateIntensity(length(lightVecRaw));
 
 //    // Environment map reflection:
 //    float phongSpecular = phong(incident, viewReflect, shininess);
@@ -75,7 +75,6 @@ void main() {
 
     vec3 outAmbient = colAmbient * light.colAmbient;
 
-    outColor = vec4(outAmbient + (outDiffuse + outSpecular) * intensity, 1.0);
-//    outColor = vec4(outSpecular, 1.0);
-//    outColor = vec4(phongSpecular);
+    float normalDirTest = dot(normal, lightVec) < 0 ? 1 : 0;
+    outColor = vec4(outAmbient + (outDiffuse + outSpecular) * intensity, 1.0) * normalDirTest;
 }

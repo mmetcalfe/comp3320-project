@@ -28,22 +28,30 @@ namespace scene {
     }
 
     void Scene::render() {
-        framebuffer->bind();
-
         glClearColor(0, 0, 0, 1.0);
+
+        //
+        NUGL::Framebuffer::useDefault();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         for (auto light : lights) {
+            // Render the light's contribution to the framebuffer:
+            framebuffer->bind();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
             auto sharedLight = light.lock();
             for (auto model : models) {
                 model->draw(*camera, sharedLight);
             }
-        }
 
-        // Render the screen:
-        NUGL::Framebuffer::useDefault();
-        framebuffer->textureAttachment->bind();
-        screen->render();
+            // Add the light's contribution to the screen:
+            NUGL::Framebuffer::useDefault();
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            framebuffer->textureAttachment->bind();
+            screen->render();
+            glDisable(GL_BLEND);
+        }
     }
 
     void Scene::addModel(std::shared_ptr<Model> model) {

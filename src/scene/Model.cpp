@@ -341,6 +341,7 @@ void Model::createVertexArrays() {
             program = textureProgram;
         }
 
+        // TODO: Handle the case of environment mappped but untextured meshes correctly.
         if (mesh.isEnvironmentMapped()) {
             program = environmentMapProgram;
         }
