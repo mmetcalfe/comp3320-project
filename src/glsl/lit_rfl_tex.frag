@@ -75,6 +75,14 @@ void main() {
 
     vec3 outAmbient = colAmbient * light.colAmbient;
 
-    float normalDirTest = dot(normal, lightVec) < 0 ? 1 : 0;
+    // Don't show lighting on surfaces that are facing the wrong way:
+    float lightDot = dot(normal, lightVec);
+    // Use a ramp near zero to remove noise when the light is very near the plane of the surface.
+    #define DOT_CUTOFF 0.001
+    float dotLessZero = lightDot < -DOT_CUTOFF ? 1 : -(1.0/DOT_CUTOFF) * lightDot;
+    float normalDirTest = lightDot < 0 ? dotLessZero : 0;
+//    float normalDirTest = lightDot < 0 ? 1 : 0; // What it looks like without the ramp (causes speckles when the light it coplanar with the surface).
+
+
     outColor = vec4(outAmbient + (outDiffuse + outSpecular) * intensity, 1.0) * normalDirTest;
 }
