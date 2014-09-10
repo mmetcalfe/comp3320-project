@@ -5,9 +5,8 @@
 
 namespace scene {
 
-    Scene::Scene(std::shared_ptr<NUGL::ShaderProgram> screenProgram) : camera(std::make_unique<Camera>()) {
-        // TODO: Resize the framebuffer when the window resizes.
-        prepareFramebuffer(800, 600);
+    Scene::Scene(std::shared_ptr<NUGL::ShaderProgram> screenProgram, int width, int height) : camera(std::make_unique<Camera>()) {
+        prepareFramebuffer(width, height);
 
         screen = std::make_unique<utility::PostprocessingScreen>(screenProgram);
     }
@@ -30,16 +29,24 @@ namespace scene {
     void Scene::render() {
         glClearColor(0, 0, 0, 1.0);
 
-        //
+        // Clear the screen:
         NUGL::Framebuffer::useDefault();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         for (auto light : lights) {
+            auto sharedLight = light.lock();
+
+            std::shared_ptr<NUGL::Texture> shadowMap;
+            if (sharedLight->type == Light::Type::point) {
+                // Render light's perspective into shadowMap.
+            }
+
+
             // Render the light's contribution to the framebuffer:
             framebuffer->bind();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            auto sharedLight = light.lock();
+
             for (auto model : models) {
                 model->draw(*camera, sharedLight);
             }

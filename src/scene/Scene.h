@@ -12,7 +12,7 @@ namespace scene {
 
     class Scene {
     public:
-        Scene(std::shared_ptr<NUGL::ShaderProgram> screenProgram);
+        Scene(std::shared_ptr<NUGL::ShaderProgram> screenProgram, int width, int height);
 
         void render();
         void addModel(std::shared_ptr<Model>);

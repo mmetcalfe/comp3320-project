@@ -32,6 +32,7 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 
     glViewport(0, 0, width, height);
     mainScene->camera->proj = glm::perspective(mainScene->camera->fov, width / float(height), 1.0f, 300.0f);
+    mainScene->prepareFramebuffer(width, height);
 }
 
 //void cursorPositionCallback(GLFWwindow* window, double x, double y) {
@@ -66,7 +67,9 @@ int main(int argc, char** argv) {
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 
     // Windowed:
-    GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL", nullptr, nullptr);
+    int screenWidth = 800;
+    int screenHeight = 600;
+    GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "OpenGL", nullptr, nullptr);
 
 //    // Fullscreen:
 //    const GLFWvidmode* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
@@ -76,7 +79,7 @@ int main(int argc, char** argv) {
 
     // Disable cursor to allow correct mouse input for camera controls on OSX.
     // See: http://stackoverflow.com/questions/14468039/glfw-glfwsetmousepos-bug-on-mac-os-x-10-7-with-opengl-camera
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+//    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 //    glfwSetCursorPosCallback(window, cursorPositionCallback);
@@ -144,7 +147,7 @@ int main(int argc, char** argv) {
     auto sharedScreenProgram = std::make_shared<NUGL::ShaderProgram>(screenProgram);
 
     // Create Scene:
-    mainScene = std::make_unique<scene::Scene>(sharedScreenProgram);
+    mainScene = std::make_unique<scene::Scene>(sharedScreenProgram, screenWidth, screenHeight);
 
     // Add some lights:
     auto lightModel = std::make_shared<scene::Model>();
