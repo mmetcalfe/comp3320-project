@@ -33,9 +33,9 @@ namespace NUGL {
             return bufferId;
         }
 
-        inline void attach(std::unique_ptr<Texture> tex) {
+        inline void attach(std::unique_ptr<Texture> tex, GLenum attachment = GL_COLOR_ATTACHMENT0) {
             bind(GL_FRAMEBUFFER);
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex->id(), 0);
+            glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, tex->id(), 0);
             textureAttachment = std::move(tex);
             checkForAndPrintGLError(__FILE__, __LINE__);
         }

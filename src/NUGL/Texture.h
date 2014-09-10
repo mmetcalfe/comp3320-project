@@ -85,16 +85,17 @@ namespace NUGL {
             checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
-        inline void setTextureData(GLenum target, GLsizei width, GLsizei height, const GLvoid *pixels) {
+        inline void setTextureData(GLenum target, GLsizei width, GLsizei height, const GLvoid *pixels,
+                GLenum format = GL_RGB, GLenum internalFormat = GL_RGB) {
             bind();
             if ((width % 4) == 0) {
                 glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
             } else {
                 glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
             }
-            glTexImage2D(target, 0, GL_RGB,
+            glTexImage2D(target, 0, internalFormat,
                     width, height,
-                    0, GL_RGB, GL_UNSIGNED_BYTE, pixels); // TODO: Check byte formats
+                    0, format, GL_UNSIGNED_BYTE, pixels); // TODO: Check byte formats
         }
 
         inline void loadFromPNG(const std::string& fileName, GLenum target) {

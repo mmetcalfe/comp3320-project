@@ -31,8 +31,12 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
     }
 
     glViewport(0, 0, width, height);
-    mainScene->camera->proj = glm::perspective(mainScene->camera->fov, width / float(height), 1.0f, 300.0f);
+
     mainScene->prepareFramebuffer(width, height);
+
+    mainScene->camera->frameWidth = width;
+    mainScene->camera->frameHeight = height;
+    mainScene->camera->prepareTransforms();
 }
 
 //void cursorPositionCallback(GLFWwindow* window, double x, double y) {
@@ -79,7 +83,7 @@ int main(int argc, char** argv) {
 
     // Disable cursor to allow correct mouse input for camera controls on OSX.
     // See: http://stackoverflow.com/questions/14468039/glfw-glfwsetmousepos-bug-on-mac-os-x-10-7-with-opengl-camera
-//    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 //    glfwSetCursorPosCallback(window, cursorPositionCallback);
@@ -291,9 +295,11 @@ int main(int argc, char** argv) {
     mainScene->camera->lookSpeed = 0.005;
     mainScene->camera->up = glm::vec3(0.0f, 0.0f, 1.0f);
 //    mainScene->camera->up = glm::vec3(0.0f, 1.0f, 0.0f);
-    mainScene->camera->proj = glm::perspective(mainScene->camera->fov, width / float(height), 0.1f, 300.0f);
     mainScene->camera->lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
     mainScene->camera->lastUpdateTime = glfwGetTime();
+    mainScene->camera->frameWidth = width;
+    mainScene->camera->frameHeight = height;
+    mainScene->camera->prepareTransforms();
 
     glEnable(GL_DEPTH_TEST);
 
