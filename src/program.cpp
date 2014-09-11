@@ -16,6 +16,7 @@
 #include "NUGL/Buffer.h"
 #include "NUGL/VertexArray.h"
 #include "NUGL/Texture.h"
+#include "scene/ProceduralAsteroid.h"
 #include "scene/Model.h"
 #include "scene/Scene.h"
 
@@ -304,6 +305,20 @@ int main(int argc, char** argv) {
     mapTransform = glm::rotate(mapTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
     cubeModel->transform = mapTransform;
     mainScene->addModel(cubeModel);
+
+    auto asteroidModel = scene::createAsteroid();
+    asteroidModel->flatProgram = sharedFlatProgram;
+    asteroidModel->textureProgram = sharedTextureProgram;
+    asteroidModel->environmentMapProgram = sharedReflectProgram;
+    asteroidModel->setEnvironmentMap(cubeMap);
+    asteroidModel->createMeshBuffers();
+    asteroidModel->createVertexArrays();
+    glm::mat4 asteroidTransform;
+    asteroidTransform = glm::translate(asteroidTransform, glm::vec3({15, 130, 40}));
+    asteroidTransform = glm::scale(asteroidTransform, glm::vec3(3));
+    asteroidTransform = glm::rotate(asteroidTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+    asteroidModel->transform = asteroidTransform;
+    mainScene->addModel(asteroidModel);
 
     auto skyBox = scene::Model::loadFromFile("assets/cube.obj");
     skyBox->flatProgram = sharedFlatProgram;

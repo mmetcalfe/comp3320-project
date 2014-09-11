@@ -293,6 +293,60 @@ std::shared_ptr<Model> Model::loadFromFile(const std::string &fileName) {
     return sceneModel;
 }
 
+std::shared_ptr<Model> Model::createIcosahedron() {
+    static const double PHI = 1.61803398874989484820;
+
+    std::shared_ptr<Model> sceneModel = std::make_shared<Model>();
+
+    Material material;
+    material.colAmbient = {1, 1, 1};
+    material.colDiffuse = {1, 1, 1};
+    material.colSpecular = {1, 1, 1};
+    material.colTransparent = {1, 1, 1};
+    material.shininess = 1;
+    material.shininessStrength = 1;
+    material.twoSided = false;
+    material.materialInfo.has.colAmbient = true;
+    material.materialInfo.has.colDiffuse = true;
+    material.materialInfo.has.colSpecular = true;
+    material.materialInfo.has.colTransparent = true;
+    material.materialInfo.has.opacity = true;
+    material.materialInfo.has.shininess = true;
+    material.materialInfo.has.shininessStrength = true;
+    sceneModel->materials.push_back(std::make_shared<Material>(material));
+
+    Mesh mesh;
+    mesh.materialIndex = 0;
+    mesh.vertices = mesh.normals = {
+        glm::normalize(glm::vec3(-1, 0, -PHI)),
+        glm::normalize(glm::vec3(1, 0, -PHI)),
+        glm::normalize(glm::vec3(1, 0, PHI)),
+        glm::normalize(glm::vec3(-1, 0, PHI)),
+
+        glm::normalize(glm::vec3(-PHI, -1, 0)),
+        glm::normalize(glm::vec3(-PHI, 1, 0)),
+        glm::normalize(glm::vec3(PHI, 1, 0)),
+        glm::normalize(glm::vec3(PHI, -1, 0)),
+
+        glm::normalize(glm::vec3(0, -PHI, 1)),
+        glm::normalize(glm::vec3(0, -PHI, -1)),
+        glm::normalize(glm::vec3(0, PHI, -1)),
+        glm::normalize(glm::vec3(0, PHI, 1)),
+    };
+
+    mesh.elements = {
+        1, 9, 0, 10, 1, 0, 5, 10, 0, 4, 5, 0, 9, 4, 0, 8, 2, 3, 4, 8, 3, 5, 4,
+        3, 11, 5, 3, 2, 11, 3, 11, 2, 6, 10, 11, 6, 1, 10, 6, 7, 1, 6, 2, 7, 6,
+        11, 10, 5, 9, 8, 4, 7, 2, 8, 9, 7, 8, 1, 7, 9
+    };
+
+    mesh.material = sceneModel->materials[0];
+    sceneModel->meshes.push_back(std::move(mesh));
+    sceneModel->rootNode.meshes.push_back(0);
+
+    return sceneModel;
+}
+
 void Model::createMeshBuffers() {
     for (auto &mesh : meshes) {
         std::vector<GLfloat> vertices;

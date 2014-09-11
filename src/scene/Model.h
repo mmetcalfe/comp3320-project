@@ -100,7 +100,9 @@ namespace scene {
         void drawDepth(Camera &camera);
         void drawNodeDepth(Model::Node &node, glm::mat4 parentModel, Camera &camera);
 
-        static std::shared_ptr<Model>  loadFromFile(const std::string &fileName);
+        static std::shared_ptr<Model> loadFromFile(const std::string &fileName);
+
+        static std::shared_ptr<Model> createIcosahedron();
 
         void setEnvironmentMap(std::shared_ptr<NUGL::Texture> envMap);
 
