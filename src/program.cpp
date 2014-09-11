@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
     glfwSetErrorCallback(errorCallback);
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
@@ -118,8 +118,9 @@ int main(int argc, char** argv) {
     textureProgram.printDebugInfo();
 
     auto reflectProgram = NUGL::ShaderProgram::createFromFiles("reflectProgram", {
-            {GL_VERTEX_SHADER, "src/glsl/reflect_tex.vert"},
-            {GL_FRAGMENT_SHADER, "src/glsl/lit_rfl_tex.frag"},
+            {GL_VERTEX_SHADER, "src/glsl/shadow.vert"},
+            {GL_FRAGMENT_SHADER, "src/glsl/shadow.frag"},
+//            {GL_FRAGMENT_SHADER, "src/glsl/lit_rfl_tex.frag"},
     });
     reflectProgram.bindFragDataLocation(0, "outColor");
     reflectProgram.link();
@@ -144,60 +145,74 @@ int main(int argc, char** argv) {
     screenProgram.updateMaterialInfo();
     screenProgram.printDebugInfo();
 
+    auto shadowMapProgram = NUGL::ShaderProgram::createFromFiles("shadowMapProgram", {
+            {GL_VERTEX_SHADER, "src/glsl/shadow_map.vert"},
+            {GL_FRAGMENT_SHADER, "src/glsl/shadow_map.frag"},
+    });
+    shadowMapProgram.bindFragDataLocation(0, "outColor");
+    shadowMapProgram.link();
+    shadowMapProgram.updateMaterialInfo();
+    shadowMapProgram.printDebugInfo();
+
     auto sharedFlatProgram = std::make_shared<NUGL::ShaderProgram>(flatProgram);
     auto sharedTextureProgram = std::make_shared<NUGL::ShaderProgram>(textureProgram);
     auto sharedReflectProgram = std::make_shared<NUGL::ShaderProgram>(reflectProgram);
     auto sharedSkyboxProgram = std::make_shared<NUGL::ShaderProgram>(skyboxProgram);
     auto sharedScreenProgram = std::make_shared<NUGL::ShaderProgram>(screenProgram);
+    auto sharedShadowMapProgram = std::make_shared<NUGL::ShaderProgram>(shadowMapProgram);
 
     // Create Scene:
     mainScene = std::make_unique<scene::Scene>(sharedScreenProgram, screenWidth, screenHeight);
+    mainScene->shadowMapProgram = sharedShadowMapProgram;
 
     // Add some lights:
     auto lightModel = std::make_shared<scene::Model>();
     auto light = std::make_shared<scene::Light>();
-    light->type = scene::Light::Type::point;
-    light->pos = {0, 0, 35};
-    light->attenuationConstant = 0;
-    light->attenuationLinear = 0.5;
+    light->type = scene::Light::Type::spot;
+    light->pos = {15, 120, 40};
+    light->dir = {1, 0, 0};
+    light->attenuationConstant = 1;
+    light->attenuationLinear = 0.1;
     light->attenuationQuadratic = 0;
+    light->angleConeOuter = 2;
+    light->angleConeInner = 1;
     light->colDiffuse = {1, 1, 1};
     light->colSpecular = {1, 1, 1};
     light->colAmbient = {0, 0, 0};
     lightModel->lights.push_back(light);
     mainScene->addModel(lightModel);
 
-    lightModel = std::make_shared<scene::Model>();
-    light = std::make_shared<scene::Light>();
-    light->type = scene::Light::Type::point;
-    light->pos = {60, 60, 30};
-    light->dir = {1, 0, 0};
-    light->attenuationConstant = 0;
-    light->attenuationLinear = 0.5;
-    light->attenuationQuadratic = 0;
-    light->colDiffuse = {1, 1, 1};
-    light->colSpecular = {1, 1, 1};
-    light->colAmbient = {0, 0, 0};
-    light->angleConeInner = 1;
-    light->angleConeOuter = 1;
-    lightModel->lights.push_back(light);
-    mainScene->addModel(lightModel);
-
-    lightModel = std::make_shared<scene::Model>();
-    light = std::make_shared<scene::Light>();
-    light->type = scene::Light::Type::point;
-    light->pos = {0, 200, 60};
-    light->dir = {1, 0, 0};
-    light->attenuationConstant = 0;
-    light->attenuationLinear = 0.05;
-    light->attenuationQuadratic = 0;
-    light->colDiffuse = {1, 1, 1};
-    light->colSpecular = {1, 1, 1};
-    light->colAmbient = {0, 0, 0};
-    light->angleConeInner = 1;
-    light->angleConeOuter = 1;
-    lightModel->lights.push_back(light);
-    mainScene->addModel(lightModel);
+//    lightModel = std::make_shared<scene::Model>();
+//    light = std::make_shared<scene::Light>();
+//    light->type = scene::Light::Type::point;
+//    light->pos = {60, 60, 30};
+//    light->dir = {1, 0, 0};
+//    light->attenuationConstant = 0;
+//    light->attenuationLinear = 0.5;
+//    light->attenuationQuadratic = 0;
+//    light->colDiffuse = {1, 1, 1};
+//    light->colSpecular = {1, 1, 1};
+//    light->colAmbient = {0, 0, 0};
+//    light->angleConeInner = 1;
+//    light->angleConeOuter = 1;
+//    lightModel->lights.push_back(light);
+//    mainScene->addModel(lightModel);
+//
+//    lightModel = std::make_shared<scene::Model>();
+//    light = std::make_shared<scene::Light>();
+//    light->type = scene::Light::Type::point;
+//    light->pos = {0, 200, 60};
+//    light->dir = {1, 0, 0};
+//    light->attenuationConstant = 0;
+//    light->attenuationLinear = 0.05;
+//    light->attenuationQuadratic = 0;
+//    light->colDiffuse = {1, 1, 1};
+//    light->colSpecular = {1, 1, 1};
+//    light->colAmbient = {0, 0, 0};
+//    light->angleConeInner = 1;
+//    light->angleConeOuter = 1;
+//    lightModel->lights.push_back(light);
+//    mainScene->addModel(lightModel);
 
 //    // TODO: Find a way to manage texture units!
     auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE1, GL_TEXTURE_CUBE_MAP);
@@ -271,31 +286,31 @@ int main(int argc, char** argv) {
     cubeModel->createMeshBuffers();
     cubeModel->createVertexArrays();
     glm::mat4 mapTransform;
-    mapTransform = glm::translate(mapTransform, glm::vec3(-10));
-    mapTransform = glm::scale(mapTransform, glm::vec3(10));
+    mapTransform = glm::translate(mapTransform, glm::vec3({15, 120, 40}));
+    mapTransform = glm::scale(mapTransform, glm::vec3(3));
     mapTransform = glm::rotate(mapTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
     cubeModel->transform = mapTransform;
     mainScene->addModel(cubeModel);
 
-    auto skyBox = scene::Model::loadFromFile("assets/cube.obj");
-    skyBox->flatProgram = sharedFlatProgram;
-    skyBox->textureProgram = sharedTextureProgram;
-    skyBox->environmentMapProgram = sharedSkyboxProgram;
-    skyBox->setEnvironmentMap(cubeMap);
-    skyBox->createMeshBuffers();
-    skyBox->createVertexArrays();
-    mainScene->addModel(skyBox);
+//    auto skyBox = scene::Model::loadFromFile("assets/cube.obj");
+//    skyBox->flatProgram = sharedFlatProgram;
+//    skyBox->textureProgram = sharedTextureProgram;
+//    skyBox->environmentMapProgram = sharedSkyboxProgram;
+//    skyBox->setEnvironmentMap(cubeMap);
+//    skyBox->createMeshBuffers();
+//    skyBox->createVertexArrays();
+//    mainScene->addModel(skyBox);
 
     // Setup Camera:
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
-    mainScene->camera->pos = glm::vec3(0.0f, 0.0f, 0.0f);
+    mainScene->camera->pos = {15, 120, 40};
+    mainScene->camera->dir = {1, 0, 0};
     mainScene->camera->fov = 45;
     mainScene->camera->speed = 10;
     mainScene->camera->lookSpeed = 0.005;
     mainScene->camera->up = glm::vec3(0.0f, 0.0f, 1.0f);
 //    mainScene->camera->up = glm::vec3(0.0f, 1.0f, 0.0f);
-    mainScene->camera->lookAt(glm::vec3(0.0f, 0.0f, 0.0f));
     mainScene->camera->lastUpdateTime = glfwGetTime();
     mainScene->camera->frameWidth = width;
     mainScene->camera->frameHeight = height;
@@ -314,10 +329,10 @@ int main(int argc, char** argv) {
             glfwSetWindowTitle(window, frameTimer.timeStr.c_str());
         }
 
-        glm::mat4 skyboxTransform;
-        skyboxTransform = glm::translate(skyboxTransform, mainScene->camera->pos);
-        skyboxTransform = glm::rotate(skyboxTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-        skyBox->transform = skyboxTransform;
+//        glm::mat4 skyboxTransform;
+//        skyboxTransform = glm::translate(skyboxTransform, mainScene->camera->pos);
+//        skyboxTransform = glm::rotate(skyboxTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+//        skyBox->transform = skyboxTransform;
 
         mainScene->render();
 

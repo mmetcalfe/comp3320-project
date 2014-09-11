@@ -48,7 +48,7 @@ namespace NUGL {
 
         }
 
-        std::unique_ptr<Texture> textureAttachment;
+        std::shared_ptr<Texture> textureAttachment;
     private:
         GLuint bufferId;
         std::unique_ptr<Renderbuffer> renderbufferAttachment;

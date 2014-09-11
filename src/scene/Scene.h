@@ -26,10 +26,11 @@ namespace scene {
         * Weak pointers to all lights attached to all models in the scene.
         */
         std::vector<std::weak_ptr<Light>> lights;
-        std::unique_ptr<Camera> camera;
+        std::unique_ptr<PlayerCamera> camera;
         std::unique_ptr<NUGL::Framebuffer> framebuffer;
         std::unique_ptr<NUGL::Framebuffer> shadowMapFramebuffer;
         std::unique_ptr<utility::PostprocessingScreen> screen;
+        std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram;
     };
 
 }

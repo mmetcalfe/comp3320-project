@@ -85,6 +85,7 @@ namespace scene {
         std::shared_ptr<NUGL::ShaderProgram> flatProgram;
         std::shared_ptr<NUGL::ShaderProgram> textureProgram;
         std::shared_ptr<NUGL::ShaderProgram> environmentMapProgram;
+        std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram;
 
         glm::mat4 transform; // TODO: Break this into components (pos, rot, scale)?
 
@@ -92,9 +93,12 @@ namespace scene {
 
         void createVertexArrays();
 
-        void draw(Camera &camera, std::shared_ptr<Light> light);
+        void draw(Camera &camera, std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera);
+        void drawNode(Model::Node &node, glm::mat4 parentModel, Camera &camera, std::shared_ptr<Light> light,
+                std::shared_ptr<LightCamera> lightCamera);
 
-        void drawNode(Model::Node &node, glm::mat4 parentModel, Camera &camera, std::shared_ptr<Light> light);
+        void drawDepth(Camera &camera);
+        void drawNodeDepth(Model::Node &node, glm::mat4 parentModel, Camera &camera);
 
         static std::shared_ptr<Model>  loadFromFile(const std::string &fileName);
 
@@ -102,7 +106,7 @@ namespace scene {
 
         void setCameraUniformsOnShaderPrograms(Camera &camera, glm::mat4 model);
 
-        void setLightUniformsOnShaderPrograms(std::shared_ptr<Light> light);
+        void setLightUniformsOnShaderPrograms(std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera);
 
         void prepareMaterialShaderProgram(std::shared_ptr<Material> material, std::shared_ptr<NUGL::ShaderProgram> shaderProgram);
     };

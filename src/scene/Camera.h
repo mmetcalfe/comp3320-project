@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -9,6 +10,7 @@
 #include "utility/debug.h"
 #include "utility/math/coordinates.h"
 #include "scene/Light.h"
+#include "NUGL/Texture.h"
 
 namespace scene {
 
@@ -18,6 +20,42 @@ namespace scene {
             view = glm::lookAt(pos, lookAtPos, up);
         };
 
+        inline void prepareTransforms() {
+            lookAt(pos + dir);
+            proj = glm::perspective(fov, frameWidth / float(frameHeight), 5.0f, 150.0f);
+        }
+
+        glm::vec3 pos;
+        glm::vec3 dir;
+        glm::vec3 up;
+        float fov = 45;
+
+        int frameWidth = 800;
+        int frameHeight = 600;
+
+        glm::mat4 view;
+        glm::mat4 proj;
+    };
+
+    class LightCamera : public Camera {
+    public:
+        static inline std::shared_ptr<LightCamera> fromLight(scene::Light &light, int frameSize) {
+            auto camera = std::make_shared<LightCamera>();
+            camera->pos = light.pos;
+            camera->dir = light.dir;
+            camera->up = {0, 0, 1}; // TODO: Improve this (to support lights that point upward).
+            camera->fov = light.angleConeOuter;
+            camera->frameWidth = frameSize;
+            camera->frameHeight = frameSize;
+            camera->prepareTransforms();
+            return camera;
+        }
+
+        std::shared_ptr<NUGL::Texture> shadowMap;
+    };
+
+    class PlayerCamera : public Camera {
+    public:
         inline void processKeyboardInput(GLFWwindow *window, float deltaTime) {
             glm::vec3 move = {0, 0, 0};
             if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
@@ -78,35 +116,8 @@ namespace scene {
             lookAt(pos + dir);
         }
 
-        inline void prepareTransforms() {
-            lookAt(pos + dir);
-            proj = glm::perspective(fov, frameWidth / float(frameHeight), 0.1f, 300.0f);
-        }
-
-        static inline Camera fromLight(scene::Light &light, int frameSize) {
-            Camera camera;
-            camera.pos = light.pos;
-            camera.dir = light.dir;
-            camera.up = {0, 0, 1}; // TODO: Improve this (to support lights that point upward).
-            camera.fov = light.angleConeOuter;
-            camera.frameWidth = frameSize;
-            camera.frameHeight = frameSize;
-            camera.prepareTransforms();
-            return camera;
-        }
-
-        glm::vec3 pos;
-        glm::vec3 up;
-        glm::vec3 dir;
         float horizontalAngle = 0;
         float verticalAngle = 0;
-        float fov = 45;
-
-        glm::mat4 view;
-        glm::mat4 proj;
-
-        int frameWidth = 800;
-        int frameHeight = 600;
 
         float speed = 10;
         float lookSpeed = 0.005;

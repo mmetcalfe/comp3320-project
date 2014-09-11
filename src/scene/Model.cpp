@@ -11,6 +11,7 @@
 #include "utility/make_unique.h"
 #include "utility/debug.h"
 #include "utility/AssimpDebug.h"
+#include "scene/Camera.h"
 
 namespace scene {
 
@@ -328,7 +329,7 @@ void Model::createMeshBuffers() {
 void Model::createVertexArrays() {
     for (auto &mesh : meshes) {
         std::vector<NUGL::VertexAttribute> attribs = {
-                {"position", 3, GL_FLOAT, GL_FALSE},
+            {"position", 3, GL_FLOAT, GL_FALSE},
         };
 
         if (mesh.hasNormals()) {
@@ -355,16 +356,60 @@ void Model::createVertexArrays() {
     }
 }
 
-void Model::draw(Camera &camera, std::shared_ptr<Light> light) {
-    drawNode(rootNode, transform, camera, light);
+void Model::drawDepth(Camera &camera) {
+    drawNodeDepth(rootNode, transform, camera);
 }
 
-void Model::drawNode(Model::Node &node, glm::mat4 parentNodeTransform, Camera &camera, std::shared_ptr<Light> light) {
+void Model::drawNodeDepth(Model::Node &node, glm::mat4 parentNodeTransform, Camera &camera) {
+    glm::mat4 model = parentNodeTransform * node.transform;
+
+    shadowMapProgram->use();
+    shadowMapProgram->setUniform("model", model);
+    shadowMapProgram->setUniform("view", camera.view);
+    shadowMapProgram->setUniform("proj", camera.proj);
+
+    auto vertexArray = std::make_unique<NUGL::VertexArray>();
+    vertexArray->bind();
+
+    for (int index : node.meshes) {
+        auto &mesh = meshes[index];
+
+        std::vector<NUGL::VertexAttribute> attribs = {
+                {"position", 3, GL_FLOAT, GL_FALSE},
+        };
+        if (mesh.hasNormals()) {
+            attribs.push_back({"normal", 3, GL_FLOAT, GL_FALSE});
+        }
+        if (mesh.isTextured()) {
+            attribs.push_back({"texcoord", 2, GL_FLOAT, GL_FALSE});
+        }
+        vertexArray->setAttributePointers(*shadowMapProgram, *mesh.vertexBuffer,
+                GL_ARRAY_BUFFER, attribs);
+
+
+//        mesh.vertexArray->bind();
+        mesh.vertexBuffer->bind(GL_ARRAY_BUFFER);
+        mesh.elementBuffer->bind(GL_ELEMENT_ARRAY_BUFFER);
+        glDrawElements(GL_TRIANGLES, mesh.elements.size(), GL_UNSIGNED_INT, 0);
+        checkForAndPrintGLError(__FILE__, __LINE__);
+    }
+
+    for (auto &child : node.children) {
+        drawNodeDepth(child, model, camera);
+    }
+}
+
+void Model::draw(Camera &camera, std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera) {
+    drawNode(rootNode, transform, camera, light, lightCamera);
+}
+
+void Model::drawNode(Model::Node &node, glm::mat4 parentNodeTransform, Camera &camera, std::shared_ptr<Light> light,
+                    std::shared_ptr<LightCamera> lightCamera) {
     glm::mat4 model = parentNodeTransform * node.transform;
 
     // TODO: Find a better way of managing shader programs!
     setCameraUniformsOnShaderPrograms(camera, model);
-    setLightUniformsOnShaderPrograms(light);
+    setLightUniformsOnShaderPrograms(light, lightCamera);
 
     for (int index : node.meshes) {
         auto &mesh = meshes[index];
@@ -381,7 +426,7 @@ void Model::drawNode(Model::Node &node, glm::mat4 parentNodeTransform, Camera &c
     }
 
     for (auto &child : node.children) {
-        drawNode(child, model, camera, light);
+        drawNode(child, model, camera, light, lightCamera);
     }
 }
 
@@ -492,7 +537,7 @@ void Model::setCameraUniformsOnShaderPrograms(Camera &camera, glm::mat4 model) {
     }
 }
 
-void Model::setLightUniformsOnShaderPrograms(std::shared_ptr<Light> light) {
+void Model::setLightUniformsOnShaderPrograms(std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera) {
 //    if (textureProgram != nullptr) {
 //        textureProgram->use();
 //        textureProgram->setUniform("model", model);
@@ -516,6 +561,19 @@ void Model::setLightUniformsOnShaderPrograms(std::shared_ptr<Light> light) {
             environmentMapProgram->setUniform("light.colAmbient", light->colAmbient);
             environmentMapProgram->setUniform("light.angleConeInner", light->angleConeInner);
             environmentMapProgram->setUniform("light.angleConeOuter", light->angleConeOuter);
+
+            if (environmentMapProgram->uniformIsActive("light.texShadowMap")) {
+                environmentMapProgram->use();
+
+                if (lightCamera != nullptr) {
+                    environmentMapProgram->setUniform("light.hasShadowMap", true);
+                    environmentMapProgram->setUniform("light.texShadowMap", lightCamera->shadowMap);
+                    environmentMapProgram->setUniform("light.view", lightCamera->view);
+                    environmentMapProgram->setUniform("light.proj", lightCamera->proj);
+                } else {
+                    environmentMapProgram->setUniform("light.hasShadowMap", false);
+                }
+            }
         }
     }
 }
