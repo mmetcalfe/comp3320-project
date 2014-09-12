@@ -6,8 +6,10 @@
 namespace scene {
 
     Scene::Scene(std::shared_ptr<NUGL::ShaderProgram> screenProgram, int width, int height) : camera(std::make_unique<PlayerCamera>()) {
+        shadowMapSize = 1024;
+
         prepareFramebuffer(width, height);
-        prepareShadowMapFramebuffer(1024);
+        prepareShadowMapFramebuffer(shadowMapSize);
 
         screen = std::make_unique<utility::PostprocessingScreen>(screenProgram);
     }
@@ -31,8 +33,8 @@ namespace scene {
         auto tex = std::make_unique<NUGL::Texture>(GL_TEXTURE1, GL_TEXTURE_2D);
         tex->setTextureData(GL_TEXTURE_2D, size, size, nullptr);
         checkForAndPrintGLError(__FILE__, __LINE__);
-        tex->setParam(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        tex->setParam(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        tex->setParam(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        tex->setParam(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         tex->setParam(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         tex->setParam(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -72,7 +74,7 @@ namespace scene {
         for (auto light : lights) {
             auto sharedLight = light.lock();
 
-            std::shared_ptr<LightCamera> lightCamera = LightCamera::fromLight(*sharedLight, 1024);
+            std::shared_ptr<LightCamera> lightCamera = LightCamera::fromLight(*sharedLight, shadowMapSize);
             if (sharedLight->type == Light::Type::spot) {
                 // Render light's perspective into shadowMap.
                 shadowMapFramebuffer->bind();

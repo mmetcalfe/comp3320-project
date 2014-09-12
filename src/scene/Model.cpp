@@ -329,16 +329,16 @@ void Model::createMeshBuffers() {
 void Model::createVertexArrays() {
     for (auto &mesh : meshes) {
         std::vector<NUGL::VertexAttribute> attribs = {
-            {"position", 3, GL_FLOAT, GL_FALSE},
+            {"position", 3, GL_FLOAT, GL_FALSE, false},
         };
 
         if (mesh.hasNormals()) {
-            attribs.push_back({"normal", 3, GL_FLOAT, GL_FALSE});
+            attribs.push_back({"normal", 3, GL_FLOAT, GL_FALSE, false});
         }
 
         auto program = flatProgram;
         if (mesh.isTextured()) {
-            attribs.push_back({"texcoord", 2, GL_FLOAT, GL_FALSE});
+            attribs.push_back({"texcoord", 2, GL_FLOAT, GL_FALSE, false});
             program = textureProgram;
         }
 
@@ -375,13 +375,13 @@ void Model::drawNodeDepth(Model::Node &node, glm::mat4 parentNodeTransform, Came
         auto &mesh = meshes[index];
 
         std::vector<NUGL::VertexAttribute> attribs = {
-                {"position", 3, GL_FLOAT, GL_FALSE},
+                {"position", 3, GL_FLOAT, GL_FALSE, false},
         };
         if (mesh.hasNormals()) {
-            attribs.push_back({"normal", 3, GL_FLOAT, GL_FALSE});
+            attribs.push_back({"normal", 3, GL_FLOAT, GL_FALSE, true});
         }
         if (mesh.isTextured()) {
-            attribs.push_back({"texcoord", 2, GL_FLOAT, GL_FALSE});
+            attribs.push_back({"texcoord", 2, GL_FLOAT, GL_FALSE, true});
         }
         vertexArray->setAttributePointers(*shadowMapProgram, *mesh.vertexBuffer,
                 GL_ARRAY_BUFFER, attribs);

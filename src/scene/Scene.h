@@ -31,6 +31,8 @@ namespace scene {
         std::unique_ptr<NUGL::Framebuffer> shadowMapFramebuffer;
         std::unique_ptr<utility::PostprocessingScreen> screen;
         std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram;
+
+        int shadowMapSize = 1024;
     };
 
 }

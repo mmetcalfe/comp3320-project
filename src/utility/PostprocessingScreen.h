@@ -28,8 +28,8 @@ namespace utility {
             quadBuffer->setData(GL_ARRAY_BUFFER, quadVertices, GL_STATIC_DRAW);
 
             std::vector<NUGL::VertexAttribute> attribs = {
-                    {"position", 2, GL_FLOAT, GL_FALSE},
-                    {"texcoord", 2, GL_FLOAT, GL_FALSE},
+                    {"position", 2, GL_FLOAT, GL_FALSE, false},
+                    {"texcoord", 2, GL_FLOAT, GL_FALSE, false},
             };
 
             vertexArray = std::make_unique<NUGL::VertexArray>();

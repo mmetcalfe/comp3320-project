@@ -34,6 +34,7 @@ namespace NUGL {
         GLboolean normalized;
 //        GLsizei stride;
 //        const GLvoid* offset;
+        bool isPadding;
     };
 
     class VertexArray {
@@ -65,20 +66,22 @@ namespace NUGL {
 
             size_t offset = 0;
             for (auto& attrib : attribs) {
-                GLint location = program.getAttribLocation(attrib.name);
-                checkForAndPrintGLError(__func__, __LINE__);
+                if (!attrib.isPadding) {
+                    GLint location = program.getAttribLocation(attrib.name);
+                    checkForAndPrintGLError(__func__, __LINE__);
 
-                glEnableVertexAttribArray(location);
-                checkForAndPrintGLError(__func__, __LINE__, attrib.name);
+                    glEnableVertexAttribArray(location);
+                    checkForAndPrintGLError(__func__, __LINE__, attrib.name);
 
-                glVertexAttribPointer(
-                        location,
-                        attrib.size,
-                        attrib.type,
-                        attrib.normalized,
-                        stride,
-                        (void*)offset);
-                checkForAndPrintGLError(__func__, __LINE__);
+                    glVertexAttribPointer(
+                            location,
+                            attrib.size,
+                            attrib.type,
+                            attrib.normalized,
+                            stride,
+                            (void *) offset);
+                    checkForAndPrintGLError(__func__, __LINE__);
+                }
 
                 offset += attrib.size * getSizeOfOpenGlType(attrib.type);
             }
