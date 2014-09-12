@@ -89,33 +89,36 @@ void main() {
 //    float normalDirTest = lightDot < 0 ? 1 : 0; // What it looks like without the ramp (causes speckles when the light it coplanar with the surface).
 
     // Do shadow mapping:
-    vec4 lightClipPos = inverse(view) * eyeSpacePosition;
-    lightClipPos.w = 1;
-    lightClipPos = light.proj * light.view * lightClipPos;
+    float isLit = 1.0;
+    if (light.hasShadowMap) {
+        vec4 lightClipPos = inverse(view) * eyeSpacePosition;
+        lightClipPos.w = 1;
+        lightClipPos = light.proj * light.view * lightClipPos;
 
-    vec3 lightClipPosDivided = lightClipPos.xyz / lightClipPos.w;
-    vec3 shadowLookup = (lightClipPosDivided * 0.5) + 0.5;
+        vec3 lightClipPosDivided = lightClipPos.xyz / lightClipPos.w;
+        vec3 shadowLookup = (lightClipPosDivided * 0.5) + 0.5;
 
 //    vec4 transformedClipPos = (lightClipPos * 0.5) + 0.5;
 //    vec4 shadowLookup = transformedClipPos;//transformedClipPos / transformedClipPos.w;
 //    vec4 shadowLookup = transformedClipPos / transformedClipPos.w;
 
-    float shadowDepth = texture(light.texShadowMap, shadowLookup.xy).z;
+        float shadowDepth = texture(light.texShadowMap, shadowLookup.xy).z;
 //    float shadowDepth = textureProj(light.texShadowMap, shadowLookup.xyw).z;
-    float bias = 0.003;
-    float isLit = shadowDepth < shadowLookup.z - bias ? 0 : 1;
+        float bias = 0.003;
+        isLit = shadowDepth < shadowLookup.z - bias ? 0 : 1;
 //    float isLit = textureProj(light.texShadowMap, shadowLookup.xyw).z  <  (shadowLookup.z-bias)/shadowLookup.w ? 0 : 1;
 
+        // Apply the view frustum:
+        if (lightClipPosDivided.x < -1 || lightClipPosDivided.x > 1 ||
+                lightClipPosDivided.y < -1 || lightClipPosDivided.y > 1
+//            || lightClipPosDivided.z < -1 || lightClipPosDivided.z > 1
+                ) {
+//            outColor = vec4(0, 0, 0, 1);
+//        outColor += vec4(0.1, 0, 0.2, 1);
+            isLit = 0;
+        }
+    }
 
     outColor = vec4(outAmbient + (outDiffuse + outSpecular) * intensity, 1.0) * isLit * normalDirTest;
 //    outColor = vec4(shadowDepth, shadowDepth, shadowDepth, 1.0);
-
-    // Apply the view frustum:
-    if (lightClipPosDivided.x < -1 || lightClipPosDivided.x > 1 ||
-        lightClipPosDivided.y < -1 || lightClipPosDivided.y > 1
-//            || lightClipPosDivided.z < -1 || lightClipPosDivided.z > 1
-            ) {
-        outColor = vec4(0, 0, 0, 1);
-//        outColor += vec4(0.1, 0, 0.2, 1);
-    }
 }

@@ -182,37 +182,37 @@ int main(int argc, char** argv) {
     lightModel->lights.push_back(light);
     mainScene->addModel(lightModel);
 
-//    lightModel = std::make_shared<scene::Model>();
-//    light = std::make_shared<scene::Light>();
-//    light->type = scene::Light::Type::point;
-//    light->pos = {60, 60, 30};
-//    light->dir = {1, 0, 0};
-//    light->attenuationConstant = 0;
-//    light->attenuationLinear = 0.5;
-//    light->attenuationQuadratic = 0;
-//    light->colDiffuse = {1, 1, 1};
-//    light->colSpecular = {1, 1, 1};
-//    light->colAmbient = {0, 0, 0};
-//    light->angleConeInner = 1;
-//    light->angleConeOuter = 1;
-//    lightModel->lights.push_back(light);
-//    mainScene->addModel(lightModel);
-//
-//    lightModel = std::make_shared<scene::Model>();
-//    light = std::make_shared<scene::Light>();
-//    light->type = scene::Light::Type::point;
-//    light->pos = {0, 200, 60};
-//    light->dir = {1, 0, 0};
-//    light->attenuationConstant = 0;
-//    light->attenuationLinear = 0.05;
-//    light->attenuationQuadratic = 0;
-//    light->colDiffuse = {1, 1, 1};
-//    light->colSpecular = {1, 1, 1};
-//    light->colAmbient = {0, 0, 0};
-//    light->angleConeInner = 1;
-//    light->angleConeOuter = 1;
-//    lightModel->lights.push_back(light);
-//    mainScene->addModel(lightModel);
+    lightModel = std::make_shared<scene::Model>();
+    light = std::make_shared<scene::Light>();
+    light->type = scene::Light::Type::point;
+    light->pos = {60, 60, 30};
+    light->dir = {1, 0, 0};
+    light->attenuationConstant = 0;
+    light->attenuationLinear = 0.5;
+    light->attenuationQuadratic = 0;
+    light->colDiffuse = {1, 1, 1};
+    light->colSpecular = {1, 1, 1};
+    light->colAmbient = {0, 0, 0};
+    light->angleConeInner = 1;
+    light->angleConeOuter = 1;
+    lightModel->lights.push_back(light);
+    mainScene->addModel(lightModel);
+
+    lightModel = std::make_shared<scene::Model>();
+    light = std::make_shared<scene::Light>();
+    light->type = scene::Light::Type::point;
+    light->pos = {0, 200, 60};
+    light->dir = {1, 0, 0};
+    light->attenuationConstant = 0;
+    light->attenuationLinear = 0.05;
+    light->attenuationQuadratic = 0;
+    light->colDiffuse = {1, 1, 1};
+    light->colSpecular = {1, 1, 1};
+    light->colAmbient = {0, 0, 0};
+    light->angleConeInner = 1;
+    light->angleConeOuter = 1;
+    lightModel->lights.push_back(light);
+    mainScene->addModel(lightModel);
 
 //    // TODO: Find a way to manage texture units!
     auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE1, GL_TEXTURE_CUBE_MAP);

@@ -74,8 +74,9 @@ namespace scene {
         for (auto light : lights) {
             auto sharedLight = light.lock();
 
-            std::shared_ptr<LightCamera> lightCamera = LightCamera::fromLight(*sharedLight, shadowMapSize);
+            std::shared_ptr<LightCamera> lightCamera;
             if (sharedLight->type == Light::Type::spot) {
+                lightCamera = LightCamera::fromLight(*sharedLight, shadowMapSize);
                 // Render light's perspective into shadowMap.
                 shadowMapFramebuffer->bind();
                 glViewport(0, 0, lightCamera->frameWidth, lightCamera->frameHeight);
@@ -89,7 +90,6 @@ namespace scene {
                 }
 
                 lightCamera->shadowMap = shadowMapFramebuffer->textureAttachment;
-//                return;
             }
 
             // Render the light's contribution to the framebuffer:
