@@ -1,0 +1,120 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[11pt]{scrartcl} % use larger type; default would be 10pt
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+\usepackage[title,titletoc,header]{appendix}
+\usepackage{multicol}
+% \usepackage{titling}
+\usepackage{longtable}
+
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage[a4paper]{geometry} % to change the page dimensions
+% \geometry{a4paper, margin=1.3in} % or letterpaper (US) or a5paper or....
+% \geometry{margin=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+
+\usepackage{pgfgantt} % gantt charts
+% \usepackage[export]{adjustbox}[2011/08/13] % For centering wide figures
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+
+\newcommand{\code}[1]{{\texttt{#1}}}
+\newcommand{\codefile}[1]{{\textit{#1}}}
+\newcommand{\program}[1]{\code{#1}}
+
+%%% END Article customizations
+
+% \setlength{\parindent}{0pt}
+% \setlength{\parskip}{2ex plus 0.5ex minus 0.3ex}
+
+%%% The "real" document content comes below...
+
+% TODO: Catchy project title
+\title{Computer Graphics Module 1 Update}
+\subtitle{A 3D testing environment for an enhanced virtual reality system}
+\author{Mitchell Metcalfe, James Ross-Gowan, Matthew Bray }
+
+\date{\today} % Activate to display a given date or no date (if empty),
+            % otherwise the current date is printed
+\rhead{ COMP3320, Module 1, \today }
+
+\begin{document}
+% \newgeometry{top=2cm}
+\maketitle
+% \vspace{-1.5 cm}
+% \tableofcontents
+% \restoregeometry
+
+\begin{abstract}
+
+    This project aims to implement an ideal virtual environment for testing an
+    enhanced virtual reality (VR) setup that utilises an Oculus Rift
+    paired with an OptiTrack 3D motion capture system.
+    The limited motion capture volume of this VR system requires a test scene
+    that naturally limits the user to a small area.
+    To meet this requirement, we propose to create an interactive 3D game that
+    allows the player to explore the interior of a small spaceship. The
+    spaceship will feature large windows, allowing the player to view a
+    procedurally generated space visualisation outside the ship - maximising
+    the user's sense of space and scale.
+
+\end{abstract}
+
+\section*{Project Schedule}
+
+The following list outlines the project schedule. The program to achieve this
+project schedule is presented in the Gantt chart in
+Figure~\ref{gantt:schedule}.
+
+    \begin{figure}[H]
+        \makebox[\textwidth][c]{\resizebox{0.95\paperwidth}{!}{\input{gantt.tex}}}
+        \caption[Project Schedule]{
+            A Gantt chart illustrating the planned project schedule.
+            Patterned grey bars represent optional tasks.
+        }
+        \label{gantt:schedule}
+    \end{figure}
+\end{document}
+
