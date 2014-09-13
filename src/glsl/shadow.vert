@@ -18,8 +18,7 @@ void main() {
 
     mat4 modelView = view * model;
 
-    vec4 eyeSpacePositionTmp = modelView * vec4(position, 1.0);
-    eyeSpacePosition = eyeSpacePositionTmp.xyzw;
+    eyeSpacePosition = modelView * vec4(position, 1.0);
 
     vec4 eyeSpaceNormalTmp = modelView * vec4(normal, 0);
     eyeSpaceNormal = eyeSpaceNormalTmp.xyz;

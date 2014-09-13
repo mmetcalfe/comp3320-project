@@ -54,7 +54,7 @@ float calculateIntensity(in float lightDist) {
 
 void main() {
     // face normal in eye space:
-    vec3 normal = normalize(eyeSpaceNormal);
+    vec3 normal = normalize(eyeSpaceNormal.xyz);
     vec3 incident = normalize(eyeSpacePosition.xyz);
     vec3 lightVecRaw = eyeSpacePosition.xyz - (view * vec4(light.pos, 1)).xyz;
     vec3 lightVec = normalize(lightVecRaw);
@@ -64,16 +64,19 @@ void main() {
 
     float intensity = calculateIntensity(length(lightVecRaw));
 
-//    // Environment map reflection:
-//    float phongSpecular = phong(incident, viewReflect, shininess);
-//    vec4 tmp_sampleCoord = modelViewInverse * vec4(reflection, 0);
-//    vec3 sampleCoord = tmp_sampleCoord.xyz;
-//    vec4 reflectCol = texture(texEnvironmentMap, sampleCoord);
-//    vec4 outSpecular = vec4(colSpecular, 1.0) * reflectCol * phongSpecular; // * shininessStrength;
+    // Environment map reflection:
+    float phongViewSpecular = phong(incident, viewReflect, shininess);
+    vec4 tmp_sampleCoord = modelViewInverse * vec4(viewReflect, 0);
+    vec3 sampleCoord = tmp_sampleCoord.xyz;
+    vec4 reflectCol = texture(texEnvironmentMap, sampleCoord);
+    vec3 envReflectCol = reflectCol.rgb * phongViewSpecular;
 
     // Specular reflection:
     float phongSpecular = phong(incident, lightReflect, shininess);
-    vec3 outSpecular = colSpecular * light.colSpecular * phongSpecular; // * shininessStrength;
+    vec3 phongHighlightCol = light.colSpecular * phongSpecular;
+
+    vec3 outSpecular = (phongHighlightCol + envReflectCol) * colSpecular;
+//    vec3 outSpecular = phongHighlightCol;
 
     vec4 texCol = texture(texDiffuse, Texcoord);
     vec3 outDiffuse = texCol.rgb * colDiffuse;
@@ -104,7 +107,7 @@ void main() {
 
         float shadowDepth = texture(light.texShadowMap, shadowLookup.xy).z;
 //    float shadowDepth = textureProj(light.texShadowMap, shadowLookup.xyw).z;
-        float bias = 0.003;
+        float bias = 0.004;
         isLit = shadowDepth < shadowLookup.z - bias ? 0 : 1;
 //    float isLit = textureProj(light.texShadowMap, shadowLookup.xyw).z  <  (shadowLookup.z-bias)/shadowLookup.w ? 0 : 1;
 
@@ -116,6 +119,8 @@ void main() {
 //            outColor = vec4(0, 0, 0, 1);
 //        outColor += vec4(0.1, 0, 0.2, 1);
             isLit = 0;
+        } else if (lightClipPosDivided.z < -1 || lightClipPosDivided.z > 1) {
+            isLit = 1;
         }
     }
 

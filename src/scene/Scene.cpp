@@ -7,9 +7,11 @@ namespace scene {
 
     Scene::Scene(std::shared_ptr<NUGL::ShaderProgram> screenProgram, int width, int height) : camera(std::make_unique<PlayerCamera>()) {
         shadowMapSize = 1024;
+        reflectionMapSize = 128;
 
         prepareFramebuffer(width, height);
         prepareShadowMapFramebuffer(shadowMapSize);
+        prepareReflectionFramebuffer(reflectionMapSize);
 
         screen = std::make_unique<utility::PostprocessingScreen>(screenProgram);
     }
@@ -64,8 +66,64 @@ namespace scene {
 //        NUGL::Framebuffer::useDefault();
     }
 
+    void Scene::prepareReflectionFramebuffer(int size) {
+//        auto tex = std::make_unique<NUGL::Texture>(GL_TEXTURE3, GL_TEXTURE_2D);
+//        tex->setTextureData(GL_TEXTURE_2D, size, size, nullptr);
+//        checkForAndPrintGLError(__FILE__, __LINE__);
+//        tex->setParam(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//        tex->setParam(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+        auto rbo  = std::make_unique<NUGL::Renderbuffer>();
+        rbo->setStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, size, size);
+
+        reflectionFramebuffer = std::make_unique<NUGL::Framebuffer>();
+//        reflectionFramebuffer->attach(std::move(tex));
+//        reflectionFramebuffer->bind(GL_FRAMEBUFFER);
+//        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X, tex->id(), 0);
+        reflectionFramebuffer->attach(std::move(rbo));
+    }
+
+    void Scene::renderReflectionMap(std::shared_ptr<Model> model) {
+        if (model->meshes.size() == 0)
+            return;
+        if (!model->meshes[0].material->materialInfo.has.texEnvironmentMap)
+            return;
+
+        Camera mapCamera;
+        glm::vec4 pos = model->transform * glm::vec4(0, 0, 0, 1);
+        mapCamera.pos = {pos.x, pos.y, pos.z};
+        mapCamera.dir = {1, 0, 0};
+        mapCamera.up = {0, 0, 1};
+        mapCamera.fov = 90;
+        mapCamera.frameWidth = reflectionMapSize;
+        mapCamera.frameHeight = reflectionMapSize;
+        mapCamera.prepareTransforms();
+
+        model->meshes[0].material->texEnvironmentMap->bind();
+//        model->meshes[0].material->texEnvironmentMap->setTextureData(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 128, 128, nullptr);
+
+        reflectionFramebuffer->bind(GL_FRAMEBUFFER);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+                model->meshes[0].material->texEnvironmentMap->id(), 0);
+
+        reflectionFramebuffer->bind();
+        glViewport(0, 0, mapCamera.frameWidth, mapCamera.frameHeight);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        for (auto model : models) {
+            model->shadowMapProgram = shadowMapProgram;
+            model->drawDepth(mapCamera);
+        }
+    }
+
     void Scene::render() {
         glClearColor(0, 0, 0, 1.0);
+
+//        // Prepare dynamic reflection maps:
+//        for (auto model : models) {
+//            renderReflectionMap(model);
+//        }
 
         // Clear the screen:
         NUGL::Framebuffer::useDefault();
@@ -80,7 +138,6 @@ namespace scene {
                 // Render light's perspective into shadowMap.
                 shadowMapFramebuffer->bind();
                 glViewport(0, 0, lightCamera->frameWidth, lightCamera->frameHeight);
-//                NUGL::Framebuffer::useDefault();
 
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -133,4 +190,6 @@ namespace scene {
             lights.push_back(weak);
         }
     }
+
+
 }

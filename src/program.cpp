@@ -215,7 +215,7 @@ int main(int argc, char** argv) {
     mainScene->addModel(lightModel);
 
 //    // TODO: Find a way to manage texture units!
-    auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE1, GL_TEXTURE_CUBE_MAP);
+    auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE2, GL_TEXTURE_CUBE_MAP);
     cubeMap->loadCubeMap({
            "assets/skybox_right1.png",
            "assets/skybox_left2.png",
@@ -292,14 +292,14 @@ int main(int argc, char** argv) {
     cubeModel->transform = mapTransform;
     mainScene->addModel(cubeModel);
 
-//    auto skyBox = scene::Model::loadFromFile("assets/cube.obj");
-//    skyBox->flatProgram = sharedFlatProgram;
-//    skyBox->textureProgram = sharedTextureProgram;
-//    skyBox->environmentMapProgram = sharedSkyboxProgram;
-//    skyBox->setEnvironmentMap(cubeMap);
-//    skyBox->createMeshBuffers();
-//    skyBox->createVertexArrays();
-//    mainScene->addModel(skyBox);
+    auto skyBox = scene::Model::loadFromFile("assets/cube.obj");
+    skyBox->flatProgram = sharedFlatProgram;
+    skyBox->textureProgram = sharedTextureProgram;
+    skyBox->environmentMapProgram = sharedSkyboxProgram;
+    skyBox->setEnvironmentMap(cubeMap);
+    skyBox->createMeshBuffers();
+    skyBox->createVertexArrays();
+    mainScene->addModel(skyBox);
 
     // Setup Camera:
     int width, height;
@@ -329,10 +329,10 @@ int main(int argc, char** argv) {
             glfwSetWindowTitle(window, frameTimer.timeStr.c_str());
         }
 
-//        glm::mat4 skyboxTransform;
-//        skyboxTransform = glm::translate(skyboxTransform, mainScene->camera->pos);
-//        skyboxTransform = glm::rotate(skyboxTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-//        skyBox->transform = skyboxTransform;
+        glm::mat4 skyboxTransform;
+        skyboxTransform = glm::translate(skyboxTransform, mainScene->camera->pos);
+        skyboxTransform = glm::rotate(skyboxTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
+        skyBox->transform = skyboxTransform;
 
         mainScene->render();
 

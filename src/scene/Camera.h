@@ -22,7 +22,7 @@ namespace scene {
 
         inline void prepareTransforms() {
             lookAt(pos + dir);
-            proj = glm::perspective(fov, frameWidth / float(frameHeight), 5.0f, 150.0f);
+            proj = glm::perspective(fov, frameWidth / float(frameHeight), 5.0f, 300.0f);
         }
 
         glm::vec3 pos;

@@ -20,6 +20,7 @@ namespace scene {
 
         void prepareFramebuffer(int width, int height);
         void prepareShadowMapFramebuffer(int size);
+        void prepareReflectionFramebuffer(int size);
 
         std::vector<std::shared_ptr<Model>> models;
         /**
@@ -29,10 +30,14 @@ namespace scene {
         std::unique_ptr<PlayerCamera> camera;
         std::unique_ptr<NUGL::Framebuffer> framebuffer;
         std::unique_ptr<NUGL::Framebuffer> shadowMapFramebuffer;
+        std::unique_ptr<NUGL::Framebuffer> reflectionFramebuffer;
         std::unique_ptr<utility::PostprocessingScreen> screen;
         std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram;
 
         int shadowMapSize = 1024;
+        int reflectionMapSize = 128;
+
+        void renderReflectionMap(std::shared_ptr<Model> shared_ptr);
     };
 
 }
