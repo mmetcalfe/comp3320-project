@@ -62,21 +62,21 @@ void main() {
     vec3 viewReflect = reflect(incident, normal);
 //    vec3 halfAngleReflection = mix(incident, reflection, 0.5);
 
-    float intensity = calculateIntensity(length(lightVecRaw));
+    vec3 outSpecular = vec3(0, 0, 0);
+    if (shininess > 0) {
+        // Environment map reflection:
+        float phongViewSpecular = phong(incident, viewReflect, shininess);
+        vec4 tmp_sampleCoord = modelViewInverse * vec4(viewReflect, 0);
+        vec3 sampleCoord = tmp_sampleCoord.xyz;
+        vec4 reflectCol = texture(texEnvironmentMap, sampleCoord);
+        vec3 envReflectCol = reflectCol.rgb * phongViewSpecular;
 
-    // Environment map reflection:
-    float phongViewSpecular = phong(incident, viewReflect, shininess);
-    vec4 tmp_sampleCoord = modelViewInverse * vec4(viewReflect, 0);
-    vec3 sampleCoord = tmp_sampleCoord.xyz;
-    vec4 reflectCol = texture(texEnvironmentMap, sampleCoord);
-    vec3 envReflectCol = reflectCol.rgb * phongViewSpecular;
+        // Specular reflection:
+        float phongSpecular = phong(incident, lightReflect, shininess);
+        vec3 phongHighlightCol = light.colSpecular * phongSpecular;
 
-    // Specular reflection:
-    float phongSpecular = phong(incident, lightReflect, shininess);
-    vec3 phongHighlightCol = light.colSpecular * phongSpecular;
-
-    vec3 outSpecular = (phongHighlightCol + envReflectCol) * colSpecular;
-//    vec3 outSpecular = phongHighlightCol;
+        outSpecular = (phongHighlightCol + envReflectCol) * colSpecular;
+    }
 
     vec4 texCol = texture(texDiffuse, Texcoord);
     vec3 outDiffuse = texCol.rgb * colDiffuse;
@@ -124,6 +124,9 @@ void main() {
         }
     }
 
-    outColor = vec4(outAmbient + (outDiffuse + outSpecular) * intensity, 1.0) * isLit * normalDirTest;
+    float intensity = calculateIntensity(length(lightVecRaw));
+    vec3 finalColor = outAmbient + (outDiffuse + outSpecular) * intensity * isLit * normalDirTest;
+
+    outColor = vec4(finalColor, 1.0);
 //    outColor = vec4(shadowDepth, shadowDepth, shadowDepth, 1.0);
 }
