@@ -3,6 +3,7 @@
 in vec2 Texcoord;
 in vec4 eyeSpacePosition;
 in vec3 eyeSpaceNormal;
+//in vec4 lightClipPos;
 
 out vec4 outColor;
 
@@ -55,15 +56,28 @@ float calculateIntensity(in float lightDist) {
 void main() {
     // face normal in eye space:
     vec3 normal = normalize(eyeSpaceNormal.xyz);
-    vec3 incident = normalize(eyeSpacePosition.xyz);
     vec3 lightVecRaw = eyeSpacePosition.xyz - (view * vec4(light.pos, 1)).xyz;
     vec3 lightVec = normalize(lightVecRaw);
-    vec3 lightReflect = reflect(lightVec, normal);
-    vec3 viewReflect = reflect(incident, normal);
-//    vec3 halfAngleReflection = mix(incident, reflection, 0.5);
+
+    // Don't show lighting on surfaces that are facing the wrong way:
+    float lightDot = dot(normal, lightVec);
+    #define DOT_CUTOFF 0.001
+    if (lightDot >= -DOT_CUTOFF) {
+        // Use a ramp near zero to remove noise when the light is very near the plane of the surface.
+        float dotLessZero = lightDot < -DOT_CUTOFF ? 1 : -(1.0/DOT_CUTOFF) * lightDot;
+        float normalDirTest = lightDot < 0 ? dotLessZero : 0;
+        //    float normalDirTest = lightDot < 0 ? 1 : 0; // What it looks like without the ramp (causes speckles when the light it coplanar with the surface).
+        outColor = vec4(0, 0, 0, 1) * normalDirTest;
+        return;
+    }
+
+    vec3 incident = normalize(eyeSpacePosition.xyz);
 
     vec3 outSpecular = vec3(0, 0, 0);
     if (shininess > 0) {
+        vec3 lightReflect = reflect(lightVec, normal);
+        vec3 viewReflect = reflect(incident, normal);
+
         // Environment map reflection:
         float phongViewSpecular = phong(incident, viewReflect, shininess);
         vec4 tmp_sampleCoord = modelViewInverse * vec4(viewReflect, 0);
@@ -78,55 +92,54 @@ void main() {
         outSpecular = (phongHighlightCol + envReflectCol) * colSpecular;
     }
 
-    vec4 texCol = texture(texDiffuse, Texcoord);
-    vec3 outDiffuse = texCol.rgb * colDiffuse;
-
-    vec3 outAmbient = colAmbient * light.colAmbient;
-
-    // Don't show lighting on surfaces that are facing the wrong way:
-    float lightDot = dot(normal, lightVec);
-    // Use a ramp near zero to remove noise when the light is very near the plane of the surface.
-    #define DOT_CUTOFF 0.001
-    float dotLessZero = lightDot < -DOT_CUTOFF ? 1 : -(1.0/DOT_CUTOFF) * lightDot;
-    float normalDirTest = lightDot < 0 ? dotLessZero : 0;
-//    float normalDirTest = lightDot < 0 ? 1 : 0; // What it looks like without the ramp (causes speckles when the light it coplanar with the surface).
-
     // Do shadow mapping:
     float isLit = 1.0;
     if (light.hasShadowMap) {
-        vec4 lightClipPos = inverse(view) * eyeSpacePosition;
-        lightClipPos.w = 1;
-        lightClipPos = light.proj * light.view * lightClipPos;
+      vec4 lightClipPos = light.proj * light.view * inverse(view) * eyeSpacePosition;
 
         vec3 lightClipPosDivided = lightClipPos.xyz / lightClipPos.w;
         vec3 shadowLookup = (lightClipPosDivided * 0.5) + 0.5;
+//        vec4 shadowLookup = lightClipPos;
 
-//    vec4 transformedClipPos = (lightClipPos * 0.5) + 0.5;
-//    vec4 shadowLookup = transformedClipPos;//transformedClipPos / transformedClipPos.w;
-//    vec4 shadowLookup = transformedClipPos / transformedClipPos.w;
+//        vec4 transformedClipPos = (lightClipPos * 0.5) + 0.5;
+//        transformedClipPos.w = lightClipPos.w;
+//        vec4 shadowLookup = transformedClipPos;
+//        vec4 shadowLookup = transformedClipPos / transformedClipPos.w;
 
         float shadowDepth = texture(light.texShadowMap, shadowLookup.xy).z;
-//    float shadowDepth = textureProj(light.texShadowMap, shadowLookup.xyw).z;
+//        float shadowDepth = texture(light.texShadowMap, shadowLookup.xy / shadowLookup.w).z;
         float bias = 0.004;
         isLit = shadowDepth < shadowLookup.z - bias ? 0 : 1;
-//    float isLit = textureProj(light.texShadowMap, shadowLookup.xyw).z  <  (shadowLookup.z-bias)/shadowLookup.w ? 0 : 1;
+//        float isLit = textureProj(light.texShadowMap, shadowLookup.xyw).z < (shadowLookup.z - bias) / shadowLookup.w;// ? 0 : 1;
 
         // Apply the view frustum:
-        if (lightClipPosDivided.x < -1 || lightClipPosDivided.x > 1 ||
-                lightClipPosDivided.y < -1 || lightClipPosDivided.y > 1
-//            || lightClipPosDivided.z < -1 || lightClipPosDivided.z > 1
+        float upper = 1;
+        float lower = 0;
+        if (shadowLookup.x < lower || shadowLookup.x > upper ||
+            shadowLookup.y < lower || shadowLookup.y > upper
+            || shadowLookup.z > upper // || shadowLookup.z < lower
                 ) {
-//            outColor = vec4(0, 0, 0, 1);
-//        outColor += vec4(0.1, 0, 0.2, 1);
             isLit = 0;
-        } else if (lightClipPosDivided.z < -1 || lightClipPosDivided.z > 1) {
+//            outColor = vec4(0.5, 0, 0, 1);
+        } else if (shadowLookup.z < lower) {
             isLit = 1;
+//            outColor = vec4(1, 0, 0, 1);
         }
+
+//        outColor = vec4(shadowLookup.x / shadowLookup.w, shadowLookup.y / shadowLookup.w, 0, 1);
+//        outColor = vec4(shadowDepth, shadowDepth, shadowDepth, 1);
+//        return;
     }
 
+    vec4 texCol = texture(texDiffuse, Texcoord);
+    vec3 outDiffuse = texCol.rgb * colDiffuse * light.colDiffuse * clamp(-lightDot, 0, 1);
+
+    vec3 outAmbient = colAmbient * light.colAmbient;
+
     float intensity = calculateIntensity(length(lightVecRaw));
-    vec3 finalColor = outAmbient + (outDiffuse + outSpecular) * intensity * isLit * normalDirTest;
+    vec3 finalColor = outAmbient + (outDiffuse + outSpecular) * intensity * isLit;
 
     outColor = vec4(finalColor, 1.0);
+
 //    outColor = vec4(shadowDepth, shadowDepth, shadowDepth, 1.0);
 }

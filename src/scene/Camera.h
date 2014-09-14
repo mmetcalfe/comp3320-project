@@ -43,7 +43,10 @@ namespace scene {
             auto camera = std::make_shared<LightCamera>();
             camera->pos = light.pos;
             camera->dir = light.dir;
-            camera->up = {0, 0, 1}; // TODO: Improve this (to support lights that point upward).
+            camera->up = {0, 0, 1};
+            if (std::abs(glm::dot(camera->dir, camera->up)) > 0.9) {
+                camera->up = {0, 1, 0};
+            }
             camera->fov = light.angleConeOuter;
             camera->frameWidth = frameSize;
             camera->frameHeight = frameSize;
@@ -114,6 +117,13 @@ namespace scene {
             processMouseInput(window, deltaTime);
 
             lookAt(pos + dir);
+        }
+
+        inline void initializeAngles() {
+            glm::vec3 spherical = utility::math::coordinates::cartesianToSpherical(dir);
+
+            horizontalAngle = spherical[1];
+            verticalAngle = spherical[2];
         }
 
         float horizontalAngle = 0;

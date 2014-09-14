@@ -177,13 +177,15 @@ int main(int argc, char** argv) {
     light->type = scene::Light::Type::spot;
     light->pos = {15, 120, 40};
     light->dir = {1, 0, 0};
+//    light->pos = {10, 120, 15};
+//    light->dir = {0, 0, -1};
     light->attenuationConstant = 1;
     light->attenuationLinear = 0.1;
     light->attenuationQuadratic = 0;
     light->angleConeOuter = 2;
     light->angleConeInner = 1;
-    light->colDiffuse = {1, 1, 1};
-    light->colSpecular = {1, 1, 1};
+    light->colDiffuse = {5, 5, 5};
+    light->colSpecular = {2, 2, 2};
     light->colAmbient = {0, 0, 0};
     lightModel->lights.push_back(light);
     mainScene->addModel(lightModel);
@@ -198,7 +200,7 @@ int main(int argc, char** argv) {
     light->attenuationQuadratic = 0;
     light->colDiffuse = {1, 1, 1};
     light->colSpecular = {1, 1, 1};
-    light->colAmbient = {0.5, 0.5, 0.5};
+    light->colAmbient = {0.2, 0.2, 0.2};
     light->angleConeInner = 1;
     light->angleConeOuter = 1;
     lightModel->lights.push_back(light);
@@ -313,8 +315,9 @@ int main(int argc, char** argv) {
     // Setup Camera:
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
-    mainScene->camera->pos = {15, 120, 40};
-    mainScene->camera->dir = {1, 0, 0};
+//    mainScene->camera->pos = {15, 120, 40};
+    mainScene->camera->pos = {37.2, 156, 38.1};
+    mainScene->camera->dir = {0.415, -0.646, -0.64};
     mainScene->camera->fov = 45;
     mainScene->camera->speed = 10;
     mainScene->camera->lookSpeed = 0.005;
@@ -324,6 +327,7 @@ int main(int argc, char** argv) {
     mainScene->camera->frameWidth = width;
     mainScene->camera->frameHeight = height;
     mainScene->camera->prepareTransforms();
+    mainScene->camera->initializeAngles();
 
     glEnable(GL_DEPTH_TEST);
 
@@ -351,12 +355,12 @@ int main(int argc, char** argv) {
 
         // Poll for and process events:
         glfwPollEvents();
-
+//        std::cout << mainScene->camera->dir << std::endl;
+//        std::cout << mainScene->camera->pos << std::endl;
         mainScene->camera->processPlayerInput(window);
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, GL_TRUE);
-
 //        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
