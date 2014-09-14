@@ -25,17 +25,23 @@ void errorCallback(int error, const char* description) {
     std::cerr << "GLFW ERROR: " << description << std::endl;
 }
 
-void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
-    if (height == 0) {
-        height = 1;
+void framebufferSizeCallback(GLFWwindow* window, int fbWidth, int fbHeight) {
+    if (fbWidth == 0) {
+        fbWidth = 1;
     }
 
-    glViewport(0, 0, width, height);
+    // Ignore high-dpi screens? (i.e. always use virtual pixel sizes)
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+
+    std::cout << "Resize to: windowSize = (" << width << ", " << height << "), fbSize = (" << fbWidth << ", " << fbHeight << ")." << std::endl;
+
+    glViewport(0, 0, fbWidth, fbHeight);
 
     mainScene->prepareFramebuffer(width, height);
 
-    mainScene->camera->frameWidth = width;
-    mainScene->camera->frameHeight = height;
+    mainScene->camera->frameWidth = fbWidth;
+    mainScene->camera->frameHeight = fbHeight;
     mainScene->camera->prepareTransforms();
 }
 
@@ -185,14 +191,14 @@ int main(int argc, char** argv) {
     lightModel = std::make_shared<scene::Model>();
     light = std::make_shared<scene::Light>();
     light->type = scene::Light::Type::point;
-    light->pos = {60, 60, 30};
+    light->pos = {0, 0, 40};
     light->dir = {1, 0, 0};
     light->attenuationConstant = 0;
     light->attenuationLinear = 0.5;
     light->attenuationQuadratic = 0;
     light->colDiffuse = {1, 1, 1};
     light->colSpecular = {1, 1, 1};
-    light->colAmbient = {0, 0, 0};
+    light->colAmbient = {0.5, 0.5, 0.5};
     light->angleConeInner = 1;
     light->angleConeOuter = 1;
     lightModel->lights.push_back(light);
@@ -235,6 +241,8 @@ int main(int argc, char** argv) {
 
     // Load assets:
     auto eagle5Model = scene::Model::loadFromFile("assets/eagle 5 transport/eagle 5 transport landed.obj");
+//    auto eagle5Model = scene::Model::loadFromFile("assets/Ship/Ship Room.obj");
+//    auto eagle5Model = scene::Model::loadFromFile("assets/textured_cube.obj");
 //    auto eagle5Model = scene::Model::loadFromFile("assets/KingsTreasure_OBJ/KingsTreasure.obj");
     eagle5Model->flatProgram = sharedFlatProgram;
     eagle5Model->textureProgram = sharedTextureProgram;
@@ -246,6 +254,7 @@ int main(int argc, char** argv) {
     mainScene->addModel(eagle5Model);
     glm::mat4 shipTransform;
     shipTransform = glm::scale(shipTransform, glm::vec3(0.3));
+//    shipTransform = glm::scale(shipTransform, glm::vec3(20));
     shipTransform = glm::rotate(shipTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f)); // TODO: Make this rotation a boolean switch on Model.
     eagle5Model->transform = shipTransform;
 
