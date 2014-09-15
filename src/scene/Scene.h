@@ -13,7 +13,7 @@ namespace scene {
 
     class Scene {
     public:
-        Scene(std::shared_ptr<NUGL::ShaderProgram> screenProgram, int width, int height);
+        Scene(std::shared_ptr<NUGL::ShaderProgram> screenProgram, glm::ivec2 windowSize, glm::ivec2 framebufferSize);
 
         void render();
         void addModel(std::shared_ptr<Model>);
@@ -36,6 +36,8 @@ namespace scene {
 
         int shadowMapSize = 1024;
         int reflectionMapSize = 128;
+        glm::ivec2 windowSize = {800, 600};
+        glm::ivec2 framebufferSize = {800, 600};
 
         void renderReflectionMap(std::shared_ptr<Model> shared_ptr);
     };

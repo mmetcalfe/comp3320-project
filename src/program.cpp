@@ -81,6 +81,9 @@ int main(int argc, char** argv) {
     int screenWidth = 800;
     int screenHeight = 600;
     GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "OpenGL", nullptr, nullptr);
+    int fbWidth, fbHeight;
+    glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
+    glViewport(0, 0, fbWidth, fbHeight);
 
 //    // Fullscreen:
 //    const GLFWvidmode* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
@@ -169,7 +172,10 @@ int main(int argc, char** argv) {
     auto sharedShadowMapProgram = std::make_shared<NUGL::ShaderProgram>(shadowMapProgram);
 
     // Create Scene:
-    mainScene = std::make_unique<scene::Scene>(sharedScreenProgram, screenWidth, screenHeight);
+    mainScene = std::make_unique<scene::Scene>(sharedScreenProgram,
+            glm::ivec2({screenWidth, screenHeight}),
+            glm::ivec2({fbWidth, fbHeight})
+    );
     mainScene->shadowMapProgram = sharedShadowMapProgram;
 
     // Add some lights:
@@ -330,8 +336,6 @@ int main(int argc, char** argv) {
     mainScene->addModel(skyBox);
 
     // Setup Camera:
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
 //    mainScene->camera->pos = {15, 120, 40};
     mainScene->camera->pos = {37.2, 156, 38.1};
     mainScene->camera->dir = {0.415, -0.646, -0.64};
@@ -341,8 +345,8 @@ int main(int argc, char** argv) {
     mainScene->camera->up = glm::vec3(0.0f, 0.0f, 1.0f);
 //    mainScene->camera->up = glm::vec3(0.0f, 1.0f, 0.0f);
     mainScene->camera->lastUpdateTime = glfwGetTime();
-    mainScene->camera->frameWidth = width;
-    mainScene->camera->frameHeight = height;
+    mainScene->camera->frameWidth = screenWidth;
+    mainScene->camera->frameHeight = screenHeight;
     mainScene->camera->prepareTransforms();
     mainScene->camera->initializeAngles();
 

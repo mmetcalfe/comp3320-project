@@ -5,11 +5,14 @@
 
 namespace scene {
 
-    Scene::Scene(std::shared_ptr<NUGL::ShaderProgram> screenProgram, int width, int height) : camera(std::make_unique<PlayerCamera>()) {
+    Scene::Scene(std::shared_ptr<NUGL::ShaderProgram> screenProgram, glm::ivec2 windowSize, glm::ivec2 framebufferSize) : camera(std::make_unique<PlayerCamera>()) {
         shadowMapSize = 1024;
         reflectionMapSize = 128;
 
-        prepareFramebuffer(width, height);
+        this->windowSize = windowSize;
+        this->framebufferSize = framebufferSize;
+
+        prepareFramebuffer(windowSize.x, windowSize.y);
         prepareShadowMapFramebuffer(shadowMapSize);
         prepareReflectionFramebuffer(reflectionMapSize);
 
@@ -161,7 +164,7 @@ namespace scene {
 
             // Add the light's contribution to the screen:
             NUGL::Framebuffer::useDefault();
-            glViewport(0, 0, camera->frameWidth, camera->frameHeight);
+            glViewport(0, 0, framebufferSize.x, framebufferSize.y);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE);
             framebuffer->textureAttachment->bind();
