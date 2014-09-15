@@ -255,9 +255,11 @@ int main(int argc, char** argv) {
     eagle5Model->createVertexArrays();
     mainScene->addModel(eagle5Model);
     glm::mat4 shipTransform;
-    shipTransform = glm::scale(shipTransform, glm::vec3(0.3));
+//    shipTransform = glm::scale(shipTransform, glm::vec3(0.3));
+    shipTransform = glm::scale(shipTransform, glm::vec3(0.1));
 //    shipTransform = glm::scale(shipTransform, glm::vec3(20));
     shipTransform = glm::rotate(shipTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f)); // TODO: Make this rotation a boolean switch on Model.
+    shipTransform = glm::translate(shipTransform, glm::vec3(500, 90, -1000));
     eagle5Model->transform = shipTransform;
 
     auto houseModel = scene::Model::loadFromFile("assets/House01/House01.obj");
