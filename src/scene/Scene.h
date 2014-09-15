@@ -7,6 +7,7 @@
 #include "scene/Light.h"
 #include "utility/make_unique.h"
 #include "utility/PostprocessingScreen.h"
+#include "utility/Profiler.h"
 #include "NUGL/Framebuffer.h"
 
 namespace scene {
@@ -33,6 +34,8 @@ namespace scene {
         std::unique_ptr<NUGL::Framebuffer> reflectionFramebuffer;
         std::unique_ptr<utility::PostprocessingScreen> screen;
         std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram;
+
+        Profiler profiler;
 
         int shadowMapSize = 1024;
         int reflectionMapSize = 128;

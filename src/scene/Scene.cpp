@@ -121,6 +121,8 @@ namespace scene {
     }
 
     void Scene::render() {
+        profiler.split("other");
+
         glClearColor(0, 0, 0, 1.0);
 
 //        // Prepare dynamic reflection maps:
@@ -132,6 +134,7 @@ namespace scene {
         NUGL::Framebuffer::useDefault();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        int lightNum = 1;
         for (auto light : lights) {
             auto sharedLight = light.lock();
 
@@ -182,7 +185,11 @@ namespace scene {
             previewModel = glm::translate(previewModel, glm::vec3(-4.0f, -4.0f, 0.0f));
             screen->screenProgram->setUniform("model", previewModel);
             screen->render();
+
+            profiler.split("light ", lightNum++);
         }
+
+        profiler.printEvery(1);
     }
 
     void Scene::addModel(std::shared_ptr<Model> model) {
