@@ -87,7 +87,13 @@ namespace scene {
         std::shared_ptr<NUGL::ShaderProgram> environmentMapProgram;
         std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram;
 
-        glm::mat4 transform; // TODO: Break this into components (pos, rot, scale)?
+        glm::vec3 pos = {0, 0, 0}; // The object's position in world space.
+        glm::vec3 dir = {1, 0, 0}; // The object's x-axis in world space.
+        glm::vec3 up  = {0, 0, 1}; // Along with 'dir', defines the plane containing the object's z-axis.
+        glm::vec3 scale = {1, 1, 1}; // Scale along each of the object's axes.
+        glm::mat4 transform; // Model transform generated from the above components.
+
+        glm::mat4 buildModelTransform(glm::vec3 pos, glm::vec3 dir, glm::vec3 up, glm::vec3 scale);
 
         void createMeshBuffers();
 

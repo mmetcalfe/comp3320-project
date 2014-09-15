@@ -410,7 +410,18 @@ void Model::createVertexArrays() {
     }
 }
 
+glm::mat4 Model::buildModelTransform(glm::vec3 pos, glm::vec3 dir, glm::vec3 up, glm::vec3 scale) {
+    glm::mat4 model;
+    model = glm::scale(model, scale);
+
+    glm::mat4 orientation = glm::lookAt(pos, pos + dir, up);
+
+    return glm::inverse(orientation) * model;
+}
+
 void Model::drawDepth(Camera &camera) {
+    transform = buildModelTransform(pos, dir, up, scale);
+
     drawNodeDepth(rootNode, transform, camera);
 }
 
@@ -454,6 +465,8 @@ void Model::drawNodeDepth(Model::Node &node, glm::mat4 parentNodeTransform, Came
 }
 
 void Model::draw(Camera &camera, std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera) {
+    transform = buildModelTransform(pos, dir, up, scale);
+
     drawNode(rootNode, transform, camera, light, lightCamera);
 }
 

@@ -229,7 +229,7 @@ int main(int argc, char** argv) {
     lightModel->lights.push_back(light);
     mainScene->addModel(lightModel);
 
-//    // TODO: Find a way to manage texture units!
+    // TODO: Find a way to manage texture units!
     auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE2, GL_TEXTURE_CUBE_MAP);
     cubeMap->loadCubeMap({
            "assets/skybox_right1.png",
@@ -260,14 +260,10 @@ int main(int argc, char** argv) {
     eagle5Model->setEnvironmentMap(cubeMap);
     eagle5Model->createMeshBuffers();
     eagle5Model->createVertexArrays();
+    eagle5Model->pos = {50, 100, 9};
+    eagle5Model->dir = {0, 1, 0};
+    eagle5Model->scale = glm::vec3(0.1);
     mainScene->addModel(eagle5Model);
-    glm::mat4 shipTransform;
-//    shipTransform = glm::scale(shipTransform, glm::vec3(0.3));
-    shipTransform = glm::scale(shipTransform, glm::vec3(0.1));
-//    shipTransform = glm::scale(shipTransform, glm::vec3(20));
-    shipTransform = glm::rotate(shipTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f)); // TODO: Make this rotation a boolean switch on Model.
-    shipTransform = glm::translate(shipTransform, glm::vec3(500, 90, -1000));
-    eagle5Model->transform = shipTransform;
 
     auto houseModel = scene::Model::loadFromFile("assets/House01/House01.obj");
     houseModel->flatProgram = sharedFlatProgram;
@@ -277,11 +273,9 @@ int main(int argc, char** argv) {
     houseModel->setEnvironmentMap(cubeMap);
     houseModel->createMeshBuffers();
     houseModel->createVertexArrays();
+    houseModel->dir = {0, 1, 0};
+    houseModel->scale = glm::vec3(3);
     mainScene->addModel(houseModel);
-    glm::mat4 houseTransform;
-    houseTransform = glm::scale(houseTransform, glm::vec3(3));
-    houseTransform = glm::rotate(houseTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-    houseModel->transform = houseTransform;
 
     auto cityModel = scene::Model::loadFromFile("assets/rc8c1qtjiygw-O/Organodron City/Organodron City.obj");
     cityModel->flatProgram = sharedFlatProgram;
@@ -291,11 +285,8 @@ int main(int argc, char** argv) {
     cityModel->setEnvironmentMap(cubeMap);
     cityModel->createMeshBuffers();
     cityModel->createVertexArrays();
+    cityModel->dir = {0, 1, 0};
     mainScene->addModel(cityModel);
-    glm::mat4 cityTransform;
-    cityTransform = glm::scale(cityTransform, glm::vec3(1));
-    cityTransform = glm::rotate(cityTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-    cityModel->transform = cityTransform;
 
     auto cubeModel = scene::Model::loadFromFile("assets/cube.obj");
     cubeModel->flatProgram = sharedFlatProgram;
@@ -305,11 +296,8 @@ int main(int argc, char** argv) {
     cubeModel->setEnvironmentMap(cubeMap);
     cubeModel->createMeshBuffers();
     cubeModel->createVertexArrays();
-    glm::mat4 mapTransform;
-    mapTransform = glm::translate(mapTransform, glm::vec3({15, 120, 40}));
-    mapTransform = glm::scale(mapTransform, glm::vec3(3));
-    mapTransform = glm::rotate(mapTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-    cubeModel->transform = mapTransform;
+    cubeModel->pos = {15, 120, 40};
+    cubeModel->scale = glm::vec3(3);
     mainScene->addModel(cubeModel);
 
     auto asteroidModel = scene::createAsteroid();
@@ -319,11 +307,8 @@ int main(int argc, char** argv) {
     asteroidModel->setEnvironmentMap(cubeMap);
     asteroidModel->createMeshBuffers();
     asteroidModel->createVertexArrays();
-    glm::mat4 asteroidTransform;
-    asteroidTransform = glm::translate(asteroidTransform, glm::vec3({15, 130, 40}));
-    asteroidTransform = glm::scale(asteroidTransform, glm::vec3(3));
-    asteroidTransform = glm::rotate(asteroidTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-    asteroidModel->transform = asteroidTransform;
+    asteroidModel->pos = {15, 130, 40};
+    asteroidModel->scale = glm::vec3(3);
     mainScene->addModel(asteroidModel);
 
     auto skyBox = scene::Model::loadFromFile("assets/cube.obj");
@@ -363,10 +348,7 @@ int main(int argc, char** argv) {
             glfwSetWindowTitle(window, frameTimer.timeStr.c_str());
         }
 
-        glm::mat4 skyboxTransform;
-        skyboxTransform = glm::translate(skyboxTransform, mainScene->camera->pos);
-        skyboxTransform = glm::rotate(skyboxTransform, float(M_PI_2), glm::vec3(1.0f, 0.0f, 0.0f));
-        skyBox->transform = skyboxTransform;
+        skyBox->pos = mainScene->camera->pos;
 
         mainScene->render();
 
