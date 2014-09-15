@@ -153,6 +153,8 @@ namespace scene {
                 }
 
                 lightCamera->shadowMap = shadowMapFramebuffer->textureAttachment;
+
+                profiler.split("shadow map ", lightNum);
             }
 
             // Render the light's contribution to the framebuffer:
@@ -164,6 +166,8 @@ namespace scene {
             for (auto model : models) {
                 model->draw(*camera, sharedLight, lightCamera);
             }
+
+            profiler.split("framebuffer ", lightNum);
 
             // Add the light's contribution to the screen:
             NUGL::Framebuffer::useDefault();
@@ -186,7 +190,8 @@ namespace scene {
             screen->screenProgram->setUniform("model", previewModel);
             screen->render();
 
-            profiler.split("light ", lightNum++);
+            profiler.split("light ", lightNum);
+            lightNum++;
         }
 
         profiler.printEvery(1);

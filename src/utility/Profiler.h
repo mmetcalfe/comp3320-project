@@ -4,6 +4,9 @@
 #include <map>
 #include <sstream>
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 class Profiler {
 public:
     inline Profiler(unsigned sampleLimit = 100) {
@@ -17,6 +20,9 @@ public:
     }
 
     inline void split(std::string label) {
+        // Wait until the effects of all previously called GL commands are complete.
+        glFinish();
+
         auto end = std::chrono::system_clock::now();
         durationMap[label].push_front(std::chrono::duration_cast<std::chrono::microseconds>(end - start));
         start = end;
@@ -53,6 +59,7 @@ public:
     }
 
     inline void print() {
+        // TODO: Sort the output by order added / duration.
         std::cout << "Times:" << std::endl;
         for (const auto& pair : durationMap) {
             std::cout << "  "

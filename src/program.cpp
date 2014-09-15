@@ -356,11 +356,16 @@ int main(int argc, char** argv) {
 //        glfwSwapInterval(1); // v-sync
         glfwSwapBuffers(window);
 
+        mainScene->profiler.split("glfwSwapBuffers");
+
         // Poll for and process events:
         glfwPollEvents();
+        mainScene->profiler.split("glfwPollEvents");
+
 //        std::cout << mainScene->camera->dir << std::endl;
 //        std::cout << mainScene->camera->pos << std::endl;
         mainScene->camera->processPlayerInput(window);
+        mainScene->profiler.split("processPlayerInput");
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, GL_TRUE);
