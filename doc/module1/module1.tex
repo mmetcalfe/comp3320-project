@@ -63,6 +63,7 @@
 \newcommand{\code}[1]{{\texttt{#1}}}
 \newcommand{\codefile}[1]{{\textit{#1}}}
 \newcommand{\program}[1]{\code{#1}}
+\newcommand{\taskname}[1]{{\textit{#1}}}
 
 %%% END Article customizations
 
@@ -98,11 +99,21 @@
 
 \section*{Project Schedule}
     
-    
+    While several tasks have been completed since the project proposal, content
+    creation tasks have taken longer than expected. For this reason, the tasks
+    for modelling the environment have been moved from module 1 to module 2.
+    Lighting tasks were easier than expected, which allowed the \taskname{Multiple lights} and \taskname{Shadow mapping} tasks to be completed during module 1.
+    The optional tasks \taskname{Displacement maps}, \taskname{Normal Mapping}, and \taskname{Bloom lighting effects} have been removed from consideration for the project due to time constraints.
 
-    The updated Gantt chart in Figure~\ref{gantt:schedule} specifies when
+    The schedule for module 2 now contains all content creation tasks (\taskname{Spaceship model}, \taskname{Procedurally generated asteroids and
+    planets}, and \taskname{Robot model}), and the \taskname{Dynamic
+    reflection mapping} and \taskname{Soft shadows} tasks. Completing these
+    tasks would satisfy the requirements of the project.
+
+    The updated Gantt chart in Figure~\ref{gantt:module1} specifies when
     we completed each of the tasks in module 1, and
     presents a program to achieve the revised project schedule.
+    The original Gantt chart from the proposal is included as Figure~\ref{gantt:proposal}
 
     \begin{figure}[H]
         \makebox[\textwidth][c]{\resizebox{0.95\paperwidth}{!}{\input{gantt.tex}}}
@@ -110,7 +121,16 @@
             A Gantt chart illustrating the planned project schedule.
             Patterned grey bars represent optional tasks.
         }
-        \label{gantt:schedule}
+        \label{gantt:module1}
+    \end{figure}
+
+    \begin{figure}[H]
+        \makebox[\textwidth][c]{\resizebox{0.95\paperwidth}{!}{\input{proposal_gantt.tex}}}
+        \caption[Project Schedule]{
+            The original Gantt chart from the project proposal
+            Patterned grey bars represent optional tasks.
+        }
+        \label{gantt:proposal}
     \end{figure}
 \end{document}
 
