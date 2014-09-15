@@ -39,6 +39,8 @@ void framebufferSizeCallback(GLFWwindow* window, int fbWidth, int fbHeight) {
 
     glViewport(0, 0, fbWidth, fbHeight);
 
+    mainScene->framebufferSize = {fbWidth, fbHeight};
+    mainScene->windowSize = {width, height};
     mainScene->prepareFramebuffer(width, height);
 
     mainScene->camera->frameWidth = fbWidth;
@@ -83,7 +85,6 @@ int main(int argc, char** argv) {
     GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "OpenGL", nullptr, nullptr);
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
-    glViewport(0, 0, fbWidth, fbHeight);
 
 //    // Fullscreen:
 //    const GLFWvidmode* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());

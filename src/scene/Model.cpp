@@ -600,6 +600,11 @@ void Model::setCameraUniformsOnShaderPrograms(Camera &camera, glm::mat4 model) {
                 glm::mat4 modelViewInverse = glm::inverse(camera.view * transform);
                 environmentMapProgram->setUniform("modelViewInverse", modelViewInverse);
             }
+
+            if (environmentMapProgram->uniformIsActive("viewInverse")) {
+                glm::mat4 viewInverse = glm::inverse(camera.view);
+                environmentMapProgram->setUniform("viewInverse", viewInverse);
+            }
         }
     }
 }

@@ -10,6 +10,7 @@ out vec4 outColor;
 // Transform uniforms:
 uniform mat4 modelViewInverse;
 uniform mat4 view;
+uniform mat4 viewInverse;
 
 // Material uniforms
 uniform vec3 colAmbient;
@@ -95,7 +96,8 @@ void main() {
     // Do shadow mapping:
     float isLit = 1.0;
     if (light.hasShadowMap) {
-      vec4 lightClipPos = light.proj * light.view * inverse(view) * eyeSpacePosition;
+      vec4 lightClipPos = light.proj * light.view * viewInverse * eyeSpacePosition;
+//      vec4 lightClipPos = light.proj * light.view * inverse(view) * eyeSpacePosition;
 
         vec3 lightClipPosDivided = lightClipPos.xyz / lightClipPos.w;
         vec3 shadowLookup = (lightClipPosDivided * 0.5) + 0.5;
@@ -106,7 +108,7 @@ void main() {
 //        vec4 shadowLookup = transformedClipPos;
 //        vec4 shadowLookup = transformedClipPos / transformedClipPos.w;
 
-        float shadowDepth = texture(light.texShadowMap, shadowLookup.xy).z;
+        float shadowDepth = texture(light.texShadowMap, shadowLookup.xy).x;
 //        float shadowDepth = texture(light.texShadowMap, shadowLookup.xy / shadowLookup.w).z;
         float bias = 0.004;
         isLit = shadowDepth < shadowLookup.z - bias ? 0 : 1;

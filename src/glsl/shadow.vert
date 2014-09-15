@@ -12,7 +12,8 @@ out vec3 eyeSpaceNormal;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
-
+//uniform mat4 viewInverse;
+//
 //// Light uniforms:
 //struct Light {
 //    vec3 pos;
@@ -46,5 +47,5 @@ void main() {
     vec4 eyeSpaceNormalTmp = modelView * vec4(normal, 0);
     eyeSpaceNormal = eyeSpaceNormalTmp.xyz;
 
-//    lightClipPos = light.proj * light.view * inverse(view) * eyeSpacePosition;
+//    lightClipPos = light.proj * light.view * viewInverse * eyeSpacePosition;
 }

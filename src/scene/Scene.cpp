@@ -36,37 +36,31 @@ namespace scene {
 
     void Scene::prepareShadowMapFramebuffer(int size) {
         auto tex = std::make_unique<NUGL::Texture>(GL_TEXTURE1, GL_TEXTURE_2D);
-        tex->setTextureData(GL_TEXTURE_2D, size, size, nullptr);
+//        tex->setTextureData(GL_TEXTURE_2D, size, size, nullptr);
+        tex->setTextureData(GL_TEXTURE_2D, size, size, nullptr, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT);
         checkForAndPrintGLError(__FILE__, __LINE__);
         tex->setParam(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         tex->setParam(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         tex->setParam(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         tex->setParam(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-        auto rbo  = std::make_unique<NUGL::Renderbuffer>();
-        rbo->setStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, size, size);
+//        auto rbo  = std::make_unique<NUGL::Renderbuffer>();
+//        rbo->setStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, size, size);
 
         shadowMapFramebuffer = std::make_unique<NUGL::Framebuffer>();
-        shadowMapFramebuffer->attach(std::move(tex));
-        shadowMapFramebuffer->attach(std::move(rbo));
-//        auto tex = std::make_unique<NUGL::Texture>(GL_TEXTURE0, GL_TEXTURE_2D);
-//        tex->setTextureData(GL_TEXTURE_2D, size, size, nullptr, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT);
-//        checkForAndPrintGLError(__FILE__, __LINE__);
-//        tex->setParam(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-//        tex->setParam(GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-//
-//        shadowMapFramebuffer = std::make_unique<NUGL::Framebuffer>();
-//        shadowMapFramebuffer->attach(std::move(tex), GL_DEPTH_ATTACHMENT);
-//
-//        shadowMapFramebuffer->bind(GL_FRAMEBUFFER);
-//        glDrawBuffer(GL_NONE);
-//        glReadBuffer(GL_NONE);
-//
-////        std::cerr << __FILE__ << ", " << __LINE__ << ": "
-////                <<  getFramebufferStatusString(glCheckFramebufferStatus(GL_FRAMEBUFFER))
-////                << std::endl;
-//
-//        NUGL::Framebuffer::useDefault();
+//        shadowMapFramebuffer->attach(std::move(tex));
+        shadowMapFramebuffer->attach(std::move(tex), GL_DEPTH_ATTACHMENT);
+//        shadowMapFramebuffer->attach(std::move(rbo));
+
+        shadowMapFramebuffer->bind(GL_FRAMEBUFFER);
+        glDrawBuffer(GL_NONE);
+        glReadBuffer(GL_NONE);
+
+//        std::cerr << __FILE__ << ", " << __LINE__ << ": "
+//                <<  getFramebufferStatusString(glCheckFramebufferStatus(GL_FRAMEBUFFER))
+//                << std::endl;
+
+        NUGL::Framebuffer::useDefault();
     }
 
     void Scene::prepareReflectionFramebuffer(int size) {
@@ -145,7 +139,8 @@ namespace scene {
                 shadowMapFramebuffer->bind();
                 glViewport(0, 0, lightCamera->frameWidth, lightCamera->frameHeight);
 
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                glClear(GL_DEPTH_BUFFER_BIT);
 
                 for (auto model : models) {
                     model->shadowMapProgram = shadowMapProgram;
