@@ -33,10 +33,10 @@ namespace NUGL {
             return bufferId;
         }
 
-        inline void attach(std::unique_ptr<Texture> tex, GLenum attachment = GL_COLOR_ATTACHMENT0, GLenum target = GL_TEXTURE_2D) {
+        inline void attach(std::shared_ptr<Texture> tex, GLenum target = GL_TEXTURE_2D, GLenum attachment = GL_COLOR_ATTACHMENT0) {
             bind(GL_FRAMEBUFFER);
             glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, target, tex->id(), 0);
-            textureAttachment = std::move(tex);
+            textureAttachment = tex;
             checkForAndPrintGLError(__FILE__, __LINE__);
         }
 

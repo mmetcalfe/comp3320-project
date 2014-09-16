@@ -63,7 +63,7 @@ public:
         std::cout << "Times:" << std::endl;
         for (const auto& pair : durationMap) {
             std::cout << "  "
-                    <<  std::setw(15)
+                    <<  std::setw(20)
                     << pair.first << ": "
                     << std::fixed
                     << std::setw(10)

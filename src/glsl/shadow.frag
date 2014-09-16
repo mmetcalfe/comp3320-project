@@ -62,19 +62,21 @@ void main() {
 
     // Don't show lighting on surfaces that are facing the wrong way:
     float lightDot = dot(normal, lightVec);
+    float normalDirTest = 1;
     #define DOT_CUTOFF 0.001
     if (lightDot >= -DOT_CUTOFF) {
         // Use a ramp near zero to remove noise when the light is very near the plane of the surface.
         float dotLessZero = lightDot < -DOT_CUTOFF ? 1 : -(1.0/DOT_CUTOFF) * lightDot;
-        float normalDirTest = lightDot < 0 ? dotLessZero : 0;
+        normalDirTest = lightDot < 0 ? dotLessZero : 0;
         //    float normalDirTest = lightDot < 0 ? 1 : 0; // What it looks like without the ramp (causes speckles when the light it coplanar with the surface).
-        outColor = vec4(0, 0, 0, 1) * normalDirTest;
-        return;
+//        outColor = vec4(0, 0, 0, 1) * normalDirTest;
+//        return;
     }
 
     vec3 incident = normalize(eyeSpacePosition.xyz);
 
     vec3 outSpecular = vec3(0, 0, 0);
+    vec3 outReflect = vec3(0, 0, 0);
     if (shininess > 0) {
         vec3 lightReflect = reflect(lightVec, normal);
         vec3 viewReflect = reflect(incident, normal);
@@ -90,7 +92,8 @@ void main() {
         float phongSpecular = phong(incident, lightReflect, shininess);
         vec3 phongHighlightCol = light.colSpecular * phongSpecular;
 
-        outSpecular = (phongHighlightCol + envReflectCol) * colSpecular;
+        outSpecular = phongHighlightCol * colSpecular;
+        outReflect = envReflectCol * colSpecular;
     }
 
     // Do shadow mapping:
@@ -139,7 +142,7 @@ void main() {
     vec3 outAmbient = colAmbient * light.colAmbient;
 
     float intensity = calculateIntensity(length(lightVecRaw));
-    vec3 finalColor = outAmbient + (outDiffuse + outSpecular) * intensity * isLit;
+    vec3 finalColor = outAmbient + outReflect + (outDiffuse + outSpecular) * intensity * isLit * normalDirTest;
 
     outColor = vec4(finalColor, 1.0);
 

@@ -241,7 +241,7 @@ std::shared_ptr<Model> Model::loadFromFile(const std::string &fileName) {
 
     utility::printAiSceneInfo(scene);
 
-    std::shared_ptr<Model> sceneModel = std::make_shared<Model>();
+    std::shared_ptr<Model> sceneModel = std::make_shared<Model>(fileName);
 
     for (unsigned int i = 0; i < scene->mNumMaterials; i++) {
         auto *material = scene->mMaterials[i];
@@ -296,24 +296,24 @@ std::shared_ptr<Model> Model::loadFromFile(const std::string &fileName) {
 std::shared_ptr<Model> Model::createIcosahedron() {
     static const double PHI = 1.61803398874989484820;
 
-    std::shared_ptr<Model> sceneModel = std::make_shared<Model>();
+    std::shared_ptr<Model> sceneModel = std::make_shared<Model>("icosahedron");
 
-    Material material;
-    material.colAmbient = {1, 1, 1};
-    material.colDiffuse = {1, 1, 1};
-    material.colSpecular = {1, 1, 1};
-    material.colTransparent = {1, 1, 1};
-    material.shininess = 1;
-    material.shininessStrength = 1;
-    material.twoSided = false;
-    material.materialInfo.has.colAmbient = true;
-    material.materialInfo.has.colDiffuse = true;
-    material.materialInfo.has.colSpecular = true;
-    material.materialInfo.has.colTransparent = true;
-    material.materialInfo.has.opacity = true;
-    material.materialInfo.has.shininess = true;
-    material.materialInfo.has.shininessStrength = true;
-    sceneModel->materials.push_back(std::make_shared<Material>(material));
+    auto material = std::make_shared<Material>();
+    material->colAmbient = {1, 1, 1};
+    material->colDiffuse = {1, 1, 1};
+    material->colSpecular = {1, 1, 1};
+    material->colTransparent = {1, 1, 1};
+    material->shininess = 1;
+    material->shininessStrength = 1;
+    material->twoSided = false;
+    material->materialInfo.has.colAmbient = true;
+    material->materialInfo.has.colDiffuse = true;
+    material->materialInfo.has.colSpecular = true;
+    material->materialInfo.has.colTransparent = true;
+    material->materialInfo.has.opacity = true;
+    material->materialInfo.has.shininess = true;
+    material->materialInfo.has.shininessStrength = true;
+    sceneModel->materials.push_back(material);
 
     Mesh mesh;
     mesh.materialIndex = 0;
@@ -532,8 +532,12 @@ void Model::prepareMaterialShaderProgram(std::shared_ptr<Material> material,
 //    }
 
     if (material->materialInfo.has.texEnvironmentMap && shaderProgram->materialInfo.has.texEnvironmentMap) {
-        material->texEnvironmentMap->bind();
-        shaderProgram->setUniform("texEnvironmentMap", material->texEnvironmentMap);
+        if (material->texEnvironmentMap != nullptr) {
+            material->texEnvironmentMap->bind();
+            shaderProgram->setUniform("texEnvironmentMap", material->texEnvironmentMap);
+        } else {
+            std::cerr << "WARNING: material->materialInfo.has.texEnvironmentMap was true, but texEnvironmentMap was null.";
+        }
     }
 
     if (material->materialInfo.has.texDiffuse && shaderProgram->materialInfo.has.texDiffuse) {
@@ -652,6 +656,8 @@ void Model::setLightUniformsOnShaderPrograms(std::shared_ptr<Light> light, std::
 
 void Model::setEnvironmentMap(std::shared_ptr<NUGL::Texture> envMap) {
     // TODO: Improve environment map management.
+    texEnvironmentMap = envMap;
+
     for (auto &mesh : meshes) {
         mesh.material->texEnvironmentMap = envMap;
         mesh.material->materialInfo.has.texEnvironmentMap = true;

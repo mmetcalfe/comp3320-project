@@ -22,13 +22,15 @@ namespace scene {
 
         inline void prepareTransforms() {
             lookAt(pos + dir);
-            proj = glm::perspective(fov, frameWidth / float(frameHeight), 5.0f, 300.0f);
+            proj = glm::perspective(fov, frameWidth / float(frameHeight), near, far);
         }
 
         glm::vec3 pos;
         glm::vec3 dir;
         glm::vec3 up;
-        float fov = 45;
+        float fov = M_PI_4;
+        float near = 5.0f;
+        float far = 300.0f;
 
         int frameWidth = 800;
         int frameHeight = 600;

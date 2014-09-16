@@ -1,4 +1,5 @@
 #include "scene/Scene.h"
+#include <tuple>
 #include "NUGL/Framebuffer.h"
 #include "NUGL/Renderbuffer.h"
 #include "utility/PostprocessingScreen.h"
@@ -7,7 +8,7 @@ namespace scene {
 
     Scene::Scene(std::shared_ptr<NUGL::ShaderProgram> screenProgram, glm::ivec2 windowSize, glm::ivec2 framebufferSize) : camera(std::make_unique<PlayerCamera>()) {
         shadowMapSize = 1024;
-        reflectionMapSize = 128;
+        reflectionMapSize = 512;
 
         this->windowSize = windowSize;
         this->framebufferSize = framebufferSize;
@@ -49,7 +50,7 @@ namespace scene {
 
         shadowMapFramebuffer = std::make_unique<NUGL::Framebuffer>();
 //        shadowMapFramebuffer->attach(std::move(tex));
-        shadowMapFramebuffer->attach(std::move(tex), GL_DEPTH_ATTACHMENT);
+        shadowMapFramebuffer->attach(std::move(tex), GL_TEXTURE_2D, GL_DEPTH_ATTACHMENT);
 //        shadowMapFramebuffer->attach(std::move(rbo));
 
         shadowMapFramebuffer->bind(GL_FRAMEBUFFER);
@@ -63,54 +64,98 @@ namespace scene {
         NUGL::Framebuffer::useDefault();
     }
 
-    void Scene::prepareReflectionFramebuffer(int size) {
-//        auto tex = std::make_unique<NUGL::Texture>(GL_TEXTURE3, GL_TEXTURE_2D);
-//        tex->setTextureData(GL_TEXTURE_2D, size, size, nullptr);
-//        checkForAndPrintGLError(__FILE__, __LINE__);
-//        tex->setParam(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//        tex->setParam(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    std::unique_ptr<NUGL::Texture> createCubeMapTexture(int size) {
+        auto tex = std::make_unique<NUGL::Texture>(GL_TEXTURE3, GL_TEXTURE_CUBE_MAP);
+        for (unsigned i = 0; i < 6; i++) {
+            tex->setTextureData(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, size, size, nullptr);
+            checkForAndPrintGLError(__func__, __LINE__);
+        }
+        checkForAndPrintGLError(__FILE__, __LINE__);
+        tex->setParam(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        tex->setParam(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        tex->setParam(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        tex->setParam(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        tex->setParam(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        tex->setParam(GL_TEXTURE_BASE_LEVEL, 0);
+        tex->setParam(GL_TEXTURE_MAX_LEVEL, 0);
 
+        checkForAndPrintGLError(__func__, __LINE__);
+
+        return tex;
+    }
+
+    void Scene::prepareReflectionFramebuffer(int size) {
+//        auto tex = createCubeMapTexture(size);
         auto rbo  = std::make_unique<NUGL::Renderbuffer>();
         rbo->setStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, size, size);
 
         reflectionFramebuffer = std::make_unique<NUGL::Framebuffer>();
-//        reflectionFramebuffer->attach(std::move(tex));
-//        reflectionFramebuffer->bind(GL_FRAMEBUFFER);
-//        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X, tex->id(), 0);
+//        reflectionFramebuffer->attach(std::move(tex), GL_TEXTURE_CUBE_MAP_POSITIVE_X);
         reflectionFramebuffer->attach(std::move(rbo));
+
+//        std::cerr << __FILE__ << ", " << __LINE__ << ": "
+//                <<  getFramebufferStatusString(glCheckFramebufferStatus(GL_FRAMEBUFFER))
+//                << std::endl;
+
+        NUGL::Framebuffer::useDefault();
     }
 
     void Scene::renderReflectionMap(std::shared_ptr<Model> model) {
-        if (model->meshes.size() == 0)
-            return;
-        if (!model->meshes[0].material->materialInfo.has.texEnvironmentMap)
-            return;
-
         Camera mapCamera;
         glm::vec4 pos = model->transform * glm::vec4(0, 0, 0, 1);
         mapCamera.pos = {pos.x, pos.y, pos.z};
-        mapCamera.dir = {1, 0, 0};
-        mapCamera.up = {0, 0, 1};
-        mapCamera.fov = 90;
+        mapCamera.dir = {0, -1, 0};
+        mapCamera.up = {0, 0, -1};
+        mapCamera.fov = M_PI_2;
         mapCamera.frameWidth = reflectionMapSize;
         mapCamera.frameHeight = reflectionMapSize;
         mapCamera.prepareTransforms();
 
-        model->meshes[0].material->texEnvironmentMap->bind();
+        auto sharedLight = std::make_shared<scene::Light>();
+        sharedLight->type = scene::Light::Type::point;
+        sharedLight->colDiffuse = {0, 0, 0};
+        sharedLight->colSpecular = {0, 0, 0};
+        sharedLight->colAmbient = {1, 1, 1};
+
+        std::vector<std::tuple<GLenum, glm::vec3, glm::vec3>> directions = {
+                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_POSITIVE_X, {0, -1, 0}, {0, 0, -1}),
+                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, {0,  1, 0}, {0, 0, -1}),
+                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, {0, 0,  1}, {-1, 0, 0}),
+                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, {0, 0, -1}, {1, 0, 0}),
+                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, {-1, 0, 0}, {0, 0, -1}),
+                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, { 1, 0, 0}, {0, 0, -1}),
+        };
+
+        for (auto params : directions) {
+            GLenum target;
+            std::tie(target, mapCamera.dir, mapCamera.up) = params;
+            mapCamera.prepareTransforms();
+            reflectionFramebuffer->attach(model->texEnvironmentMap, target);
+//            reflectionFramebuffer->attach(reflectionFramebuffer->textureAttachment, target);
+
+//        model->meshes[0].material->texEnvironmentMap->bind();
 //        model->meshes[0].material->texEnvironmentMap->setTextureData(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 128, 128, nullptr);
 
-        reflectionFramebuffer->bind(GL_FRAMEBUFFER);
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-                model->meshes[0].material->texEnvironmentMap->id(), 0);
+//        reflectionFramebuffer->bind(GL_FRAMEBUFFER);
+//        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X,
+//                model->meshes[0].material->texEnvironmentMap->id(), 0);
 
-        reflectionFramebuffer->bind();
-        glViewport(0, 0, mapCamera.frameWidth, mapCamera.frameHeight);
+            reflectionFramebuffer->bind();
+            glViewport(0, 0, mapCamera.frameWidth, mapCamera.frameHeight);
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        for (auto model : models) {
-            model->shadowMapProgram = shadowMapProgram;
-            model->drawDepth(mapCamera);
+            for (auto drawModel : models) {
+                if (model == drawModel)
+                    continue;
+
+                drawModel->shadowMapProgram = shadowMapProgram;
+//                auto prog = drawModel->environmentMapProgram;
+//                drawModel->environmentMapProgram = nullptr;
+//                drawModel->drawDepth(mapCamera);
+                drawModel->draw(mapCamera, sharedLight, nullptr);
+//                drawModel->environmentMapProgram = prog;
+            }
         }
     }
 
@@ -119,10 +164,22 @@ namespace scene {
 
         glClearColor(0, 0, 0, 1.0);
 
-//        // Prepare dynamic reflection maps:
-//        for (auto model : models) {
-//            renderReflectionMap(model);
-//        }
+        // Prepare dynamic reflection maps:
+        int refMapNum = 1;
+        for (auto model : models) {
+            if (!model->dynamicReflections)
+                continue;
+
+            if (model->texEnvironmentMap == nullptr) {
+                auto tex = createCubeMapTexture(reflectionMapSize);
+                model->setEnvironmentMap(std::move(tex));
+                profiler.split("create reflection map ", refMapNum);
+            }
+
+            renderReflectionMap(model);
+            profiler.split("reflection map ", refMapNum++);
+//            model->setEnvironmentMap(reflectionFramebuffer->textureAttachment);
+        }
 
         // Clear the screen:
         NUGL::Framebuffer::useDefault();

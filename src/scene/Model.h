@@ -65,7 +65,7 @@ namespace scene {
         }
 
         inline bool isEnvironmentMapped() {
-            return material->texEnvironmentMap != nullptr;
+            return material->materialInfo.has.texEnvironmentMap;
         }
     };
 
@@ -77,6 +77,14 @@ namespace scene {
             glm::mat4 transform;
         };
 
+        Model() = delete;
+
+        Model(std::string modelName) {
+            this->modelName = modelName;
+        }
+
+        std::string modelName;
+
         std::vector<Mesh> meshes;
         std::vector<std::shared_ptr<Light>> lights;
         std::vector<std::shared_ptr<Material>> materials;
@@ -86,6 +94,11 @@ namespace scene {
         std::shared_ptr<NUGL::ShaderProgram> textureProgram;
         std::shared_ptr<NUGL::ShaderProgram> environmentMapProgram;
         std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram;
+
+        // TODO: Improve environment map management.
+        bool dynamicReflections = false;
+        std::shared_ptr<NUGL::Texture> texEnvironmentMap;
+
 
         glm::vec3 pos = {0, 0, 0}; // The object's position in world space.
         glm::vec3 dir = {1, 0, 0}; // The object's x-axis in world space.

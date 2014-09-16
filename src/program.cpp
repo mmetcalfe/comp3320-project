@@ -180,41 +180,41 @@ int main(int argc, char** argv) {
     mainScene->shadowMapProgram = sharedShadowMapProgram;
 
     // Add some lights:
-    auto lightModel = std::make_shared<scene::Model>();
+    auto lightModel = std::make_shared<scene::Model>("spotlight");
     auto light = std::make_shared<scene::Light>();
-    light->type = scene::Light::Type::spot;
-    light->pos = {15, 120, 40};
-    light->dir = {1, 0, 0};
-//    light->pos = {10, 120, 15};
-//    light->dir = {0, 0, -1};
-    light->attenuationConstant = 1;
-    light->attenuationLinear = 0.1;
-    light->attenuationQuadratic = 0;
-    light->angleConeOuter = 2;
-    light->angleConeInner = 1;
-    light->colDiffuse = {5, 5, 5};
-    light->colSpecular = {2, 2, 2};
-    light->colAmbient = {0, 0, 0};
-    lightModel->lights.push_back(light);
-    mainScene->addModel(lightModel);
+//    light->type = scene::Light::Type::spot;
+//    light->pos = {15, 120, 40};
+//    light->dir = {1, 0, 0};
+////    light->pos = {10, 120, 15};
+////    light->dir = {0, 0, -1};
+//    light->attenuationConstant = 1;
+//    light->attenuationLinear = 0.1;
+//    light->attenuationQuadratic = 0;
+//    light->angleConeOuter = 2;
+//    light->angleConeInner = 1;
+//    light->colDiffuse = {5, 5, 5};
+//    light->colSpecular = {2, 2, 2};
+//    light->colAmbient = {0, 0, 0};
+//    lightModel->lights.push_back(light);
+//    mainScene->addModel(lightModel);
+//
+//    lightModel = std::make_shared<scene::Model>("point light 1");
+//    light = std::make_shared<scene::Light>();
+//    light->type = scene::Light::Type::point;
+//    light->pos = {0, 0, 40};
+//    light->dir = {1, 0, 0};
+//    light->attenuationConstant = 0;
+//    light->attenuationLinear = 0.5;
+//    light->attenuationQuadratic = 0;
+//    light->colDiffuse = {1, 1, 1};
+//    light->colSpecular = {1, 1, 1};
+//    light->colAmbient = {0.2, 0.2, 0.2};
+//    light->angleConeInner = 1;
+//    light->angleConeOuter = 1;
+//    lightModel->lights.push_back(light);
+//    mainScene->addModel(lightModel);
 
-    lightModel = std::make_shared<scene::Model>();
-    light = std::make_shared<scene::Light>();
-    light->type = scene::Light::Type::point;
-    light->pos = {0, 0, 40};
-    light->dir = {1, 0, 0};
-    light->attenuationConstant = 0;
-    light->attenuationLinear = 0.5;
-    light->attenuationQuadratic = 0;
-    light->colDiffuse = {1, 1, 1};
-    light->colSpecular = {1, 1, 1};
-    light->colAmbient = {0.2, 0.2, 0.2};
-    light->angleConeInner = 1;
-    light->angleConeOuter = 1;
-    lightModel->lights.push_back(light);
-    mainScene->addModel(lightModel);
-
-    lightModel = std::make_shared<scene::Model>();
+    lightModel = std::make_shared<scene::Model>("point light 2");
     light = std::make_shared<scene::Light>();
     light->type = scene::Light::Type::point;
     light->pos = {0, 200, 60};
@@ -233,12 +233,19 @@ int main(int argc, char** argv) {
     // TODO: Find a way to manage texture units!
     auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE2, GL_TEXTURE_CUBE_MAP);
     cubeMap->loadCubeMap({
-           "assets/skybox_right1.png",
-           "assets/skybox_left2.png",
-           "assets/skybox_top3.png",
-           "assets/skybox_bottom4.png",
-           "assets/skybox_front5.png",
-           "assets/skybox_back6.png"
+//            "assets/skybox_right1.png",
+//            "assets/skybox_left2.png",
+//            "assets/skybox_top3.png",
+//            "assets/skybox_bottom4.png",
+//            "assets/skybox_front5.png",
+//            "assets/skybox_back6.png"
+
+            "assets/PereaBeach1/posx.jpg",
+            "assets/PereaBeach1/negx.jpg",
+            "assets/PereaBeach1/posy.jpg",
+            "assets/PereaBeach1/negy.jpg",
+            "assets/PereaBeach1/posz.jpg",
+            "assets/PereaBeach1/negz.jpg"
     });
     cubeMap->setParam(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     cubeMap->setParam(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -305,11 +312,12 @@ int main(int argc, char** argv) {
     asteroidModel->flatProgram = sharedFlatProgram;
     asteroidModel->textureProgram = sharedTextureProgram;
     asteroidModel->environmentMapProgram = sharedReflectProgram;
-    asteroidModel->setEnvironmentMap(cubeMap);
+    asteroidModel->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
+    asteroidModel->dynamicReflections = true;
     asteroidModel->createMeshBuffers();
     asteroidModel->createVertexArrays();
-    asteroidModel->pos = {15, 130, 40};
-    asteroidModel->scale = glm::vec3(3);
+    asteroidModel->pos = {50, 120, 40};
+    asteroidModel->scale = glm::vec3(10);
     mainScene->addModel(asteroidModel);
 
     auto skyBox = scene::Model::loadFromFile("assets/cube.obj");
@@ -325,7 +333,7 @@ int main(int argc, char** argv) {
 //    mainScene->camera->pos = {15, 120, 40};
     mainScene->camera->pos = {37.2, 156, 38.1};
     mainScene->camera->dir = {0.415, -0.646, -0.64};
-    mainScene->camera->fov = 45;
+    mainScene->camera->fov = M_PI_4;
     mainScene->camera->speed = 10;
     mainScene->camera->lookSpeed = 0.005;
     mainScene->camera->up = glm::vec3(0.0f, 0.0f, 1.0f);
