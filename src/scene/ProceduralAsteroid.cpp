@@ -62,10 +62,6 @@ static void subdivide(std::mt19937 &gen, scene::Mesh &mesh) {
     mesh.elements = newElements;
 }
 
-static glm::vec3 normalFromTriangle(glm::vec3 a, glm::vec3 b, glm::vec3 c) {
-    return glm::normalize(glm::cross(b - a, c - a));
-}
-
 std::shared_ptr<Model> createAsteroid() {
     auto model = scene::Model::createIcosahedron();
     Mesh &mesh = model->meshes[0];
@@ -81,7 +77,6 @@ std::shared_ptr<Model> createAsteroid() {
         subdivide(mt, mesh);
 
     for (unsigned i = 0; i < mesh.vertices.size(); i ++) {
-        unsigned faces = 0;
         glm::vec3 normal = { 0, 0, 0 };
 
         for (unsigned faceIndex = 0; faceIndex < mesh.elements.size(); faceIndex += 3) {
@@ -89,14 +84,12 @@ std::shared_ptr<Model> createAsteroid() {
             GLint b = mesh.elements[faceIndex + 1];
             GLint c = mesh.elements[faceIndex + 2];
 
-            if (i == a || i == b || i == c) {
-                normal += normalFromTriangle(mesh.vertices[a], mesh.vertices[b], mesh.vertices[c]);
-                faces++;
-            }
+            if (i == a || i == b || i == c)
+                normal += glm::cross(mesh.vertices[b] - mesh.vertices[a],
+                                     mesh.vertices[c] - mesh.vertices[a]);
         }
 
-        normal /= float(faces);
-        mesh.normals[i] = normal;
+        mesh.normals[i] = glm::normalize(normal);
     }
 
     return model;
