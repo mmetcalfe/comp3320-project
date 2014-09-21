@@ -199,10 +199,16 @@ namespace scene {
 //                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 glClear(GL_DEPTH_BUFFER_BIT);
 
+                // Front-face culling:
+                glEnable(GL_CULL_FACE);
+                glCullFace(GL_FRONT);
+
                 for (auto model : models) {
                     model->shadowMapProgram = shadowMapProgram;
                     model->drawDepth(*lightCamera);
                 }
+
+                glDisable(GL_CULL_FACE);
 
                 lightCamera->shadowMap = shadowMapFramebuffer->textureAttachment;
 

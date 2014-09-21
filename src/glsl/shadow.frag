@@ -113,8 +113,8 @@ void main() {
 
         float shadowDepth = texture(light.texShadowMap, shadowLookup.xy).x;
 //        float shadowDepth = texture(light.texShadowMap, shadowLookup.xy / shadowLookup.w).z;
-        float bias = 0.004;
-        isLit = shadowDepth < shadowLookup.z - bias ? 0 : 1;
+        float bias = 0.0;
+        isLit = shadowDepth < ((lightClipPos.z - bias) / lightClipPos.w) * 0.5 + 0.5 ? 0 : 1;
 //        float isLit = textureProj(light.texShadowMap, shadowLookup.xyw).z < (shadowLookup.z - bias) / shadowLookup.w;// ? 0 : 1;
 
         // Apply the view frustum:
