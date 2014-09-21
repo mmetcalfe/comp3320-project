@@ -110,109 +110,102 @@ int main(int argc, char** argv) {
 
 
     // Load glsl:
-    auto flatProgram = NUGL::ShaderProgram::createFromFiles("flatProgram", {
+    auto flatProgram = NUGL::ShaderProgram::createSharedFromFiles("flatProgram", {
             {GL_VERTEX_SHADER, "src/glsl/position.vert"},
             {GL_FRAGMENT_SHADER, "src/glsl/uniform.frag"},
     });
-    flatProgram.bindFragDataLocation(0, "outColor");
-    flatProgram.link();
-    flatProgram.updateMaterialInfo();
-    flatProgram.printDebugInfo();
+    flatProgram->bindFragDataLocation(0, "outColor");
+    flatProgram->link();
+    flatProgram->updateMaterialInfo();
+    flatProgram->printDebugInfo();
 
-    auto textureProgram = NUGL::ShaderProgram::createFromFiles("textureProgram", {
+    auto textureProgram = NUGL::ShaderProgram::createSharedFromFiles("textureProgram", {
             {GL_VERTEX_SHADER, "src/glsl/textured.vert"},
             {GL_FRAGMENT_SHADER, "src/glsl/textured.frag"},
     });
-    textureProgram.bindFragDataLocation(0, "outColor");
-    textureProgram.link();
-    textureProgram.updateMaterialInfo();
-    textureProgram.printDebugInfo();
+    textureProgram->bindFragDataLocation(0, "outColor");
+    textureProgram->link();
+    textureProgram->updateMaterialInfo();
+    textureProgram->printDebugInfo();
 
-    auto reflectProgram = NUGL::ShaderProgram::createFromFiles("reflectProgram", {
+    auto reflectProgram = NUGL::ShaderProgram::createSharedFromFiles("reflectProgram", {
             {GL_VERTEX_SHADER, "src/glsl/shadow.vert"},
             {GL_FRAGMENT_SHADER, "src/glsl/shadow.frag"},
 //            {GL_FRAGMENT_SHADER, "src/glsl/lit_rfl_tex.frag"},
     });
-    reflectProgram.bindFragDataLocation(0, "outColor");
-    reflectProgram.link();
-    reflectProgram.updateMaterialInfo();
-    reflectProgram.printDebugInfo();
+    reflectProgram->bindFragDataLocation(0, "outColor");
+    reflectProgram->link();
+    reflectProgram->updateMaterialInfo();
+    reflectProgram->printDebugInfo();
 
-    auto skyboxProgram = NUGL::ShaderProgram::createFromFiles("skyboxProgram", {
+    auto skyboxProgram = NUGL::ShaderProgram::createSharedFromFiles("skyboxProgram", {
             {GL_VERTEX_SHADER, "src/glsl/skybox.vert"},
             {GL_FRAGMENT_SHADER, "src/glsl/skybox.frag"},
     });
-    skyboxProgram.bindFragDataLocation(0, "outColor");
-    skyboxProgram.link();
-    skyboxProgram.updateMaterialInfo();
-    skyboxProgram.printDebugInfo();
+    skyboxProgram->bindFragDataLocation(0, "outColor");
+    skyboxProgram->link();
+    skyboxProgram->updateMaterialInfo();
+    skyboxProgram->printDebugInfo();
 
-    auto screenProgram = NUGL::ShaderProgram::createFromFiles("screenProgram", {
+    auto screenProgram = NUGL::ShaderProgram::createSharedFromFiles("screenProgram", {
             {GL_VERTEX_SHADER, "src/glsl/screen.vert"},
             {GL_FRAGMENT_SHADER, "src/glsl/textured.frag"},
     });
-    screenProgram.bindFragDataLocation(0, "outColor");
-    screenProgram.link();
-    screenProgram.updateMaterialInfo();
-    screenProgram.printDebugInfo();
+    screenProgram->bindFragDataLocation(0, "outColor");
+    screenProgram->link();
+    screenProgram->updateMaterialInfo();
+    screenProgram->printDebugInfo();
 
-    auto shadowMapProgram = NUGL::ShaderProgram::createFromFiles("shadowMapProgram", {
+    auto shadowMapProgram = NUGL::ShaderProgram::createSharedFromFiles("shadowMapProgram", {
             {GL_VERTEX_SHADER, "src/glsl/shadow_map.vert"},
             {GL_FRAGMENT_SHADER, "src/glsl/shadow_map.frag"},
     });
-    shadowMapProgram.bindFragDataLocation(0, "outColor");
-    shadowMapProgram.link();
-    shadowMapProgram.updateMaterialInfo();
-    shadowMapProgram.printDebugInfo();
-
-    auto sharedFlatProgram = std::make_shared<NUGL::ShaderProgram>(flatProgram);
-    auto sharedTextureProgram = std::make_shared<NUGL::ShaderProgram>(textureProgram);
-    auto sharedReflectProgram = std::make_shared<NUGL::ShaderProgram>(reflectProgram);
-    auto sharedSkyboxProgram = std::make_shared<NUGL::ShaderProgram>(skyboxProgram);
-    auto sharedScreenProgram = std::make_shared<NUGL::ShaderProgram>(screenProgram);
-    auto sharedShadowMapProgram = std::make_shared<NUGL::ShaderProgram>(shadowMapProgram);
+    shadowMapProgram->bindFragDataLocation(0, "outColor");
+    shadowMapProgram->link();
+    shadowMapProgram->updateMaterialInfo();
+    shadowMapProgram->printDebugInfo();
 
     // Create Scene:
-    mainScene = std::make_unique<scene::Scene>(sharedScreenProgram,
+    mainScene = std::make_unique<scene::Scene>(screenProgram,
             glm::ivec2({screenWidth, screenHeight}),
             glm::ivec2({fbWidth, fbHeight})
     );
-    mainScene->shadowMapProgram = sharedShadowMapProgram;
+    mainScene->shadowMapProgram = shadowMapProgram;
 
     // Add some lights:
     auto lightModel = std::make_shared<scene::Model>("spotlight");
     auto light = std::make_shared<scene::Light>();
-//    light->type = scene::Light::Type::spot;
-//    light->pos = {15, 120, 40};
-//    light->dir = {1, 0, 0};
-////    light->pos = {10, 120, 15};
-////    light->dir = {0, 0, -1};
-//    light->attenuationConstant = 1;
-//    light->attenuationLinear = 0.1;
-//    light->attenuationQuadratic = 0;
-//    light->angleConeOuter = 2;
-//    light->angleConeInner = 1;
-//    light->colDiffuse = {5, 5, 5};
-//    light->colSpecular = {2, 2, 2};
-//    light->colAmbient = {0, 0, 0};
-//    lightModel->lights.push_back(light);
-//    mainScene->addModel(lightModel);
-//
-//    lightModel = std::make_shared<scene::Model>("point light 1");
-//    light = std::make_shared<scene::Light>();
-//    light->type = scene::Light::Type::point;
-//    light->pos = {0, 0, 40};
-//    light->dir = {1, 0, 0};
-//    light->attenuationConstant = 0;
-//    light->attenuationLinear = 0.5;
-//    light->attenuationQuadratic = 0;
-//    light->colDiffuse = {1, 1, 1};
-//    light->colSpecular = {1, 1, 1};
-//    light->colAmbient = {0.2, 0.2, 0.2};
-//    light->angleConeInner = 1;
-//    light->angleConeOuter = 1;
-//    lightModel->lights.push_back(light);
-//    mainScene->addModel(lightModel);
+    light->type = scene::Light::Type::spot;
+    light->pos = {15, 120, 40};
+    light->dir = {1, 0, 0};
+//    light->pos = {10, 120, 15};
+//    light->dir = {0, 0, -1};
+    light->attenuationConstant = 1;
+    light->attenuationLinear = 0.1;
+    light->attenuationQuadratic = 0;
+    light->angleConeOuter = 2;
+    light->angleConeInner = 1;
+    light->colDiffuse = {5, 5, 5};
+    light->colSpecular = {2, 2, 2};
+    light->colAmbient = {0, 0, 0};
+    lightModel->lights.push_back(light);
+    mainScene->addModel(lightModel);
+
+    lightModel = std::make_shared<scene::Model>("point light 1");
+    light = std::make_shared<scene::Light>();
+    light->type = scene::Light::Type::point;
+    light->pos = {0, 0, 40};
+    light->dir = {1, 0, 0};
+    light->attenuationConstant = 0;
+    light->attenuationLinear = 0.5;
+    light->attenuationQuadratic = 0;
+    light->colDiffuse = {1, 1, 1};
+    light->colSpecular = {1, 1, 1};
+    light->colAmbient = {0.2, 0.2, 0.2};
+    light->angleConeInner = 1;
+    light->angleConeOuter = 1;
+    lightModel->lights.push_back(light);
+    mainScene->addModel(lightModel);
 
     lightModel = std::make_shared<scene::Model>("point light 2");
     light = std::make_shared<scene::Light>();
@@ -261,10 +254,10 @@ int main(int argc, char** argv) {
 //    auto eagle5Model = scene::Model::loadFromFile("assets/Ship/Ship Room.obj");
 //    auto eagle5Model = scene::Model::loadFromFile("assets/textured_cube.obj");
 //    auto eagle5Model = scene::Model::loadFromFile("assets/KingsTreasure_OBJ/KingsTreasure.obj");
-    eagle5Model->flatProgram = sharedFlatProgram;
-    eagle5Model->textureProgram = sharedTextureProgram;
+    eagle5Model->flatProgram = flatProgram;
+    eagle5Model->textureProgram = textureProgram;
 //    eagle5Model->environmentMapProgram = sharedFlatReflectProgram;
-    eagle5Model->environmentMapProgram = sharedReflectProgram;
+    eagle5Model->environmentMapProgram = reflectProgram;
     eagle5Model->setEnvironmentMap(cubeMap);
     eagle5Model->createMeshBuffers();
     eagle5Model->createVertexArrays();
@@ -274,10 +267,10 @@ int main(int argc, char** argv) {
     mainScene->addModel(eagle5Model);
 
     auto houseModel = scene::Model::loadFromFile("assets/House01/House01.obj");
-    houseModel->flatProgram = sharedFlatProgram;
-    houseModel->textureProgram = sharedTextureProgram;
+    houseModel->flatProgram = flatProgram;
+    houseModel->textureProgram = textureProgram;
 //    houseModel->environmentMapProgram = sharedFlatReflectProgram;
-    houseModel->environmentMapProgram = sharedReflectProgram;
+    houseModel->environmentMapProgram = reflectProgram;
     houseModel->setEnvironmentMap(cubeMap);
     houseModel->createMeshBuffers();
     houseModel->createVertexArrays();
@@ -286,10 +279,10 @@ int main(int argc, char** argv) {
     mainScene->addModel(houseModel);
 
     auto cityModel = scene::Model::loadFromFile("assets/rc8c1qtjiygw-O/Organodron City/Organodron City.obj");
-    cityModel->flatProgram = sharedFlatProgram;
-    cityModel->textureProgram = sharedTextureProgram;
+    cityModel->flatProgram = flatProgram;
+    cityModel->textureProgram = textureProgram;
 //    cityModel->environmentMapProgram = sharedFlatReflectProgram;
-    cityModel->environmentMapProgram = sharedReflectProgram;
+    cityModel->environmentMapProgram = reflectProgram;
     cityModel->setEnvironmentMap(cubeMap);
     cityModel->createMeshBuffers();
     cityModel->createVertexArrays();
@@ -297,10 +290,10 @@ int main(int argc, char** argv) {
     mainScene->addModel(cityModel);
 
     auto cubeModel = scene::Model::loadFromFile("assets/cube.obj");
-    cubeModel->flatProgram = sharedFlatProgram;
-    cubeModel->textureProgram = sharedTextureProgram;
+    cubeModel->flatProgram = flatProgram;
+    cubeModel->textureProgram = textureProgram;
 //    cubeModel->environmentMapProgram = sharedFlatReflectProgram;
-    cubeModel->environmentMapProgram = sharedReflectProgram;
+    cubeModel->environmentMapProgram = reflectProgram;
     cubeModel->setEnvironmentMap(cubeMap);
     cubeModel->createMeshBuffers();
     cubeModel->createVertexArrays();
@@ -309,9 +302,9 @@ int main(int argc, char** argv) {
     mainScene->addModel(cubeModel);
 
     auto asteroidModel = scene::createAsteroid();
-    asteroidModel->flatProgram = sharedFlatProgram;
-    asteroidModel->textureProgram = sharedTextureProgram;
-    asteroidModel->environmentMapProgram = sharedReflectProgram;
+    asteroidModel->flatProgram = flatProgram;
+    asteroidModel->textureProgram = textureProgram;
+    asteroidModel->environmentMapProgram = reflectProgram;
     asteroidModel->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
     asteroidModel->dynamicReflections = true;
     asteroidModel->createMeshBuffers();
@@ -321,9 +314,9 @@ int main(int argc, char** argv) {
     mainScene->addModel(asteroidModel);
 
     auto skyBox = scene::Model::loadFromFile("assets/cube.obj");
-    skyBox->flatProgram = sharedFlatProgram;
-    skyBox->textureProgram = sharedTextureProgram;
-    skyBox->environmentMapProgram = sharedSkyboxProgram;
+    skyBox->flatProgram = flatProgram;
+    skyBox->textureProgram = textureProgram;
+    skyBox->environmentMapProgram = skyboxProgram;
     skyBox->setEnvironmentMap(cubeMap);
     skyBox->createMeshBuffers();
     skyBox->createVertexArrays();

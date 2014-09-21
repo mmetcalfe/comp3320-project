@@ -53,7 +53,7 @@ namespace NUGL {
         glGetProgramiv(programId, GL_ACTIVE_UNIFORMS, &activeUniforms);
         GLint activeUniformMaxLength;
         glGetProgramiv(programId, GL_ACTIVE_UNIFORM_MAX_LENGTH, &activeUniformMaxLength);
-        char infoLogBuff[512];
+        char infoLogBuff[512] = {0};
         glGetProgramInfoLog(programId, 512, nullptr, infoLogBuff);
         std::cout << "printProgramDebugInfo(" << programId << ", " << programName <<  ") {" << std::endl;
         std::cout << "  GL_DELETE_STATUS: " << (deleteStatus == GL_TRUE ? "Flagged for deletion" : "False") << "," << std::endl;
@@ -70,7 +70,7 @@ namespace NUGL {
 
         if (linkStatus != GL_TRUE) {
             std::stringstream errMsg;
-            errMsg << __func__ << ": Link error in shader program: " << infoLogBuff << ".";
+            errMsg << __func__ << ": Link error in shader program '" << programName << "': " << infoLogBuff << ".";
             throw std::logic_error(errMsg.str());
         }
     }
@@ -89,8 +89,21 @@ namespace NUGL {
             return createFromFiles("NO_NAME", shaders);
         }
 
+        static inline std::shared_ptr<ShaderProgram> createSharedFromFiles(const std::string& name, std::vector<std::pair<GLenum, std::string>> shaders) {
+            auto program = std::make_shared<ShaderProgram>(name);
+
+            for (auto& pair : shaders) {
+                auto shader = std::make_shared<Shader>(pair.first, pair.second);
+                shader->compile();
+                shader->printDebugInfo();
+                program->attachShader(shader);
+            }
+            return program;
+        }
+
         static inline ShaderProgram createFromFiles(const std::string& name, std::vector<std::pair<GLenum, std::string>> shaders) {
             ShaderProgram program(name);
+
             for (auto& pair : shaders) {
                 auto shader = std::make_shared<Shader>(pair.first, pair.second);
                 shader->compile();
@@ -107,20 +120,24 @@ namespace NUGL {
         inline void attachShader(std::shared_ptr<Shader> shader) {
             shaders.push_back(shader);
             glAttachShader(programId, shader->id());
+            checkForAndPrintGLError(__FILE__, __LINE__, programName);
         }
 
         inline void bindFragDataLocation(GLuint colorNumber, const std::string& name) {
             glBindFragDataLocation(programId, colorNumber, name.c_str());
+            checkForAndPrintGLError(__FILE__, __LINE__, programName);
         }
 
         inline void link() {
             glLinkProgram(programId);
+            checkForAndPrintGLError(__FILE__, __LINE__, programName);
 
             // TODO: After linking, detach all shaders and remove them from the shaders list.
         }
 
         inline void use() {
             glUseProgram(programId);
+            checkForAndPrintGLError(__FILE__, __LINE__, programName);
         }
 
         inline bool uniformIsActive(const std::string& name) {
@@ -130,6 +147,7 @@ namespace NUGL {
 
         inline GLint getUniformLocation(const std::string& name) {
             GLint uniLoc = glGetUniformLocation(programId, name.c_str());
+            checkForAndPrintGLError(__FILE__, __LINE__, programName);
 
             if (uniLoc == -1) {
                 std::stringstream errMsg;
@@ -143,6 +161,7 @@ namespace NUGL {
 
         inline GLint getAttribLocation(const std::string& name) {
             GLint attribLoc = glGetAttribLocation(programId, name.c_str());
+            checkForAndPrintGLError(__FILE__, __LINE__, programName);
 
             if (attribLoc == -1) {
                 std::stringstream errMsg;
@@ -164,6 +183,7 @@ namespace NUGL {
 
         inline void validate() {
             glValidateProgram(programId);
+            checkForAndPrintGLError(__FILE__, __LINE__, programName);
         }
 
         template<typename T>
