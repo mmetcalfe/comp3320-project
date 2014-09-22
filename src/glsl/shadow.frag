@@ -54,52 +54,10 @@ float calculateIntensity(in float lightDist) {
     return 1.0 / denom;
 }
 
-void main() {
-    // face normal in eye space:
-    vec3 normal = normalize(eyeSpaceNormal.xyz);
-    vec3 lightVecRaw = eyeSpacePosition.xyz - (view * vec4(light.pos, 1)).xyz;
-    vec3 lightVec = normalize(lightVecRaw);
-
-    // Don't show lighting on surfaces that are facing the wrong way:
-    float lightDot = dot(normal, lightVec);
-    float normalDirTest = 1;
-    #define DOT_CUTOFF 0.001
-    if (lightDot >= -DOT_CUTOFF) {
-        // Use a ramp near zero to remove noise when the light is very near the plane of the surface.
-        float dotLessZero = lightDot < -DOT_CUTOFF ? 1 : -(1.0/DOT_CUTOFF) * lightDot;
-        normalDirTest = lightDot < 0 ? dotLessZero : 0;
-        //    float normalDirTest = lightDot < 0 ? 1 : 0; // What it looks like without the ramp (causes speckles when the light it coplanar with the surface).
-//        outColor = vec4(0, 0, 0, 1) * normalDirTest;
-//        return;
-    }
-
-    vec3 incident = normalize(eyeSpacePosition.xyz);
-
-    vec3 outSpecular = vec3(0, 0, 0);
-    vec3 outReflect = vec3(0, 0, 0);
-    if (shininess > 0) {
-        vec3 lightReflect = reflect(lightVec, normal);
-        vec3 viewReflect = reflect(incident, normal);
-
-        // Environment map reflection:
-        float phongViewSpecular = phong(incident, viewReflect, shininess);
-        vec4 tmp_sampleCoord = modelViewInverse * vec4(viewReflect, 0);
-        vec3 sampleCoord = tmp_sampleCoord.xyz;
-        vec4 reflectCol = texture(texEnvironmentMap, sampleCoord);
-        vec3 envReflectCol = reflectCol.rgb * phongViewSpecular;
-
-        // Specular reflection:
-        float phongSpecular = phong(incident, lightReflect, shininess);
-        vec3 phongHighlightCol = light.colSpecular * phongSpecular;
-
-        outSpecular = phongHighlightCol * colSpecular;
-        outReflect = envReflectCol * colSpecular;
-    }
-
-    // Do shadow mapping:
+float doShadowMapping() {
     float isLit = 1.0;
     if (light.hasShadowMap) {
-      vec4 lightClipPos = light.proj * light.view * viewInverse * eyeSpacePosition;
+        vec4 lightClipPos = light.proj * light.view * viewInverse * eyeSpacePosition;
 //      vec4 lightClipPos = light.proj * light.view * inverse(view) * eyeSpacePosition;
 
         vec3 lightClipPosDivided = lightClipPos.xyz / lightClipPos.w;
@@ -121,8 +79,8 @@ void main() {
         float upper = 1;
         float lower = 0;
         if (shadowLookup.x < lower || shadowLookup.x > upper ||
-            shadowLookup.y < lower || shadowLookup.y > upper
-            || shadowLookup.z > upper // || shadowLookup.z < lower
+                shadowLookup.y < lower || shadowLookup.y > upper
+                || shadowLookup.z > upper // || shadowLookup.z < lower
                 ) {
             isLit = 0;
 //            outColor = vec4(0.5, 0, 0, 1);
@@ -131,20 +89,69 @@ void main() {
 //            outColor = vec4(1, 0, 0, 1);
         }
 
-//        outColor = vec4(shadowLookup.x / shadowLookup.w, shadowLookup.y / shadowLookup.w, 0, 1);
 //        outColor = vec4(shadowDepth, shadowDepth, shadowDepth, 1);
 //        return;
     }
 
-    vec4 texCol = texture(texDiffuse, Texcoord);
-    vec3 outDiffuse = texCol.rgb * colDiffuse * light.colDiffuse * clamp(-lightDot, 0, 1);
+    return isLit;
+}
 
+void main() {
+    // face normal in eye space:
+    vec3 normal = normalize(eyeSpaceNormal.xyz);
+    vec3 lightVecRaw = eyeSpacePosition.xyz - (view * vec4(light.pos, 1)).xyz;
+    vec3 lightVec = normalize(lightVecRaw);
+
+    // Don't show lighting on surfaces that are facing the wrong way:
+    float lightDot = -dot(lightVec, normal);
+    float normalDirTest = 1;
+    #define DOT_CUTOFF 0.11
+    if (lightDot < DOT_CUTOFF) {
+        // Use a ramp near zero to remove noise when the light is very near the plane of the surface.
+        normalDirTest = lightDot > 0 ? (1.0 / DOT_CUTOFF) * lightDot : 0;
+
+//      // What it looks like without the ramp (causes speckles when the light it coplanar with the surface).
+//        float normalDirTest = lightDot < 0 ? 1 : 0;
+//        outColor = vec4(1, 0, 1, 1) * normalDirTest;
+//        return;
+    }
+
+    vec3 incident = normalize(eyeSpacePosition.xyz);
+
+    // Environment map reflection:
+    vec3 outReflect = vec3(0, 0, 0);
+    if (shininess > 0) {
+        vec3 viewReflect = reflect(incident, normal);
+        float phongViewSpecular = phong(incident, viewReflect, shininess);
+        vec4 tmp_sampleCoord = modelViewInverse * vec4(viewReflect, 0);
+        vec3 sampleCoord = tmp_sampleCoord.xyz;
+        vec4 reflectCol = texture(texEnvironmentMap, sampleCoord);
+        vec3 envReflectCol = reflectCol.rgb * phongViewSpecular;
+        outReflect = envReflectCol * colSpecular;
+    }
+
+    // Specular reflection:
+    vec3 outSpecular = vec3(0, 0, 0);
+    if (shininess > 0) {
+        vec3 lightReflect = reflect(lightVec, normal);
+        float phongSpecular = phong(incident, lightReflect, shininess);
+        vec3 phongHighlightCol = light.colSpecular * phongSpecular;
+        outSpecular = phongHighlightCol * colSpecular;
+    }
+
+    // Shadow mapping:
+    float isLit = doShadowMapping();
+
+    // Diffuse component:
+    vec4 texCol = texture(texDiffuse, Texcoord);
+    vec3 outDiffuse = texCol.rgb * colDiffuse * light.colDiffuse * clamp(lightDot, 0, 1);
+
+    // Ambient component:
     vec3 outAmbient = colAmbient * light.colAmbient;
 
+    // Final colour:
     float intensity = calculateIntensity(length(lightVecRaw));
     vec3 finalColor = outAmbient + outReflect + (outDiffuse + outSpecular) * intensity * isLit * normalDirTest;
 
     outColor = vec4(finalColor, 1.0);
-
-//    outColor = vec4(shadowDepth, shadowDepth, shadowDepth, 1.0);
 }

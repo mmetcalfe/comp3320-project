@@ -429,9 +429,11 @@ void Model::drawNodeDepth(Model::Node &node, glm::mat4 parentNodeTransform, Came
     glm::mat4 model = parentNodeTransform * node.transform;
 
     shadowMapProgram->use();
-    shadowMapProgram->setUniform("model", model);
-    shadowMapProgram->setUniform("view", camera.view);
-    shadowMapProgram->setUniform("proj", camera.proj);
+    shadowMapProgram->setUniformIfActive("model", model);
+    shadowMapProgram->setUniformIfActive("view", camera.view);
+    shadowMapProgram->setUniformIfActive("proj", camera.proj);
+    glm::mat4 mvp = camera.proj * camera.view * model;
+    shadowMapProgram->setUniformIfActive("mvp", mvp);
 
     auto vertexArray = std::make_unique<NUGL::VertexArray>();
     vertexArray->bind();
@@ -577,38 +579,39 @@ void Model::prepareMaterialShaderProgram(std::shared_ptr<Material> material,
 
 }
 
+
 void Model::setCameraUniformsOnShaderPrograms(Camera &camera, glm::mat4 model) {
+    glm::mat4 mvp = camera.proj * camera.view * model;
+
     if (textureProgram != nullptr) {
         textureProgram->use();
-        textureProgram->setUniform("model", model);
-        textureProgram->setUniform("view", camera.view);
-        textureProgram->setUniform("proj", camera.proj);
+        textureProgram->setUniformIfActive("model", model);
+        textureProgram->setUniformIfActive("view", camera.view);
+        textureProgram->setUniformIfActive("proj", camera.proj);
     }
 
     if (flatProgram != nullptr) {
         flatProgram->use();
-        flatProgram->setUniform("model", model);
-        flatProgram->setUniform("view", camera.view);
-        flatProgram->setUniform("proj", camera.proj);
+        flatProgram->setUniformIfActive("model", model);
+        flatProgram->setUniformIfActive("view", camera.view);
+        flatProgram->setUniformIfActive("proj", camera.proj);
     }
 
     if (environmentMapProgram != nullptr) {
         if (environmentMapProgram != nullptr) {
             environmentMapProgram->use();
-            environmentMapProgram->setUniform("model", model);
-            environmentMapProgram->setUniform("view", camera.view);
-            environmentMapProgram->setUniform("proj", camera.proj);
+            environmentMapProgram->setUniformIfActive("model", model);
+            environmentMapProgram->setUniformIfActive("view", camera.view);
+            environmentMapProgram->setUniformIfActive("proj", camera.proj);
 
-            if (environmentMapProgram->uniformIsActive("modelViewInverse")) {
-                // We don't invert the transforms relating to the model's internal structure.
-                glm::mat4 modelViewInverse = glm::inverse(camera.view * transform);
-                environmentMapProgram->setUniform("modelViewInverse", modelViewInverse);
-            }
+            environmentMapProgram->setUniformIfActive("mvp", mvp);
 
-            if (environmentMapProgram->uniformIsActive("viewInverse")) {
-                glm::mat4 viewInverse = glm::inverse(camera.view);
-                environmentMapProgram->setUniform("viewInverse", viewInverse);
-            }
+            // We don't invert the transforms relating to the model's internal structure.
+            glm::mat4 modelViewInverse = glm::inverse(camera.view * transform);
+            environmentMapProgram->setUniformIfActive("modelViewInverse", modelViewInverse);
+
+            glm::mat4 viewInverse = glm::inverse(camera.view);
+            environmentMapProgram->setUniformIfActive("viewInverse", viewInverse);
         }
     }
 }

@@ -11,7 +11,8 @@ out vec3 eyeSpaceNormal;
 
 uniform mat4 model;
 uniform mat4 view;
-uniform mat4 proj;
+//uniform mat4 proj;
+uniform mat4 mvp;
 //uniform mat4 viewInverse;
 //
 //// Light uniforms:
@@ -38,7 +39,8 @@ uniform mat4 proj;
 
 void main() {
     Texcoord = texcoord;
-    gl_Position = proj * view * model * vec4(position, 1.0);
+//    gl_Position = proj * view * model * vec4(position, 1.0);
+    gl_Position = mvp * vec4(position, 1.0);
 
     mat4 modelView = view * model;
 

@@ -187,6 +187,12 @@ namespace NUGL {
         }
 
         template<typename T>
+        inline void setUniformIfActive(const std::string& name, const T& value) {
+            if (uniformIsActive(name))
+                setUniform(name, value);
+        }
+
+        template<typename T>
         inline void setUniform(const std::string& name, const T& value) {
             GLint uniLoc = getUniformLocation(name);
             setUniform(uniLoc, value);
