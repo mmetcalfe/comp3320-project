@@ -1,5 +1,7 @@
 #include "scene/Scene.h"
 #include <tuple>
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include "NUGL/Framebuffer.h"
 #include "NUGL/Renderbuffer.h"
 #include "utility/PostprocessingScreen.h"
@@ -160,37 +162,116 @@ namespace scene {
     }
 
     void Scene::render() {
+        glClearColor(0, 0, 0, 1.0);
         profiler.split("other");
 
-        glClearColor(0, 0, 0, 1.0);
-
-        // Prepare dynamic reflection maps:
-        int refMapNum = 1;
-        for (auto model : models) {
-            if (!model->dynamicReflections)
-                continue;
-
-            if (model->texEnvironmentMap == nullptr) {
-                auto tex = createCubeMapTexture(reflectionMapSize);
-                model->setEnvironmentMap(std::move(tex));
-                profiler.split("create reflection map ", refMapNum);
-            }
-
-            renderReflectionMap(model);
-            profiler.split("reflection map ", refMapNum++);
-//            model->setEnvironmentMap(reflectionFramebuffer->textureAttachment);
-        }
+        renderDynamicReflectionMaps();
 
         // Clear the screen:
         NUGL::Framebuffer::useDefault();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+//        forwardRender();
+        deferredRender();
+
+        profiler.printEvery(1);
+    }
+
+    void Scene::deferredRender() {
+        // Requires:
+        //  - A g-buffer class to store framebuffers for each attribute;
+        //  - Code to bind each framebuffer to a separate fragdatalocation;
+        //  - A g-buffer shader program that populates the g-buffer when rendering geometry;
+        //  - A VAO for each mesh to support the g-buffer shader program;
+        //  - Deferred shading programs that take input from the g-buffer instead of the vertex shader, etc.;
+
+        // Render all geometry to g-buffer:
+//        for (auto model : models) {
+//            model->draw(*camera, sharedLight, lightCamera);
+//        }
+
+        // Attach g-buffer uniforms to the deferred shaders:
+
+        // Run the deferred shader over the framebuffer for each light:
+
+
         int lightNum = 1;
         for (auto light : lights) {
             auto sharedLight = light.lock();
 
-            std::shared_ptr<LightCamera> lightCamera;
-            if (sharedLight->type == Light::Type::spot) {
+            auto lightCamera = prepareShadowMap(lightNum, sharedLight);
+
+            // Render the light's contribution to the framebuffer:
+            framebuffer->bind();
+            glViewport(0, 0, camera->frameWidth, camera->frameHeight);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            drawModels(sharedLight, lightCamera);
+
+            profiler.split("framebuffer ", lightNum);
+
+            // Add the light's contribution to the screen:
+            addFramebufferToScreen();
+
+            // Render a tiny shadow map:
+            drawShadowMapThumbnail(lightNum);
+
+            profiler.split("light ", lightNum);
+            lightNum++;
+        }
+    }
+
+    void Scene::forwardRender() {
+        int lightNum = 1;
+        for (auto light : lights) {
+            auto sharedLight = light.lock();
+
+            auto lightCamera = prepareShadowMap(lightNum, sharedLight);
+
+            // Render the light's contribution to the framebuffer:
+            framebuffer->bind();
+            glViewport(0, 0, camera->frameWidth, camera->frameHeight);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            drawModels(sharedLight, lightCamera);
+
+            profiler.split("framebuffer ", lightNum);
+
+            // Add the light's contribution to the screen:
+            addFramebufferToScreen();
+
+            // Render a tiny shadow map:
+            drawShadowMapThumbnail(lightNum);
+
+            profiler.split("light ", lightNum);
+            lightNum++;
+        }
+    }
+
+    void Scene::drawShadowMapThumbnail(int lightNum) {
+        screen->screenProgram->use();
+        screen->screenProgram->setUniform("texDiffuse", shadowMapFramebuffer->textureAttachment);
+        glm::mat4 previewModel;
+        previewModel = glm::scale(previewModel, glm::vec3(0.2f, 0.2, 1.0f));
+        previewModel = glm::translate(previewModel, glm::vec3(-4.0f + (lightNum - 1) * 2, -4.0f, 0.0f));
+        screen->screenProgram->setUniform("model", previewModel);
+        screen->render();
+    }
+
+    void Scene::addFramebufferToScreen() {
+        NUGL::Framebuffer::useDefault();
+        glViewport(0, 0, framebufferSize.x, framebufferSize.y);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+        framebuffer->textureAttachment->bind();
+        screen->screenProgram->use();
+        screen->screenProgram->setUniform("texDiffuse", framebuffer->textureAttachment);
+        screen->screenProgram->setUniform("model", glm::mat4());
+        screen->render();
+        glDisable(GL_BLEND);
+    }
+
+    std::shared_ptr<LightCamera> Scene::prepareShadowMap(int lightNum, std::shared_ptr<Light> sharedLight) {
+        std::__1::shared_ptr<LightCamera> lightCamera;
+        if (sharedLight->type == Light::Type::spot) {
                 lightCamera = LightCamera::fromLight(*sharedLight, shadowMapSize);
                 // Render light's perspective into shadowMap.
                 shadowMapFramebuffer->bind();
@@ -214,45 +295,31 @@ namespace scene {
 
                 profiler.split("shadow map ", lightNum);
             }
+        return lightCamera;
+    }
 
-            // Render the light's contribution to the framebuffer:
-            framebuffer->bind();
-            glViewport(0, 0, camera->frameWidth, camera->frameHeight);
-
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            for (auto model : models) {
+    void Scene::drawModels(std::shared_ptr<Light> sharedLight, std::shared_ptr<LightCamera> lightCamera) {
+        for (auto model : models) {
                 model->draw(*camera, sharedLight, lightCamera);
             }
+    }
 
-            profiler.split("framebuffer ", lightNum);
+    void Scene::renderDynamicReflectionMaps() {
+        int refMapNum = 1;
+        for (auto model : models) {
+            if (!model->dynamicReflections)
+                continue;
 
-            // Add the light's contribution to the screen:
-            NUGL::Framebuffer::useDefault();
-            glViewport(0, 0, framebufferSize.x, framebufferSize.y);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-            framebuffer->textureAttachment->bind();
-            screen->screenProgram->use();
-            screen->screenProgram->setUniform("texDiffuse", framebuffer->textureAttachment);
-            screen->screenProgram->setUniform("model", glm::mat4());
-            screen->render();
-            glDisable(GL_BLEND);
+            if (model->texEnvironmentMap == nullptr) {
+                auto tex = createCubeMapTexture(reflectionMapSize);
+                model->setEnvironmentMap(move(tex));
+                profiler.split("create reflection map ", refMapNum);
+            }
 
-            // Render a tiny shadow map:
-            screen->screenProgram->use();
-            screen->screenProgram->setUniform("texDiffuse", shadowMapFramebuffer->textureAttachment);
-            glm::mat4 previewModel;
-            previewModel = glm::scale(previewModel, glm::vec3(0.2f, 0.2, 1.0f));
-            previewModel = glm::translate(previewModel, glm::vec3(-4.0f, -4.0f, 0.0f));
-            screen->screenProgram->setUniform("model", previewModel);
-            screen->render();
-
-            profiler.split("light ", lightNum);
-            lightNum++;
+            renderReflectionMap(model);
+            profiler.split("reflection map ", refMapNum++);
+//            model->setEnvironmentMap(reflectionFramebuffer->textureAttachment);
         }
-
-        profiler.printEvery(1);
     }
 
     void Scene::addModel(std::shared_ptr<Model> model) {

@@ -17,6 +17,9 @@ namespace scene {
         Scene(std::shared_ptr<NUGL::ShaderProgram> screenProgram, glm::ivec2 windowSize, glm::ivec2 framebufferSize);
 
         void render();
+        void forwardRender();
+        void deferredRender();
+
         void addModel(std::shared_ptr<Model>);
 
         void prepareFramebuffer(int width, int height);
@@ -43,6 +46,15 @@ namespace scene {
         glm::ivec2 framebufferSize = {800, 600};
 
         void renderReflectionMap(std::shared_ptr<Model> shared_ptr);
+        void renderDynamicReflectionMaps();
+
+        void drawModels(std::shared_ptr<Light> sharedLight, std::shared_ptr<LightCamera> lightCamera);
+
+        std::shared_ptr<LightCamera> prepareShadowMap(int lightNum, std::shared_ptr<Light> sharedLight);
+
+        void addFramebufferToScreen();
+
+        void drawShadowMapThumbnail(int lightNum);
     };
 
 }
