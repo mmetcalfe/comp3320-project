@@ -15,7 +15,7 @@ namespace scene {
         this->windowSize = windowSize;
         this->framebufferSize = framebufferSize;
 
-        prepareFramebuffer(windowSize.x, windowSize.y);
+        prepareFramebuffer(windowSize);
         prepareShadowMapFramebuffer(shadowMapSize);
         prepareReflectionFramebuffer(reflectionMapSize);
         prepareGBuffer(windowSize);
@@ -23,23 +23,64 @@ namespace scene {
         screen = std::make_unique<utility::PostprocessingScreen>(screenProgram);
     }
 
-    void Scene::prepareFramebuffer(int width, int height) {
-        auto tex = std::make_unique<NUGL::Texture>(GL_TEXTURE0, GL_TEXTURE_2D);
-        tex->setTextureData(GL_TEXTURE_2D, width, height, nullptr);
-        tex->setDefaultParams();
-        checkForAndPrintGLError(__FILE__, __LINE__);
+    void Scene::prepareFramebuffer(glm::ivec2 windowSize) {
+        auto tex = NUGL::Texture::createTexture(GL_TEXTURE0, GL_TEXTURE_2D, windowSize.x, windowSize.y, GL_RGB);
 
         auto rbo  = std::make_unique<NUGL::Renderbuffer>();
-        rbo->setStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+        rbo->setStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, windowSize.x, windowSize.y);
 
         framebuffer = std::make_unique<NUGL::Framebuffer>();
         framebuffer->attach(std::move(tex));
         framebuffer->attach(std::move(rbo));
     }
 
+    void Scene::prepareGBuffer(glm::ivec2 windowSize) {
+        /*
+         * G-Buffer format:
+         * |--------+--------+--------+--------|--------|
+         * |   R8   |   G8   |   B8   |   A8   | attach |
+         * |--------+--------+--------+--------|--------|
+         * |          depth           | stencil|   DS   |
+         * |--------+--------+--------+--------|--------|
+         * | normal x (FP16) | normal y (FP16) |   RT0  | outNormal
+         * |--------+--------+--------+--------|--------|
+         * |      diffuse albedo      | rough  |   RT1  | outAlbedoRoughness
+         * |--------+--------+--------+--------|--------|
+         * |      env map col         | spec in|   RT2  | outEnvMapColSpecIntensity
+         * |--------+--------+--------+--------|--------|
+         * |                          |        |   RT3  |
+         * |--------+--------+--------+--------|--------|
+         */
+
+        GLenum unit = GL_TEXTURE8;
+        auto depthTex = NUGL::Texture::createTexture(unit++, GL_TEXTURE_2D, windowSize.x, windowSize.y, GL_DEPTH24_STENCIL8, GL_DEPTH_COMPONENT);
+        auto normalsTex = NUGL::Texture::createTexture(unit++, GL_TEXTURE_2D, windowSize.x, windowSize.y, GL_RG16F);
+        auto albedoTex = NUGL::Texture::createTexture(unit++, GL_TEXTURE_2D, windowSize.x, windowSize.y, GL_RGBA8);
+        auto envMapColTex = NUGL::Texture::createTexture(unit++, GL_TEXTURE_2D, windowSize.x, windowSize.y, GL_RGBA8);
+
+        checkForAndPrintGLError(__FILE__, __LINE__);
+
+        GLenum attach = GL_COLOR_ATTACHMENT0;
+        auto gBuffer = std::make_unique<NUGL::Framebuffer>();
+        gBuffer->attach(std::move(depthTex), GL_TEXTURE_2D, GL_DEPTH_STENCIL_ATTACHMENT);
+        gBuffer->attach(std::move(normalsTex), GL_TEXTURE_2D, attach++);
+        gBuffer->attach(std::move(albedoTex), GL_TEXTURE_2D, attach++);
+        gBuffer->attach(std::move(envMapColTex), GL_TEXTURE_2D, attach++);
+
+        checkForAndPrintGLError(__FILE__, __LINE__);
+
+
+        this->gBuffer = std::move(gBuffer);
+
+        std::cerr << __FILE__ << ", " << __LINE__ << ": "
+        <<  getFramebufferStatusString(glCheckFramebufferStatus(GL_FRAMEBUFFER))
+        << std::endl;
+
+        NUGL::Framebuffer::useDefault();
+    }
+
     void Scene::prepareShadowMapFramebuffer(int size) {
         auto tex = std::make_unique<NUGL::Texture>(GL_TEXTURE1, GL_TEXTURE_2D);
-//        tex->setTextureData(GL_TEXTURE_2D, size, size, nullptr);
         tex->setTextureData(GL_TEXTURE_2D, size, size, nullptr, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT);
         checkForAndPrintGLError(__FILE__, __LINE__);
         tex->setParam(GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -47,13 +88,8 @@ namespace scene {
         tex->setParam(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         tex->setParam(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-//        auto rbo  = std::make_unique<NUGL::Renderbuffer>();
-//        rbo->setStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, size, size);
-
         shadowMapFramebuffer = std::make_unique<NUGL::Framebuffer>();
-//        shadowMapFramebuffer->attach(std::move(tex));
         shadowMapFramebuffer->attach(std::move(tex), GL_TEXTURE_2D, GL_DEPTH_ATTACHMENT);
-//        shadowMapFramebuffer->attach(std::move(rbo));
 
         shadowMapFramebuffer->bind(GL_FRAMEBUFFER);
         glDrawBuffer(GL_NONE);
@@ -81,14 +117,15 @@ namespace scene {
     }
 
     void Scene::prepareReflectionFramebuffer(int size) {
-//        auto tex = createCubeMapTexture(size);
         auto rbo  = std::make_unique<NUGL::Renderbuffer>();
         rbo->setStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, size, size);
 
         reflectionFramebuffer = std::make_unique<NUGL::Framebuffer>();
-//        reflectionFramebuffer->attach(std::move(tex), GL_TEXTURE_CUBE_MAP_POSITIVE_X);
         reflectionFramebuffer->attach(std::move(rbo));
 
+//        auto depthTex = std::make_unique<NUGL::Texture>(GL_TEXTURE15, GL_TEXTURE_2D);
+//        depthTex->setTextureData(GL_TEXTURE_2D, windowSize.x, windowSize.y, nullptr, GL_DEPTH_COMPONENT, GL_DEPTH_COMPONENT);
+//        depthTex->setDefaultParams();
 //        std::cerr << __FILE__ << ", " << __LINE__ << ": "
 //                <<  getFramebufferStatusString(glCheckFramebufferStatus(GL_FRAMEBUFFER))
 //                << std::endl;
@@ -127,14 +164,6 @@ namespace scene {
             std::tie(target, mapCamera.dir, mapCamera.up) = params;
             mapCamera.prepareTransforms();
             reflectionFramebuffer->attach(model->texEnvironmentMap, target);
-//            reflectionFramebuffer->attach(reflectionFramebuffer->textureAttachment, target);
-
-//        model->meshes[0].material->texEnvironmentMap->bind();
-//        model->meshes[0].material->texEnvironmentMap->setTextureData(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 128, 128, nullptr);
-
-//        reflectionFramebuffer->bind(GL_FRAMEBUFFER);
-//        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X,
-//                model->meshes[0].material->texEnvironmentMap->id(), 0);
 
             reflectionFramebuffer->bind();
             glViewport(0, 0, mapCamera.frameWidth, mapCamera.frameHeight);
@@ -148,7 +177,7 @@ namespace scene {
                 drawModel->shadowMapProgram = shadowMapProgram;
 //                auto prog = drawModel->environmentMapProgram;
 //                drawModel->environmentMapProgram = nullptr;
-//                drawModel->drawWithShaderProgram(mapCamera);
+//                drawModel->draw(mapCamera);
                 drawModel->draw(mapCamera, sharedLight, nullptr);
 //                drawModel->environmentMapProgram = prog;
             }
@@ -171,36 +200,6 @@ namespace scene {
         profiler.printEvery(1);
     }
 
-    void Scene::prepareGBuffer(glm::ivec2 windowSize) {
-        /*
-         * G-Buffer format:
-         * |--------+--------+--------+--------|--------|
-         * |   R8   |   G8   |   B8   |   A8   | attach |
-         * |--------+--------+--------+--------|--------|
-         * |          depth           | stencil|   DS   |
-         * |--------+--------+--------+--------|--------|
-         * | normal x (FP16) | normal y (FP16) |   RT0  | outNormal
-         * |--------+--------+--------+--------|--------|
-         * |      diffuse albedo      | rough  |   RT1  | outAlbedoRoughness
-         * |--------+--------+--------+--------|--------|
-         * |      env map col         | spec in|   RT2  | outEnvMapColSpecIntensity
-         * |--------+--------+--------+--------|--------|
-         * |                          |        |   RT3  |
-         * |--------+--------+--------+--------|--------|
-         */
-
-        GLenum unit = GL_TEXTURE8;
-        auto depthTex = NUGL::Texture::createTexture(unit++, GL_TEXTURE_2D, windowSize.x, windowSize.y, GL_RGBA8);
-        auto normalsTex = NUGL::Texture::createTexture(unit++, GL_TEXTURE_2D, windowSize.x, windowSize.y, GL_RG16F);
-        auto albedoTex = NUGL::Texture::createTexture(unit++, GL_TEXTURE_2D, windowSize.x, windowSize.y, GL_RGBA8);
-        auto envMapColTex = NUGL::Texture::createTexture(unit++, GL_TEXTURE_2D, windowSize.x, windowSize.y, GL_RGBA8);
-
-        auto gBuffer = std::make_unique<NUGL::Framebuffer>();
-        gBuffer->attach(std::move(depthTex), GL_TEXTURE_2D, GL_DEPTH_STENCIL_ATTACHMENT);
-        gBuffer->attach(std::move(normalsTex), GL_TEXTURE_2D, GL_COLOR_ATTACHMENT0);
-        gBuffer->attach(std::move(albedoTex), GL_TEXTURE_2D, GL_COLOR_ATTACHMENT1);
-        gBuffer->attach(std::move(envMapColTex), GL_TEXTURE_2D, GL_COLOR_ATTACHMENT2);
-    }
 
     void Scene::deferredRender() {
         // Requires:
@@ -212,16 +211,20 @@ namespace scene {
 
 
         // Render all geometry to g-buffer:
-//        for (auto model : models) {
-//            model->draw(*camera, sharedLight, lightCamera);
-//        }
+        gBuffer->bind();
+        GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
+        glDrawBuffers(3,  attachments);
+
+        glViewport(0, 0, camera->frameWidth, camera->frameHeight);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        drawModels(gBufferProgram);
+
+        profiler.split("render g-buffer");
 
         // Attach g-buffer uniforms to the deferred shaders:
 
         // Run the deferred shader over the framebuffer for each light:
-
-        profiler.split("deferred");
-
         int lightNum = 1;
         for (auto light : lights) {
             auto sharedLight = light.lock();
@@ -245,6 +248,29 @@ namespace scene {
             profiler.split("light ", lightNum);
             lightNum++;
         }
+
+        profiler.split("deferred lighting");
+
+        int texNum = 0;
+        for (auto pair : gBuffer->textureAttachments) {
+            auto tex = pair.second;
+
+            screen->screenProgram->use();
+            tex->bind();
+            screen->screenProgram->setUniform("texDiffuse", tex);
+
+            float width = 1.0f / 4;
+
+            glm::mat4 previewModel;
+            previewModel = glm::scale(previewModel, glm::vec3(width, width, 1.0f));
+            previewModel = glm::translate(previewModel, glm::vec3(texNum * 2 - (1/width - 1), (1/width - 1), 0.0f));
+            screen->screenProgram->setUniform("model", previewModel);
+            screen->render();
+
+            texNum++;
+        }
+
+        profiler.split("g-buffer thumbnails");
     }
 
     void Scene::forwardRender() {
@@ -274,8 +300,9 @@ namespace scene {
     }
 
     void Scene::drawShadowMapThumbnail(int lightNum) {
+        framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]->bind();
         screen->screenProgram->use();
-        screen->screenProgram->setUniform("texDiffuse", shadowMapFramebuffer->textureAttachments[0]);
+        screen->screenProgram->setUniform("texDiffuse", shadowMapFramebuffer->textureAttachments[GL_DEPTH_ATTACHMENT]);
         glm::mat4 previewModel;
         previewModel = glm::scale(previewModel, glm::vec3(0.2f, 0.2, 1.0f));
         previewModel = glm::translate(previewModel, glm::vec3(-4.0f + (lightNum - 1) * 2, -4.0f, 0.0f));
@@ -288,16 +315,16 @@ namespace scene {
         glViewport(0, 0, framebufferSize.x, framebufferSize.y);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        framebuffer->textureAttachments[0]->bind();
+        framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]->bind();
         screen->screenProgram->use();
-        screen->screenProgram->setUniform("texDiffuse", framebuffer->textureAttachments[0]);
+        screen->screenProgram->setUniform("texDiffuse", framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
         screen->screenProgram->setUniform("model", glm::mat4());
         screen->render();
         glDisable(GL_BLEND);
     }
 
     std::shared_ptr<LightCamera> Scene::prepareShadowMap(int lightNum, std::shared_ptr<Light> sharedLight) {
-        std::__1::shared_ptr<LightCamera> lightCamera;
+        std::shared_ptr<LightCamera> lightCamera;
         if (sharedLight->type == Light::Type::spot) {
                 lightCamera = LightCamera::fromLight(*sharedLight, shadowMapSize);
                 // Render light's perspective into shadowMap.
@@ -313,12 +340,12 @@ namespace scene {
 
                 for (auto model : models) {
                     model->shadowMapProgram = shadowMapProgram;
-                    model->drawWithShaderProgram(*lightCamera, shadowMapProgram);
+                    model->draw(*lightCamera, shadowMapProgram);
                 }
 
                 glDisable(GL_CULL_FACE);
 
-                lightCamera->shadowMap = shadowMapFramebuffer->textureAttachments[0];
+                lightCamera->shadowMap = shadowMapFramebuffer->textureAttachments[GL_DEPTH_ATTACHMENT];
 
                 profiler.split("shadow map ", lightNum);
             }
@@ -327,8 +354,14 @@ namespace scene {
 
     void Scene::drawModels(std::shared_ptr<Light> sharedLight, std::shared_ptr<LightCamera> lightCamera) {
         for (auto model : models) {
-                model->draw(*camera, sharedLight, lightCamera);
-            }
+            model->draw(*camera, sharedLight, lightCamera);
+        }
+    }
+
+    void Scene::drawModels(std::shared_ptr<NUGL::ShaderProgram> program) {
+        for (auto model : models) {
+            model->draw(*camera, program);
+        }
     }
 
     void Scene::renderDynamicReflectionMaps() {
@@ -357,6 +390,4 @@ namespace scene {
             lights.push_back(weak);
         }
     }
-
-
 }

@@ -32,9 +32,9 @@ namespace NUGL {
 
         inline void bind() {
             glActiveTexture(textureUnit);
-            checkForAndPrintGLError(__FILE__, __LINE__);
+//            checkForAndPrintGLError(__FILE__, __LINE__);
             glBindTexture(textureTarget, textureId);
-            checkForAndPrintGLError(__FILE__, __LINE__);
+//            checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
         //! Face order is: +X, -X, +Y, -Y, +Z, -Z.
@@ -50,7 +50,7 @@ namespace NUGL {
             bind();
             for (int i = 0; i < 6; i++) {
                 loadFromImage(faceFileNames[i], GL_TEXTURE_CUBE_MAP_POSITIVE_X + i);
-                checkForAndPrintGLError(__func__, __LINE__);
+//                checkForAndPrintGLError(__func__, __LINE__);
             }
         }
 
@@ -84,7 +84,7 @@ namespace NUGL {
                 throw std::invalid_argument(errMsg.str());
             }
 
-            checkForAndPrintGLError(__FILE__, __LINE__);
+//            checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
         inline void setTextureData(GLenum target, GLsizei width, GLsizei height, const GLvoid *pixels,
@@ -92,20 +92,21 @@ namespace NUGL {
             bind();
             if ((width % 4) == 0) {
                 glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-                checkForAndPrintGLError(__FILE__, __LINE__);
+//                checkForAndPrintGLError(__FILE__, __LINE__);
             } else {
                 glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-                checkForAndPrintGLError(__FILE__, __LINE__);
+//                checkForAndPrintGLError(__FILE__, __LINE__);
             }
             glTexImage2D(target, 0, internalFormat,
                     width, height,
                     0, format, GL_UNSIGNED_BYTE, pixels); // TODO: Check byte formats
-            checkForAndPrintGLError(__FILE__, __LINE__);
+////            checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
-        static inline std::unique_ptr<Texture> createTexture(GLenum unit, GLenum target, GLsizei width, GLsizei height, GLenum internalFormat = GL_RGB) {
+        static inline std::unique_ptr<Texture> createTexture(GLenum unit, GLenum target, GLsizei width, GLsizei height,
+                GLenum internalFormat, GLenum format = GL_RGBA) {
             auto newTex = std::make_unique<NUGL::Texture>(unit, target);
-            newTex->setTextureData(target, width, height, nullptr, GL_RGBA, internalFormat);
+            newTex->setTextureData(target, width, height, nullptr, format, internalFormat);
             newTex->setDefaultParams();
 
             return std::move(newTex);
@@ -175,7 +176,7 @@ namespace NUGL {
 
         inline void setParam(GLenum param, GLint value) {
             glTexParameteri(textureTarget, param, value);
-            checkForAndPrintGLError(__FILE__, __LINE__);
+////            checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
         inline void setDefaultParams() {
@@ -193,7 +194,7 @@ namespace NUGL {
                 setParam(GL_TEXTURE_MAX_LEVEL, 0);
             }
 
-            checkForAndPrintGLError(__FILE__, __LINE__);
+////            checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
         inline GLuint id() {

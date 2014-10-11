@@ -22,14 +22,14 @@ namespace scene {
 
         void addModel(std::shared_ptr<Model>);
 
-        void prepareFramebuffer(int width, int height);
+        void prepareFramebuffer(glm::ivec2 windowSize);
         void prepareShadowMapFramebuffer(int size);
         void prepareReflectionFramebuffer(int size);
 
         std::vector<std::shared_ptr<Model>> models;
         /**
-        * Weak pointers to all lights attached to all models in the scene.
-        */
+         * Weak pointers to all lights attached to all models in the scene.
+         */
         std::vector<std::weak_ptr<Light>> lights;
         std::unique_ptr<PlayerCamera> camera;
         std::unique_ptr<NUGL::Framebuffer> framebuffer;
@@ -59,6 +59,8 @@ namespace scene {
         void drawShadowMapThumbnail(int lightNum);
 
         void prepareGBuffer(glm::ivec2 ivec2);
+
+        void drawModels(std::shared_ptr<NUGL::ShaderProgram> shared_ptr);
     };
 
 }

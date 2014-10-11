@@ -26,7 +26,7 @@ out vec4 outNormal;
 out vec4 outAlbedoRoughness;
 out vec4 outEnvMapColSpecIntensity;
 
-uniform mat4 viewInverse;
+uniform mat4 modelViewInverse;
 
 // Material uniforms
 uniform vec3 colDiffuse;
@@ -45,10 +45,10 @@ void main() {
     outNormal.xy = normal.xy;
 
     // Environment map reflection:
-    outEnvMapColSpecIntensity.rgb = vec3(0, 0, 0);
+    outEnvMapColSpecIntensity.rgba = vec4(0, 0, 0, 0);
     if (shininess > 0) {
         vec3 viewReflect = reflect(incident, normal);
-        vec4 sampleCoord = viewInverse * vec4(viewReflect, 0);
+        vec4 sampleCoord = modelViewInverse * vec4(viewReflect, 0);
         vec4 reflectCol = texture(texEnvironmentMap, sampleCoord.xyz);
         outEnvMapColSpecIntensity.rgb = reflectCol.rgb * colSpecular;
     }

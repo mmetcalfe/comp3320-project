@@ -120,7 +120,7 @@ namespace scene {
         void drawNode(Model::Node &node, glm::mat4 parentModel, Camera &camera, std::shared_ptr<Light> light,
                 std::shared_ptr<LightCamera> lightCamera);
 
-        void drawWithShaderProgram(Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program);
+        void draw(Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program);
         void drawNodeWithProgram(Model::Node &node, glm::mat4 parentModel, Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program);
 
         static std::shared_ptr<Model> loadFromFile(const std::string &fileName);

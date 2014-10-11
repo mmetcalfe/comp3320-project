@@ -41,7 +41,7 @@ void framebufferSizeCallback(GLFWwindow* window, int fbWidth, int fbHeight) {
 
     mainScene->framebufferSize = {fbWidth, fbHeight};
     mainScene->windowSize = {width, height};
-    mainScene->prepareFramebuffer(width, height);
+    mainScene->prepareFramebuffer(mainScene->windowSize);
 
     mainScene->camera->frameWidth = fbWidth;
     mainScene->camera->frameHeight = fbHeight;

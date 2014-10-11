@@ -228,6 +228,8 @@ void copyAiNode(const aiNode *pNode, Model::Node &node) {
 }
 
 std::shared_ptr<Model> Model::loadFromFile(const std::string &fileName) {
+    std::cout << "Loading '" << fileName << "'..."<< std::endl;
+
     Assimp::Importer importer;
     const aiScene *scene = importer.ReadFile(fileName, getPostProcessingFlags());
 
@@ -239,7 +241,7 @@ std::shared_ptr<Model> Model::loadFromFile(const std::string &fileName) {
         throw std::invalid_argument(errMsg.str().c_str());
     }
 
-    utility::printAiSceneInfo(scene);
+//    utility::printAiSceneInfo(scene);
 
     std::shared_ptr<Model> sceneModel = std::make_shared<Model>(fileName);
 
@@ -427,7 +429,7 @@ glm::mat4 Model::buildModelTransform(glm::vec3 pos, glm::vec3 dir, glm::vec3 up,
     return glm::inverse(orientation) * model;
 }
 
-void Model::drawWithShaderProgram(Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program) {
+void Model::draw(Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program) {
     transform = buildModelTransform(pos, dir, up, scale);
 
     drawNodeWithProgram(rootNode, transform, camera, program);
@@ -436,10 +438,13 @@ void Model::drawWithShaderProgram(Camera &camera, std::shared_ptr<NUGL::ShaderPr
 void Model::drawNodeWithProgram(Model::Node &node, glm::mat4 parentNodeTransform, Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program) {
     glm::mat4 model = parentNodeTransform * node.transform;
 
+    program->use();
     setCameraUniformsOnShaderProgram(program, camera, model);
 
     for (int index : node.meshes) {
         auto &mesh = meshes[index];
+
+        prepareMaterialShaderProgram(mesh.material, program);
 
         if (!mesh.vertexArrayMap.count(*program)) {
             mesh.prepareVertexArrayForShaderProgram(program);
