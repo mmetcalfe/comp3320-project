@@ -35,8 +35,10 @@ namespace scene {
         std::unique_ptr<NUGL::Framebuffer> framebuffer;
         std::unique_ptr<NUGL::Framebuffer> shadowMapFramebuffer;
         std::unique_ptr<NUGL::Framebuffer> reflectionFramebuffer;
+        std::unique_ptr<NUGL::Framebuffer> gBuffer;
         std::unique_ptr<utility::PostprocessingScreen> screen;
         std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram;
+        std::shared_ptr<NUGL::ShaderProgram> gBufferProgram;
 
         Profiler profiler;
 
@@ -55,6 +57,8 @@ namespace scene {
         void addFramebufferToScreen();
 
         void drawShadowMapThumbnail(int lightNum);
+
+        void prepareGBuffer(glm::ivec2 ivec2);
     };
 
 }

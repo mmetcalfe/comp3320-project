@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <stdexcept>
 #include <vector>
 #include <sstream>
@@ -11,6 +12,7 @@
 
 #include <boost/filesystem.hpp>
 
+#include "utility/make_unique.h"
 #include "utility/debug.h"
 
 namespace NUGL {
@@ -90,12 +92,23 @@ namespace NUGL {
             bind();
             if ((width % 4) == 0) {
                 glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+                checkForAndPrintGLError(__FILE__, __LINE__);
             } else {
                 glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+                checkForAndPrintGLError(__FILE__, __LINE__);
             }
             glTexImage2D(target, 0, internalFormat,
                     width, height,
                     0, format, GL_UNSIGNED_BYTE, pixels); // TODO: Check byte formats
+            checkForAndPrintGLError(__FILE__, __LINE__);
+        }
+
+        static inline std::unique_ptr<Texture> createTexture(GLenum unit, GLenum target, GLsizei width, GLsizei height, GLenum internalFormat = GL_RGB) {
+            auto newTex = std::make_unique<NUGL::Texture>(unit, target);
+            newTex->setTextureData(target, width, height, nullptr, GL_RGBA, internalFormat);
+            newTex->setDefaultParams();
+
+            return std::move(newTex);
         }
 
         inline void loadFromPNG(const std::string& fileName, GLenum target) {
@@ -162,6 +175,25 @@ namespace NUGL {
 
         inline void setParam(GLenum param, GLint value) {
             glTexParameteri(textureTarget, param, value);
+            checkForAndPrintGLError(__FILE__, __LINE__);
+        }
+
+        inline void setDefaultParams() {
+            setParam(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            setParam(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+            if (textureTarget == GL_TEXTURE_2D) {
+                setParam(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                setParam(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+            } else if (textureTarget == GL_TEXTURE_CUBE_MAP) {
+                setParam(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                setParam(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                setParam(GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+                setParam(GL_TEXTURE_BASE_LEVEL, 0);
+                setParam(GL_TEXTURE_MAX_LEVEL, 0);
+            }
+
+            checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
         inline GLuint id() {

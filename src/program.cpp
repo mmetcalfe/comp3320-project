@@ -110,6 +110,17 @@ int main(int argc, char** argv) {
 
 
     // Load glsl:
+    auto gBufferProgram = NUGL::ShaderProgram::createSharedFromFiles("gBufferProgram", {
+            {GL_VERTEX_SHADER, "src/glsl/g-buffer.vert"},
+            {GL_FRAGMENT_SHADER, "src/glsl/g-buffer.frag"},
+    });
+    gBufferProgram->bindFragDataLocation(0, "outNormal");
+    gBufferProgram->bindFragDataLocation(1, "outAlbedoRoughness");
+    gBufferProgram->bindFragDataLocation(2, "outEnvMapColSpecIntensity");
+    gBufferProgram->link();
+    gBufferProgram->updateMaterialInfo();
+    gBufferProgram->printDebugInfo();
+
     auto flatProgram = NUGL::ShaderProgram::createSharedFromFiles("flatProgram", {
             {GL_VERTEX_SHADER, "src/glsl/position.vert"},
             {GL_FRAGMENT_SHADER, "src/glsl/uniform.frag"},
@@ -171,6 +182,7 @@ int main(int argc, char** argv) {
             glm::ivec2({fbWidth, fbHeight})
     );
     mainScene->shadowMapProgram = shadowMapProgram;
+    mainScene->gBufferProgram = gBufferProgram;
 
     // Add some lights:
     auto lightModel = std::make_shared<scene::Model>("spotlight 1");
