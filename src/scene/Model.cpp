@@ -380,33 +380,41 @@ void Model::createMeshBuffers() {
     }
 }
 
+void Mesh::prepareVertexArrayForShaderProgram(std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram) {
+    std::vector<NUGL::VertexAttribute> attribs = {
+            {"position", 3, GL_FLOAT, GL_FALSE, !shadowMapProgram->attributeIsActive("position")},
+    };
+
+    if (hasNormals()) {
+        attribs.push_back({"normal", 3, GL_FLOAT, GL_FALSE, !shadowMapProgram->attributeIsActive("normal")});
+    }
+
+    if (isTextured()) {
+        attribs.push_back({"texcoord", 2, GL_FLOAT, GL_FALSE, !shadowMapProgram->attributeIsActive("texcoord")});
+    }
+
+    shadowMapProgram->use();
+
+    auto vertexArray = std::make_unique<NUGL::VertexArray>();
+    vertexArray->bind();
+    vertexArray->setAttributePointers(*shadowMapProgram, *vertexBuffer, GL_ARRAY_BUFFER, attribs);
+
+    vertexArrayMap[*shadowMapProgram] = move(vertexArray);
+}
+
 void Model::createVertexArrays() {
     for (auto &mesh : meshes) {
-        std::vector<NUGL::VertexAttribute> attribs = {
-            {"position", 3, GL_FLOAT, GL_FALSE, false},
-        };
-
-        if (mesh.hasNormals()) {
-            attribs.push_back({"normal", 3, GL_FLOAT, GL_FALSE, false});
-        }
-
         auto program = flatProgram;
         if (mesh.isTextured()) {
-            attribs.push_back({"texcoord", 2, GL_FLOAT, GL_FALSE, false});
             program = textureProgram;
         }
-
         // TODO: Handle the case of environment mappped but untextured meshes correctly.
         if (mesh.isEnvironmentMapped()) {
             program = environmentMapProgram;
         }
-
         mesh.shaderProgram = program;
 
-        mesh.shaderProgram->use();
-        mesh.vertexArray = std::make_unique<NUGL::VertexArray>();
-        mesh.vertexArray->bind();
-        mesh.vertexArray->setAttributePointers(*program, *mesh.vertexBuffer, GL_ARRAY_BUFFER, attribs);
+        mesh.prepareVertexArrayForShaderProgram(program);
     }
 }
 
@@ -435,26 +443,22 @@ void Model::drawNodeDepth(Model::Node &node, glm::mat4 parentNodeTransform, Came
     glm::mat4 mvp = camera.proj * camera.view * model;
     shadowMapProgram->setUniformIfActive("mvp", mvp);
 
-    auto vertexArray = std::make_unique<NUGL::VertexArray>();
-    vertexArray->bind();
-
     for (int index : node.meshes) {
         auto &mesh = meshes[index];
 
-        std::vector<NUGL::VertexAttribute> attribs = {
-                {"position", 3, GL_FLOAT, GL_FALSE, false},
-        };
-        if (mesh.hasNormals()) {
-            attribs.push_back({"normal", 3, GL_FLOAT, GL_FALSE, true});
+        if (!mesh.vertexArrayMap.count(*shadowMapProgram)) {
+            mesh.prepareVertexArrayForShaderProgram(shadowMapProgram);
         }
-        if (mesh.isTextured()) {
-            attribs.push_back({"texcoord", 2, GL_FLOAT, GL_FALSE, true});
+
+        if (!mesh.vertexArrayMap.count(*shadowMapProgram)) {
+            std::stringstream errMsg;
+            errMsg << __func__
+                    << ": Mesh has no vertex array for shader program: '" << shadowMapProgram->name() << "'"
+                    << ".";
+            throw std::runtime_error(errMsg.str().c_str());
         }
-        vertexArray->setAttributePointers(*shadowMapProgram, *mesh.vertexBuffer,
-                GL_ARRAY_BUFFER, attribs);
 
-
-//        mesh.vertexArray->bind();
+        mesh.vertexArrayMap[*shadowMapProgram]->bind();
         mesh.vertexBuffer->bind(GL_ARRAY_BUFFER);
         mesh.elementBuffer->bind(GL_ELEMENT_ARRAY_BUFFER);
         glDrawElements(GL_TRIANGLES, mesh.elements.size(), GL_UNSIGNED_INT, 0);
@@ -486,7 +490,16 @@ void Model::drawNode(Model::Node &node, glm::mat4 parentNodeTransform, Camera &c
 
         prepareMaterialShaderProgram(mesh.material, mesh.shaderProgram);
 
-        mesh.vertexArray->bind();
+
+        if (!mesh.vertexArrayMap.count(*(mesh.shaderProgram))) {
+            std::stringstream errMsg;
+            errMsg << __func__
+                    << ": Mesh has no vertex array for shader program: '" << mesh.shaderProgram->name() << "'"
+                    << ".";
+            throw std::runtime_error(errMsg.str().c_str());
+        }
+
+        mesh.vertexArrayMap[*(mesh.shaderProgram)]->bind();
 
         mesh.vertexBuffer->bind(GL_ARRAY_BUFFER);
         mesh.elementBuffer->bind(GL_ELEMENT_ARRAY_BUFFER);

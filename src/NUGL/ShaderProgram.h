@@ -159,6 +159,11 @@ namespace NUGL {
             return uniLoc;
         }
 
+        inline bool attributeIsActive(const std::string& name) {
+            GLint attribLoc = glGetAttribLocation(programId, name.c_str());
+            return (attribLoc != -1);
+        }
+
         inline GLint getAttribLocation(const std::string& name) {
             GLint attribLoc = glGetAttribLocation(programId, name.c_str());
             checkForAndPrintGLError(__FILE__, __LINE__, programName);
@@ -177,7 +182,7 @@ namespace NUGL {
             printProgramDebugInfo(programId, programName);
         }
 
-        inline GLuint id() {
+        inline GLuint id() const {
             return programId;
         }
 
@@ -249,6 +254,14 @@ namespace NUGL {
             materialInfo.has.texOpacity = uniformIsActive("texOpacity");
         }
 
+        bool operator==(const NUGL::ShaderProgram &other) const {
+            return id() == other.id();
+        }
+
+        std::string name() {
+            return programName;
+        }
+
     private:
         GLuint programId;
         std::vector<std::shared_ptr<Shader>> shaders;
@@ -259,5 +272,14 @@ namespace NUGL {
         // TODO: Consider moving this (and MaterialInfo) outside of ShaderProgram (and NUGL?).
         //! Describes which uniforms the shader program accepts.
         MaterialInfo materialInfo;
+    };
+}
+
+namespace std {
+    template<>
+    struct hash<NUGL::ShaderProgram> {
+        std::size_t operator()(const NUGL::ShaderProgram &k) const {
+            return std::hash<GLuint>()(k.id());
+        }
     };
 }

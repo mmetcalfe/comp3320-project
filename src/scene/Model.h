@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <unordered_map>
 
 #include "NUGL/ShaderProgram.h"
 #include "NUGL/Texture.h"
@@ -52,9 +53,10 @@ namespace scene {
 
         std::unique_ptr<NUGL::Buffer> vertexBuffer;
         std::unique_ptr<NUGL::Buffer> elementBuffer;
-        std::unique_ptr<NUGL::VertexArray> vertexArray;
 
         std::shared_ptr<NUGL::ShaderProgram> shaderProgram;
+
+        std::unordered_map<NUGL::ShaderProgram, std::unique_ptr<NUGL::VertexArray>> vertexArrayMap;
 
         inline bool isTextured() {
             return material->texDiffuse != nullptr && !texCoords.empty();
@@ -65,8 +67,10 @@ namespace scene {
         }
 
         inline bool isEnvironmentMapped() {
-            return material->materialInfo.has.texEnvironmentMap;
+            return (bool)material->materialInfo.has.texEnvironmentMap;
         }
+
+        void prepareVertexArrayForShaderProgram(std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram);
     };
 
     class Model {
