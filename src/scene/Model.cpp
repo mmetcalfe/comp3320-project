@@ -427,38 +427,33 @@ glm::mat4 Model::buildModelTransform(glm::vec3 pos, glm::vec3 dir, glm::vec3 up,
     return glm::inverse(orientation) * model;
 }
 
-void Model::drawDepth(Camera &camera) {
+void Model::drawWithShaderProgram(Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program) {
     transform = buildModelTransform(pos, dir, up, scale);
 
-    drawNodeDepth(rootNode, transform, camera);
+    drawNodeWithProgram(rootNode, transform, camera, program);
 }
 
-void Model::drawNodeDepth(Model::Node &node, glm::mat4 parentNodeTransform, Camera &camera) {
+void Model::drawNodeWithProgram(Model::Node &node, glm::mat4 parentNodeTransform, Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program) {
     glm::mat4 model = parentNodeTransform * node.transform;
 
-    shadowMapProgram->use();
-    shadowMapProgram->setUniformIfActive("model", model);
-    shadowMapProgram->setUniformIfActive("view", camera.view);
-    shadowMapProgram->setUniformIfActive("proj", camera.proj);
-    glm::mat4 mvp = camera.proj * camera.view * model;
-    shadowMapProgram->setUniformIfActive("mvp", mvp);
+    setCameraUniformsOnShaderProgram(program, camera, model);
 
     for (int index : node.meshes) {
         auto &mesh = meshes[index];
 
-        if (!mesh.vertexArrayMap.count(*shadowMapProgram)) {
-            mesh.prepareVertexArrayForShaderProgram(shadowMapProgram);
+        if (!mesh.vertexArrayMap.count(*program)) {
+            mesh.prepareVertexArrayForShaderProgram(program);
         }
 
-        if (!mesh.vertexArrayMap.count(*shadowMapProgram)) {
+        if (!mesh.vertexArrayMap.count(*program)) {
             std::stringstream errMsg;
             errMsg << __func__
-                    << ": Mesh has no vertex array for shader program: '" << shadowMapProgram->name() << "'"
+                    << ": Mesh has no vertex array for shader program: '" << program->name() << "'"
                     << ".";
             throw std::runtime_error(errMsg.str().c_str());
         }
 
-        mesh.vertexArrayMap[*shadowMapProgram]->bind();
+        mesh.vertexArrayMap[*program]->bind();
         mesh.vertexBuffer->bind(GL_ARRAY_BUFFER);
         mesh.elementBuffer->bind(GL_ELEMENT_ARRAY_BUFFER);
         glDrawElements(GL_TRIANGLES, mesh.elements.size(), GL_UNSIGNED_INT, 0);
@@ -466,7 +461,7 @@ void Model::drawNodeDepth(Model::Node &node, glm::mat4 parentNodeTransform, Came
     }
 
     for (auto &child : node.children) {
-        drawNodeDepth(child, model, camera);
+        drawNodeWithProgram(child, model, camera, program);
     }
 }
 
@@ -594,39 +589,35 @@ void Model::prepareMaterialShaderProgram(std::shared_ptr<Material> material,
 
 
 void Model::setCameraUniformsOnShaderPrograms(Camera &camera, glm::mat4 model) {
-    glm::mat4 mvp = camera.proj * camera.view * model;
-
     if (textureProgram != nullptr) {
-        textureProgram->use();
-        textureProgram->setUniformIfActive("model", model);
-        textureProgram->setUniformIfActive("view", camera.view);
-        textureProgram->setUniformIfActive("proj", camera.proj);
+        setCameraUniformsOnShaderProgram(textureProgram, camera, model);
     }
 
     if (flatProgram != nullptr) {
-        flatProgram->use();
-        flatProgram->setUniformIfActive("model", model);
-        flatProgram->setUniformIfActive("view", camera.view);
-        flatProgram->setUniformIfActive("proj", camera.proj);
+        setCameraUniformsOnShaderProgram(flatProgram, camera, model);
     }
 
     if (environmentMapProgram != nullptr) {
-        if (environmentMapProgram != nullptr) {
-            environmentMapProgram->use();
-            environmentMapProgram->setUniformIfActive("model", model);
-            environmentMapProgram->setUniformIfActive("view", camera.view);
-            environmentMapProgram->setUniformIfActive("proj", camera.proj);
-
-            environmentMapProgram->setUniformIfActive("mvp", mvp);
-
-            // We don't invert the transforms relating to the model's internal structure.
-            glm::mat4 modelViewInverse = glm::inverse(camera.view * transform);
-            environmentMapProgram->setUniformIfActive("modelViewInverse", modelViewInverse);
-
-            glm::mat4 viewInverse = glm::inverse(camera.view);
-            environmentMapProgram->setUniformIfActive("viewInverse", viewInverse);
-        }
+        setCameraUniformsOnShaderProgram(environmentMapProgram, camera, model);
     }
+}
+
+void Model::setCameraUniformsOnShaderProgram(std::shared_ptr<NUGL::ShaderProgram> program, Camera &camera, glm::mat4 model) {
+    glm::mat4 mvp = camera.proj * camera.view * model;
+
+    program->use();
+    program->setUniformIfActive("model", model);
+    program->setUniformIfActive("view", camera.view);
+    program->setUniformIfActive("proj", camera.proj);
+
+    program->setUniformIfActive("mvp", mvp);
+
+    // We don't invert the transforms relating to the model's internal structure.
+    glm::mat4 modelViewInverse = glm::inverse(camera.view * transform);
+    program->setUniformIfActive("modelViewInverse", modelViewInverse);
+
+    glm::mat4 viewInverse = glm::inverse(camera.view);
+    program->setUniformIfActive("viewInverse", viewInverse);
 }
 
 void Model::setLightUniformsOnShaderPrograms(std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera) {

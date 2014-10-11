@@ -120,8 +120,8 @@ namespace scene {
         void drawNode(Model::Node &node, glm::mat4 parentModel, Camera &camera, std::shared_ptr<Light> light,
                 std::shared_ptr<LightCamera> lightCamera);
 
-        void drawDepth(Camera &camera);
-        void drawNodeDepth(Model::Node &node, glm::mat4 parentModel, Camera &camera);
+        void drawWithShaderProgram(Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program);
+        void drawNodeWithProgram(Model::Node &node, glm::mat4 parentModel, Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program);
 
         static std::shared_ptr<Model> loadFromFile(const std::string &fileName);
 
@@ -134,5 +134,7 @@ namespace scene {
         void setLightUniformsOnShaderPrograms(std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera);
 
         void prepareMaterialShaderProgram(std::shared_ptr<Material> material, std::shared_ptr<NUGL::ShaderProgram> shaderProgram);
+
+        void setCameraUniformsOnShaderProgram(std::shared_ptr<NUGL::ShaderProgram> program, Camera &camera, glm::mat4 model);
     };
 }

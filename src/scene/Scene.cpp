@@ -148,7 +148,7 @@ namespace scene {
                 drawModel->shadowMapProgram = shadowMapProgram;
 //                auto prog = drawModel->environmentMapProgram;
 //                drawModel->environmentMapProgram = nullptr;
-//                drawModel->drawDepth(mapCamera);
+//                drawModel->drawWithShaderProgram(mapCamera);
                 drawModel->draw(mapCamera, sharedLight, nullptr);
 //                drawModel->environmentMapProgram = prog;
             }
@@ -313,7 +313,7 @@ namespace scene {
 
                 for (auto model : models) {
                     model->shadowMapProgram = shadowMapProgram;
-                    model->drawDepth(*lightCamera);
+                    model->drawWithShaderProgram(*lightCamera, shadowMapProgram);
                 }
 
                 glDisable(GL_CULL_FACE);
