@@ -71,7 +71,7 @@ namespace scene {
 
         void setCameraUniformsOnShaderPrograms(Camera &camera, glm::mat4 model);
 
-        void setLightUniformsOnShaderPrograms(std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera);
+        static void setLightUniformsOnShaderProgram(std::shared_ptr<NUGL::ShaderProgram> program, std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera);
 
         void setCameraUniformsOnShaderProgram(std::shared_ptr<NUGL::ShaderProgram> program, Camera &camera, glm::mat4 model);
     };

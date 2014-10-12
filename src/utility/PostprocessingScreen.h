@@ -59,6 +59,10 @@ namespace utility {
         }
 
         inline void render(float gridDim = 1, float gridX = 0, float gridY = 0) {
+            render(screenProgram, gridDim, gridX, gridY);
+        }
+
+        inline void render(std::shared_ptr<NUGL::ShaderProgram> program, float gridDim = 1, float gridX = 0, float gridY = 0) {
             if (!screenMesh->isTextured()) {
                 std::stringstream errMsg;
                 errMsg << "PostprocessingScreen::" << __func__
@@ -67,16 +71,16 @@ namespace utility {
                 throw std::runtime_error(errMsg.str().c_str());
             }
 
-            screenProgram->use();
+            program->use();
 
             float width = 1.0f / gridDim;
             glm::mat4 previewModel;
             previewModel = glm::scale(previewModel, glm::vec3(width, width, 1.0f));
             previewModel = glm::translate(previewModel, glm::vec3(gridX * 2 - (gridDim - 1), gridY * 2 - (gridDim - 1), 0.0f));
-            screenProgram->setUniform("model", previewModel);
+            program->setUniform("model", previewModel);
 
             glDisable(GL_DEPTH_TEST);
-            screenMesh->draw(screenProgram);
+            screenMesh->draw(program);
             glEnable(GL_DEPTH_TEST);
         }
 

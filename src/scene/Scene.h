@@ -39,6 +39,7 @@ namespace scene {
         std::unique_ptr<utility::PostprocessingScreen> screen;
         std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram;
         std::shared_ptr<NUGL::ShaderProgram> gBufferProgram;
+        std::shared_ptr<NUGL::ShaderProgram> deferredShadingProgram;
 
         Profiler profiler;
 

@@ -7,5 +7,5 @@ out vec4 outColor;
 uniform sampler2D texDiffuse;
 
 void main() {
-    outColor = texture(texDiffuse, Texcoord);
+    outColor = vec4(texture(texDiffuse, Texcoord).rgb, 1.0);
 }

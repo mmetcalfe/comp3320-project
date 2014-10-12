@@ -215,7 +215,7 @@ namespace scene {
         GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
         glDrawBuffers(3,  attachments);
 
-        glViewport(0, 0, camera->frameWidth, camera->frameHeight);
+        glViewport(0, 0, windowSize.x, windowSize.y);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         drawModels(gBufferProgram);
@@ -231,29 +231,34 @@ namespace scene {
 
             auto lightCamera = prepareShadowMap(lightNum, sharedLight);
 
-
-//            NUGL::Framebuffer::useDefault();
-//            glViewport(0, 0, framebufferSize.x, framebufferSize.y);
-//            glEnable(GL_BLEND);
-//            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-//            gBuffer->bindTextures();
-//            screen->screenProgram->use();
-//            screen->screenProgram->setUniform("texDepthStencil", framebuffer->textureAttachments[GL_DEPTH_STENCIL_ATTACHMENT]);
-//            screen->screenProgram->setUniform("texNormal", framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
-//            screen->screenProgram->setUniform("texAlbedoRoughness", framebuffer->textureAttachments[GL_COLOR_ATTACHMENT1]);
-//            screen->screenProgram->setUniform("outEnvMapColSpecIntensity", framebuffer->textureAttachments[GL_COLOR_ATTACHMENT2]);
-//            screen->screenProgram->setUniform("model", glm::mat4());
-//            screen->render();
-//            glDisable(GL_BLEND);
-
-
-            // Render the light's contribution to the framebuffer:
             framebuffer->bind();
-            glViewport(0, 0, camera->frameWidth, camera->frameHeight);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            drawModels(sharedLight, lightCamera);
+            glViewport(0, 0, windowSize.x, windowSize.y);
+            gBuffer->bindTextures();
+            deferredShadingProgram->use();
+            deferredShadingProgram->setUniform("texDepthStencil", gBuffer->textureAttachments[GL_DEPTH_STENCIL_ATTACHMENT]);
+            deferredShadingProgram->setUniform("texNormal", gBuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
+            deferredShadingProgram->setUniform("texAlbedoRoughness", gBuffer->textureAttachments[GL_COLOR_ATTACHMENT1]);
+            deferredShadingProgram->setUniform("texEnvMapColSpecIntensity", gBuffer->textureAttachments[GL_COLOR_ATTACHMENT2]);
+            glm::mat4 projInverse = glm::inverse(camera->proj);
+            deferredShadingProgram->setUniform("projInverse", projInverse);
+            glm::mat4 viewInverse = glm::inverse(camera->view);
+            deferredShadingProgram->setUniform("viewInverse", viewInverse);
+            deferredShadingProgram->setUniform("view", camera->view);
 
-            profiler.split("framebuffer ", lightNum);
+            Model::setLightUniformsOnShaderProgram(deferredShadingProgram, sharedLight, lightCamera);
+
+            screen->setTexture(framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
+            screen->render(deferredShadingProgram);
+            profiler.split("deferred light ", lightNum);
+
+//
+//            // Render the light's contribution to the framebuffer:
+//            framebuffer->bind();
+//            glViewport(0, 0, camera->frameWidth, camera->frameHeight);
+//            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//            drawModels(sharedLight, lightCamera);
+//
+//            profiler.split("framebuffer ", lightNum);
 
             // Add the light's contribution to the screen:
             addFramebufferToScreen();
@@ -325,6 +330,7 @@ namespace scene {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         screen->setTexture(framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
         screen->render(2, 0.5, 0.5);
+//        screen->render(4, 3, 1);
         screen->removeTexture();
 
         glDisable(GL_BLEND);

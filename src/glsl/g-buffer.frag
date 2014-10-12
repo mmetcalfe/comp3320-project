@@ -52,6 +52,7 @@ void main() {
         vec4 reflectCol = texture(texEnvironmentMap, sampleCoord.xyz);
         outEnvMapColSpecIntensity.rgb = reflectCol.rgb * colSpecular;
     }
+//    outEnvMapColSpecIntensity = vec4(eyeSpacePosition.rgb/100.0, 0.0);
 
     // Diffuse albedo:
     vec4 texCol = texture(texDiffuse, Texcoord);

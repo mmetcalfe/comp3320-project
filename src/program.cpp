@@ -121,6 +121,15 @@ int main(int argc, char** argv) {
     gBufferProgram->updateMaterialInfo();
     gBufferProgram->printDebugInfo();
 
+    auto deferredShadingProgram = NUGL::ShaderProgram::createSharedFromFiles("deferredShadingProgram", {
+            {GL_VERTEX_SHADER, "src/glsl/deferredShading.vert"},
+            {GL_FRAGMENT_SHADER, "src/glsl/deferredShading.frag"},
+    });
+    deferredShadingProgram->bindFragDataLocation(0, "outColor");
+    deferredShadingProgram->link();
+    deferredShadingProgram->updateMaterialInfo();
+    deferredShadingProgram->printDebugInfo();
+
     auto flatProgram = NUGL::ShaderProgram::createSharedFromFiles("flatProgram", {
             {GL_VERTEX_SHADER, "src/glsl/position.vert"},
             {GL_FRAGMENT_SHADER, "src/glsl/uniform.frag"},
@@ -183,6 +192,7 @@ int main(int argc, char** argv) {
     );
     mainScene->shadowMapProgram = shadowMapProgram;
     mainScene->gBufferProgram = gBufferProgram;
+    mainScene->deferredShadingProgram = deferredShadingProgram;
 
     // Add some lights:
     auto lightModel = std::make_shared<scene::Model>("spotlight 1");
@@ -201,21 +211,21 @@ int main(int argc, char** argv) {
     lightModel->lights.push_back(light);
     mainScene->addModel(lightModel);
 
-    lightModel = std::make_shared<scene::Model>("spotlight 2");
-    light = std::make_shared<scene::Light>();
-    light->type = scene::Light::Type::spot;
-    light->pos = {50, 200, 40};
-    light->dir = {0, -1, 0};
-    light->attenuationConstant = 0;
-    light->attenuationLinear = 0;
-    light->attenuationQuadratic = 1;
-    light->colDiffuse = glm::vec3(5000);
-    light->colSpecular = {2, 2, 2};
-    light->colAmbient = {0, 0, 0};
-    light->angleConeInner = 1;
-    light->angleConeOuter = 1;
-    lightModel->lights.push_back(light);
-    mainScene->addModel(lightModel);
+//    lightModel = std::make_shared<scene::Model>("spotlight 2");
+//    light = std::make_shared<scene::Light>();
+//    light->type = scene::Light::Type::spot;
+//    light->pos = {50, 200, 40};
+//    light->dir = {0, -1, 0};
+//    light->attenuationConstant = 0;
+//    light->attenuationLinear = 0;
+//    light->attenuationQuadratic = 1;
+//    light->colDiffuse = glm::vec3(5000);
+//    light->colSpecular = {2, 2, 2};
+//    light->colAmbient = {0, 0, 0};
+//    light->angleConeInner = 1;
+//    light->angleConeOuter = 1;
+//    lightModel->lights.push_back(light);
+//    mainScene->addModel(lightModel);
 
 //    lightModel = std::make_shared<scene::Model>("point light 1");
 //    light = std::make_shared<scene::Light>();

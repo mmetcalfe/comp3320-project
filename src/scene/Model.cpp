@@ -419,7 +419,7 @@ void Model::drawNode(Model::Node &node, glm::mat4 parentNodeTransform, Camera &c
 
     // TODO: Find a better way of managing shader programs!
     setCameraUniformsOnShaderPrograms(camera, model);
-    setLightUniformsOnShaderPrograms(light, lightCamera);
+    setLightUniformsOnShaderProgram(environmentMapProgram, light, lightCamera);
 
     for (int index : node.meshes) {
         auto &mesh = meshes[index];
@@ -465,41 +465,31 @@ void Model::setCameraUniformsOnShaderProgram(std::shared_ptr<NUGL::ShaderProgram
     program->setUniformIfActive("viewInverse", viewInverse);
 }
 
-void Model::setLightUniformsOnShaderPrograms(std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera) {
-//    if (textureProgram != nullptr) {
-//        textureProgram->use();
-//        textureProgram->setUniform("model", model);
-//    }
-//
-//    if (flatProgram != nullptr) {
-//        flatProgram->use();
-//        flatProgram->setUniform("model", model);
-//    }
+void Model::setLightUniformsOnShaderProgram(std::shared_ptr<NUGL::ShaderProgram> program, std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera) {
+    if (program != nullptr) {
+        if (program->uniformIsActive("light.pos")) {
+            program->use();
+            program->setUniform("light.pos", light->pos);
+            program->setUniform("light.dir", light->dir);
+            program->setUniform("light.attenuationConstant", light->attenuationConstant);
+            program->setUniform("light.attenuationLinear", light->attenuationLinear);
+            program->setUniform("light.attenuationQuadratic", light->attenuationQuadratic);
+            program->setUniform("light.colDiffuse", light->colDiffuse);
+            program->setUniform("light.colSpecular", light->colSpecular);
+            program->setUniform("light.colAmbient", light->colAmbient);
+            program->setUniform("light.angleConeInner", light->angleConeInner);
+            program->setUniform("light.angleConeOuter", light->angleConeOuter);
 
-    if (environmentMapProgram != nullptr) {
-        if (environmentMapProgram->uniformIsActive("light.pos")) {
-            environmentMapProgram->use();
-            environmentMapProgram->setUniform("light.pos", light->pos);
-            environmentMapProgram->setUniform("light.dir", light->dir);
-            environmentMapProgram->setUniform("light.attenuationConstant", light->attenuationConstant);
-            environmentMapProgram->setUniform("light.attenuationLinear", light->attenuationLinear);
-            environmentMapProgram->setUniform("light.attenuationQuadratic", light->attenuationQuadratic);
-            environmentMapProgram->setUniform("light.colDiffuse", light->colDiffuse);
-            environmentMapProgram->setUniform("light.colSpecular", light->colSpecular);
-            environmentMapProgram->setUniform("light.colAmbient", light->colAmbient);
-            environmentMapProgram->setUniform("light.angleConeInner", light->angleConeInner);
-            environmentMapProgram->setUniform("light.angleConeOuter", light->angleConeOuter);
-
-            if (environmentMapProgram->uniformIsActive("light.texShadowMap")) {
-                environmentMapProgram->use();
+            if (program->uniformIsActive("light.texShadowMap")) {
+                program->use();
 
                 if (lightCamera != nullptr) {
-                    environmentMapProgram->setUniform("light.hasShadowMap", true);
-                    environmentMapProgram->setUniform("light.texShadowMap", lightCamera->shadowMap);
-                    environmentMapProgram->setUniform("light.view", lightCamera->view);
-                    environmentMapProgram->setUniform("light.proj", lightCamera->proj);
+                    program->setUniform("light.hasShadowMap", true);
+                    program->setUniform("light.texShadowMap", lightCamera->shadowMap);
+                    program->setUniform("light.view", lightCamera->view);
+                    program->setUniform("light.proj", lightCamera->proj);
                 } else {
-                    environmentMapProgram->setUniform("light.hasShadowMap", false);
+                    program->setUniform("light.hasShadowMap", false);
                 }
             }
         }
