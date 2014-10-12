@@ -28,7 +28,7 @@ namespace scene {
         std::unordered_map<NUGL::ShaderProgram, std::unique_ptr<NUGL::VertexArray>> vertexArrayMap;
 
         inline bool isTextured() {
-            return material->texDiffuse != nullptr && !texCoords.empty();
+            return (bool)material->materialInfo.has.texDiffuse && !texCoords.empty();
         }
 
         inline bool hasNormals() {
@@ -39,6 +39,7 @@ namespace scene {
             return (bool)material->materialInfo.has.texEnvironmentMap;
         }
 
+        void generateBuffers(bool forceTexcoords = false);
         void draw(std::shared_ptr<NUGL::ShaderProgram> program);
         void prepareVertexArrayForShaderProgram(std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram);
         void prepareMaterialShaderProgram(std::shared_ptr<NUGL::ShaderProgram> program);

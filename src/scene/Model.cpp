@@ -355,34 +355,7 @@ std::shared_ptr<Model> Model::createIcosahedron() {
 
 void Model::createMeshBuffers() {
     for (auto &mesh : meshes) {
-        std::vector<GLfloat> vertices;
-//        for (auto& vertex : mesh.vertices) {
-        for (unsigned int i = 0; i < mesh.vertices.size(); i++) {
-            auto &vertex = mesh.vertices[i];
-            vertices.push_back(vertex.x);
-            vertices.push_back(vertex.y);
-            vertices.push_back(vertex.z);
-
-            if (mesh.hasNormals()) {
-                auto &normal = mesh.normals[i];
-                vertices.push_back(normal.x);
-                vertices.push_back(normal.y);
-                vertices.push_back(normal.z);
-            }
-
-            if (mesh.isTextured()) {
-                auto &texCoord = mesh.texCoords[i];
-//                vertices.push_back(1 - texCoord.x); // TODO: fix texcoords ??
-//                vertices.push_back(1 - texCoord.y);
-                vertices.push_back(texCoord.x);
-                vertices.push_back(texCoord.y);
-            }
-        }
-        mesh.vertexBuffer = std::make_unique<NUGL::Buffer>();
-        mesh.vertexBuffer->setData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
-
-        mesh.elementBuffer = std::make_unique<NUGL::Buffer>();
-        mesh.elementBuffer->setData(GL_ELEMENT_ARRAY_BUFFER, mesh.elements, GL_STATIC_DRAW);
+        mesh.generateBuffers();
     }
 }
 

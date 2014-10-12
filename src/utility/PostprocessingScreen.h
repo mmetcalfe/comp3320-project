@@ -6,6 +6,8 @@
 #include "NUGL/Buffer.h"
 #include "NUGL/VertexArray.h"
 #include "NUGL/ShaderProgram.h"
+#include "scene/Material.h"
+#include "scene/Mesh.h"
 
 namespace utility {
 
@@ -15,40 +17,72 @@ namespace utility {
         inline PostprocessingScreen(std::shared_ptr<NUGL::ShaderProgram> screenProgram) {
             this->screenProgram = screenProgram;
 
-            std::vector<GLfloat> quadVertices = {
-                    -1.0f, 1.0f, 0.0f, 1.0f,
-                    1.0f, 1.0f, 1.0f, 1.0f,
-                    1.0f, -1.0f, 1.0f, 0.0f,
+            auto mesh = std::make_unique<scene::Mesh>();
+            mesh->materialIndex = 0;
 
-                    1.0f, -1.0f, 1.0f, 0.0f,
-                    -1.0f, -1.0f, 0.0f, 0.0f,
-                    -1.0f, 1.0f, 0.0f, 1.0f
+            float s = 1;
+            mesh->vertices = {
+                glm::vec3(-s,  s, 0.0f),
+                glm::vec3( s,  s, 0.0f),
+                glm::vec3( s, -s, 0.0f),
+                glm::vec3(-s, -s, 0.0f),
             };
-            quadBuffer = std::make_unique<NUGL::Buffer>();
-            quadBuffer->setData(GL_ARRAY_BUFFER, quadVertices, GL_STATIC_DRAW);
-
-            std::vector<NUGL::VertexAttribute> attribs = {
-                    {"position", 2, GL_FLOAT, GL_FALSE, false},
-                    {"texcoord", 2, GL_FLOAT, GL_FALSE, false},
+            mesh->texCoords = {
+                glm::vec2(0.0f, 1.0f),
+                glm::vec2(1.0f, 1.0f),
+                glm::vec2(1.0f, 0.0f),
+                glm::vec2(0.0f, 0.0f),
+            };
+            mesh->elements = {
+                    0, 1, 2,
+                    2, 3, 0
             };
 
-            vertexArray = std::make_unique<NUGL::VertexArray>();
-            vertexArray->bind();
-            vertexArray->setAttributePointers(*screenProgram, *quadBuffer, GL_ARRAY_BUFFER, attribs);
+            auto material = std::make_shared<scene::Material>();
+            material->twoSided = false;
+            material->materialInfo.has.texDiffuse = false;
+            mesh->material = material;
+
+            mesh->generateBuffers(true);
+
+            screenMesh = std::move(mesh);
         }
 
-        inline void render() {
+        inline void setTexture(std::shared_ptr<NUGL::Texture> tex) {
+            screenMesh->material->texDiffuse = tex;
+            screenMesh->material->materialInfo.has.texDiffuse = true;
+        }
+
+        inline void removeTexture() {
+            screenMesh->material->texDiffuse = nullptr;
+            screenMesh->material->materialInfo.has.texDiffuse = false;
+        }
+
+        inline void render(float gridDim = 1, float gridX = 0, float gridY = 0) {
+            if (!screenMesh->isTextured()) {
+                std::stringstream errMsg;
+                errMsg << "PostprocessingScreen::" << __func__
+                        << ": screenMesh must have a texture"
+                        << ".";
+                throw std::runtime_error(errMsg.str().c_str());
+            }
+
             screenProgram->use();
-            vertexArray->bind();
-            quadBuffer->bind(GL_ARRAY_BUFFER);
+
+            float width = 1.0f / gridDim;
+            glm::mat4 previewModel;
+            previewModel = glm::scale(previewModel, glm::vec3(width, width, 1.0f));
+            previewModel = glm::translate(previewModel, glm::vec3(gridX * 2 - (gridDim - 1), gridY * 2 - (gridDim - 1), 0.0f));
+            screenProgram->setUniform("model", previewModel);
+
             glDisable(GL_DEPTH_TEST);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            screenMesh->draw(screenProgram);
             glEnable(GL_DEPTH_TEST);
         }
 
-        std::unique_ptr<NUGL::Buffer> quadBuffer;
-        std::unique_ptr<NUGL::VertexArray> vertexArray;
         std::shared_ptr<NUGL::ShaderProgram> screenProgram;
-    };
 
+    private:
+        std::unique_ptr<scene::Mesh> screenMesh;
+    };
 }

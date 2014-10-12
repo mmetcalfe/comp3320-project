@@ -23,9 +23,16 @@ void Mesh::draw(std::shared_ptr<NUGL::ShaderProgram> program) {
 
     if (!vertexArrayMap.count(*program)) {
         std::stringstream errMsg;
-        errMsg << __func__
-                << ": Mesh has no vertex array for shader program: '" << program->name() << "'"
+        errMsg << __FILE__ << ", " << __LINE__ << ", " << __func__ << ": "
+                << "Mesh has no vertex array for shader program: '" << program->name() << "'"
                 << ".";
+        throw std::runtime_error(errMsg.str().c_str());
+    }
+
+    if (vertexBuffer == nullptr) {
+        std::stringstream errMsg;
+        errMsg << __FILE__ << ", " << __LINE__ << ", " << __func__ << ": "
+                << "Mesh has a null vertexBuffer.";
         throw std::runtime_error(errMsg.str().c_str());
     }
 
@@ -36,26 +43,33 @@ void Mesh::draw(std::shared_ptr<NUGL::ShaderProgram> program) {
     checkForAndPrintGLError(__FILE__, __LINE__);
 }
 
-void Mesh::prepareVertexArrayForShaderProgram(std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram) {
+void Mesh::prepareVertexArrayForShaderProgram(std::shared_ptr<NUGL::ShaderProgram> program) {
+    if (vertexBuffer == nullptr) {
+        std::stringstream errMsg;
+        errMsg << __FILE__ << ", " << __LINE__ << ", " << __func__ << ": "
+                << "Mesh has a null vertexBuffer.";
+        throw std::runtime_error(errMsg.str().c_str());
+    }
+
     std::vector<NUGL::VertexAttribute> attribs = {
-            {"position", 3, GL_FLOAT, GL_FALSE, !shadowMapProgram->attributeIsActive("position")},
+            {"position", 3, GL_FLOAT, GL_FALSE, !program->attributeIsActive("position")},
     };
 
     if (hasNormals()) {
-        attribs.push_back({"normal", 3, GL_FLOAT, GL_FALSE, !shadowMapProgram->attributeIsActive("normal")});
+        attribs.push_back({"normal", 3, GL_FLOAT, GL_FALSE, !program->attributeIsActive("normal")});
     }
 
     if (isTextured()) {
-        attribs.push_back({"texcoord", 2, GL_FLOAT, GL_FALSE, !shadowMapProgram->attributeIsActive("texcoord")});
+        attribs.push_back({"texcoord", 2, GL_FLOAT, GL_FALSE, !program->attributeIsActive("texcoord")});
     }
 
-    shadowMapProgram->use();
+    program->use();
 
     auto vertexArray = std::make_unique<NUGL::VertexArray>();
     vertexArray->bind();
-    vertexArray->setAttributePointers(*shadowMapProgram, *vertexBuffer, GL_ARRAY_BUFFER, attribs);
+    vertexArray->setAttributePointers(*program, *vertexBuffer, GL_ARRAY_BUFFER, attribs);
 
-    vertexArrayMap[*shadowMapProgram] = move(vertexArray);
+    vertexArrayMap[*program] = move(vertexArray);
 }
 
 void Mesh::prepareMaterialShaderProgram(std::shared_ptr<NUGL::ShaderProgram> program) {
@@ -101,8 +115,12 @@ void Mesh::prepareMaterialShaderProgram(std::shared_ptr<NUGL::ShaderProgram> pro
     }
 
     if (material->materialInfo.has.texDiffuse && program->materialInfo.has.texDiffuse) {
-        material->texDiffuse->bind();
-        program->setUniform("texDiffuse", material->texDiffuse);
+        if (material->texDiffuse != nullptr) {
+            material->texDiffuse->bind();
+            program->setUniform("texDiffuse", material->texDiffuse);
+        } else {
+            std::cerr << "WARNING: material->materialInfo.has.texDiffuse was true, but texDiffuse was null.";
+        }
     }
 
 //    if (material->materialInfo.has.texSpecular && program->materialInfo.has.texSpecular) {
@@ -134,7 +152,49 @@ void Mesh::prepareMaterialShaderProgram(std::shared_ptr<NUGL::ShaderProgram> pro
 //        material->texOpacity->bind();
 //        program->setUniform("texOpacity", material->texOpacity);
 //    }
-
 }
+
+void Mesh::generateBuffers(bool forceTexcoords) {
+    // Verify element buffer correctness:
+    for (unsigned int e : elements) {
+        if (e >= vertices.size()) {
+            std::stringstream errMsg;
+            errMsg << __FILE__ << ", " << __LINE__ << ", " << __func__ << ": "
+                    << "Element buffer of mesh contains out of range elements"
+                    << " (request for vertex " << e << " out of " << vertices.size() << " vertices).";
+            throw std::runtime_error(errMsg.str().c_str());
+        }
+    }
+
+    std::vector<GLfloat> vertexBufferData;
+    for (unsigned int i = 0; i < vertices.size(); i++) {
+        auto &vertex = vertices[i];
+        vertexBufferData.push_back(vertex.x);
+        vertexBufferData.push_back(vertex.y);
+        vertexBufferData.push_back(vertex.z);
+
+        if (hasNormals()) {
+            auto &normal = normals[i];
+            vertexBufferData.push_back(normal.x);
+            vertexBufferData.push_back(normal.y);
+            vertexBufferData.push_back(normal.z);
+        }
+
+        if (isTextured() || forceTexcoords) {
+            auto &texCoord = texCoords[i];
+//                vertexBufferData.push_back(1 - texCoord.x);
+//                vertexBufferData.push_back(1 - texCoord.y);
+            vertexBufferData.push_back(texCoord.x);
+            vertexBufferData.push_back(texCoord.y);
+        }
+    }
+
+    vertexBuffer = std::make_unique<NUGL::Buffer>();
+    vertexBuffer->setData(GL_ARRAY_BUFFER, vertexBufferData, GL_STATIC_DRAW);
+
+    elementBuffer = std::make_unique<NUGL::Buffer>();
+    elementBuffer->setData(GL_ELEMENT_ARRAY_BUFFER, elements, GL_STATIC_DRAW);
+}
+
 
 }

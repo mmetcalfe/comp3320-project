@@ -259,7 +259,7 @@ namespace scene {
             addFramebufferToScreen();
 
             // Render a tiny shadow map:
-            drawShadowMapThumbnail(lightNum);
+            drawShadowMapThumbnail(lightNum - 1);
 
             profiler.split("light ", lightNum);
             lightNum++;
@@ -269,29 +269,6 @@ namespace scene {
 
         // Render g-buffer thumbnails:
         drawGBufferThumbnails();
-    }
-
-    void Scene::drawGBufferThumbnails() {
-        int texNum = 0;
-        for (auto& pair : gBuffer->textureAttachments) {
-            auto tex = pair.second;
-
-            screen->screenProgram->use();
-            tex->bind();
-            screen->screenProgram->setUniform("texDiffuse", tex);
-
-            float width = 1.0f / 4;
-
-            glm::mat4 previewModel;
-            previewModel = glm::scale(previewModel, glm::vec3(width, width, 1.0f));
-            previewModel = glm::translate(previewModel, glm::vec3(texNum * 2 - (1/width - 1), (1/width - 1), 0.0f));
-            screen->screenProgram->setUniform("model", previewModel);
-            screen->render();
-
-            texNum++;
-        }
-
-        profiler.split("g-buffer thumbnails");
     }
 
     void Scene::forwardRender() {
@@ -313,22 +290,32 @@ namespace scene {
             addFramebufferToScreen();
 
             // Render a tiny shadow map:
-            drawShadowMapThumbnail(lightNum);
+            drawShadowMapThumbnail(lightNum - 1);
 
             profiler.split("light ", lightNum);
             lightNum++;
         }
     }
 
+    void Scene::drawGBufferThumbnails() {
+        int texNum = 0;
+        for (auto& pair : gBuffer->textureAttachments) {
+            auto tex = pair.second;
+
+            screen->setTexture(tex);
+            screen->render(4, texNum, 0);
+            screen->removeTexture();
+
+            texNum++;
+        }
+
+        profiler.split("g-buffer thumbnails");
+    }
+
     void Scene::drawShadowMapThumbnail(int lightNum) {
-        framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]->bind();
-        screen->screenProgram->use();
-        screen->screenProgram->setUniform("texDiffuse", shadowMapFramebuffer->textureAttachments[GL_DEPTH_ATTACHMENT]);
-        glm::mat4 previewModel;
-        previewModel = glm::scale(previewModel, glm::vec3(0.2f, 0.2, 1.0f));
-        previewModel = glm::translate(previewModel, glm::vec3(-4.0f + (lightNum - 1) * 2, -4.0f, 0.0f));
-        screen->screenProgram->setUniform("model", previewModel);
-        screen->render();
+        screen->setTexture(shadowMapFramebuffer->textureAttachments[GL_DEPTH_ATTACHMENT]);
+        screen->render(4, lightNum, 3);
+        screen->removeTexture();
     }
 
     void Scene::addFramebufferToScreen() {
@@ -336,11 +323,10 @@ namespace scene {
         glViewport(0, 0, framebufferSize.x, framebufferSize.y);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]->bind();
-        screen->screenProgram->use();
-        screen->screenProgram->setUniform("texDiffuse", framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
-        screen->screenProgram->setUniform("model", glm::mat4());
-        screen->render();
+        screen->setTexture(framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
+        screen->render(2, 0.5, 0.5);
+        screen->removeTexture();
+
         glDisable(GL_BLEND);
     }
 
