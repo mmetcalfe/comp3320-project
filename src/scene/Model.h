@@ -1,78 +1,18 @@
 #pragma once
 
 #include <memory>
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <unordered_map>
 
-#include "NUGL/ShaderProgram.h"
-#include "NUGL/Texture.h"
 #include "NUGL/Buffer.h"
+#include "NUGL/Texture.h"
 #include "NUGL/VertexArray.h"
-#include "scene/Camera.h"
+#include "NUGL/ShaderProgram.h"
+#include "scene/Mesh.h"
 #include "scene/Light.h"
+#include "scene/Camera.h"
+#include "scene/Material.h"
 
 namespace scene {
-    struct Material {
-        // Colours.
-        glm::vec3 colAmbient = {0.7, 0, 0.9};
-        glm::vec3 colDiffuse = {0.7, 0, 0.9};
-        glm::vec3 colSpecular = {0.7, 0, 0.9};
-        glm::vec3 colTransparent = {0.7, 0, 0.9};
-
-        // Opacity of material in [0, 1].
-        float opacity = 1;
-
-        // Exponent in phong-shading.
-        float shininess = 1;
-
-        // Scales specular color.
-        float shininessStrength = 1;
-
-        // Indicates whether backface culling must be disabled.
-        bool twoSided = true;
-
-        std::shared_ptr<NUGL::Texture> texDiffuse;
-        std::shared_ptr<NUGL::Texture> texEnvironmentMap;
-
-        // Summarises the types of data this material offers.
-        NUGL::MaterialInfo materialInfo;
-    };
-
-    struct Mesh {
-        int materialIndex;
-        std::shared_ptr<Material> material;
-
-        std::vector<glm::vec3> vertices;
-        std::vector<glm::vec3> normals;
-        std::vector<glm::vec2> texCoords;
-        std::vector<GLint> elements;
-
-        std::unique_ptr<NUGL::Buffer> vertexBuffer;
-        std::unique_ptr<NUGL::Buffer> elementBuffer;
-
-        std::shared_ptr<NUGL::ShaderProgram> shaderProgram;
-
-        std::unordered_map<NUGL::ShaderProgram, std::unique_ptr<NUGL::VertexArray>> vertexArrayMap;
-
-        inline bool isTextured() {
-            return material->texDiffuse != nullptr && !texCoords.empty();
-        }
-
-        inline bool hasNormals() {
-            return !normals.empty();
-        }
-
-        inline bool isEnvironmentMapped() {
-            return (bool)material->materialInfo.has.texEnvironmentMap;
-        }
-
-        void prepareVertexArrayForShaderProgram(std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram);
-    };
-
     class Model {
     public:
         struct Node {
@@ -132,8 +72,6 @@ namespace scene {
         void setCameraUniformsOnShaderPrograms(Camera &camera, glm::mat4 model);
 
         void setLightUniformsOnShaderPrograms(std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera);
-
-        void prepareMaterialShaderProgram(std::shared_ptr<Material> material, std::shared_ptr<NUGL::ShaderProgram> shaderProgram);
 
         void setCameraUniformsOnShaderProgram(std::shared_ptr<NUGL::ShaderProgram> program, Camera &camera, glm::mat4 model);
     };

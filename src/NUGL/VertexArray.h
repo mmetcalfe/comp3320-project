@@ -6,6 +6,8 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "NUGL/Buffer.h"
+#include "NUGL/ShaderProgram.h"
 #include "utility/debug.h"
 
 namespace NUGL {

@@ -2,6 +2,9 @@
 #include <iostream>
 #include <memory>
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #include <boost/filesystem.hpp>
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>           // Output data structure
@@ -12,6 +15,7 @@
 #include "utility/debug.h"
 #include "utility/AssimpDebug.h"
 #include "scene/Camera.h"
+#include "scene/Mesh.h"
 
 namespace scene {
 
@@ -382,28 +386,6 @@ void Model::createMeshBuffers() {
     }
 }
 
-void Mesh::prepareVertexArrayForShaderProgram(std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram) {
-    std::vector<NUGL::VertexAttribute> attribs = {
-            {"position", 3, GL_FLOAT, GL_FALSE, !shadowMapProgram->attributeIsActive("position")},
-    };
-
-    if (hasNormals()) {
-        attribs.push_back({"normal", 3, GL_FLOAT, GL_FALSE, !shadowMapProgram->attributeIsActive("normal")});
-    }
-
-    if (isTextured()) {
-        attribs.push_back({"texcoord", 2, GL_FLOAT, GL_FALSE, !shadowMapProgram->attributeIsActive("texcoord")});
-    }
-
-    shadowMapProgram->use();
-
-    auto vertexArray = std::make_unique<NUGL::VertexArray>();
-    vertexArray->bind();
-    vertexArray->setAttributePointers(*shadowMapProgram, *vertexBuffer, GL_ARRAY_BUFFER, attribs);
-
-    vertexArrayMap[*shadowMapProgram] = move(vertexArray);
-}
-
 void Model::createVertexArrays() {
     for (auto &mesh : meshes) {
         auto program = flatProgram;
@@ -435,6 +417,12 @@ void Model::draw(Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program) {
     drawNodeWithProgram(rootNode, transform, camera, program);
 }
 
+void Model::draw(Camera &camera, std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera) {
+    transform = buildModelTransform(pos, dir, up, scale);
+
+    drawNode(rootNode, transform, camera, light, lightCamera);
+}
+
 void Model::drawNodeWithProgram(Model::Node &node, glm::mat4 parentNodeTransform, Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program) {
     glm::mat4 model = parentNodeTransform * node.transform;
 
@@ -444,36 +432,12 @@ void Model::drawNodeWithProgram(Model::Node &node, glm::mat4 parentNodeTransform
     for (int index : node.meshes) {
         auto &mesh = meshes[index];
 
-        prepareMaterialShaderProgram(mesh.material, program);
-
-        if (!mesh.vertexArrayMap.count(*program)) {
-            mesh.prepareVertexArrayForShaderProgram(program);
-        }
-
-        if (!mesh.vertexArrayMap.count(*program)) {
-            std::stringstream errMsg;
-            errMsg << __func__
-                    << ": Mesh has no vertex array for shader program: '" << program->name() << "'"
-                    << ".";
-            throw std::runtime_error(errMsg.str().c_str());
-        }
-
-        mesh.vertexArrayMap[*program]->bind();
-        mesh.vertexBuffer->bind(GL_ARRAY_BUFFER);
-        mesh.elementBuffer->bind(GL_ELEMENT_ARRAY_BUFFER);
-        glDrawElements(GL_TRIANGLES, mesh.elements.size(), GL_UNSIGNED_INT, 0);
-        checkForAndPrintGLError(__FILE__, __LINE__);
+        mesh.draw(program);
     }
 
     for (auto &child : node.children) {
         drawNodeWithProgram(child, model, camera, program);
     }
-}
-
-void Model::draw(Camera &camera, std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera) {
-    transform = buildModelTransform(pos, dir, up, scale);
-
-    drawNode(rootNode, transform, camera, light, lightCamera);
 }
 
 void Model::drawNode(Model::Node &node, glm::mat4 parentNodeTransform, Camera &camera, std::shared_ptr<Light> light,
@@ -486,110 +450,13 @@ void Model::drawNode(Model::Node &node, glm::mat4 parentNodeTransform, Camera &c
 
     for (int index : node.meshes) {
         auto &mesh = meshes[index];
-        mesh.shaderProgram->use();
 
-        prepareMaterialShaderProgram(mesh.material, mesh.shaderProgram);
-
-
-        if (!mesh.vertexArrayMap.count(*(mesh.shaderProgram))) {
-            std::stringstream errMsg;
-            errMsg << __func__
-                    << ": Mesh has no vertex array for shader program: '" << mesh.shaderProgram->name() << "'"
-                    << ".";
-            throw std::runtime_error(errMsg.str().c_str());
-        }
-
-        mesh.vertexArrayMap[*(mesh.shaderProgram)]->bind();
-
-        mesh.vertexBuffer->bind(GL_ARRAY_BUFFER);
-        mesh.elementBuffer->bind(GL_ELEMENT_ARRAY_BUFFER);
-        glDrawElements(GL_TRIANGLES, mesh.elements.size(), GL_UNSIGNED_INT, 0);
-        checkForAndPrintGLError(__FILE__, __LINE__);
+        mesh.draw(mesh.shaderProgram);
     }
 
     for (auto &child : node.children) {
         drawNode(child, model, camera, light, lightCamera);
     }
-}
-
-void Model::prepareMaterialShaderProgram(std::shared_ptr<Material> material,
-        std::shared_ptr<NUGL::ShaderProgram> shaderProgram) {
-    if (material->materialInfo.has.colAmbient && shaderProgram->materialInfo.has.colAmbient) {
-        shaderProgram->setUniform("colAmbient", material->colAmbient);
-    }
-
-    if (material->materialInfo.has.colDiffuse && shaderProgram->materialInfo.has.colDiffuse) {
-        shaderProgram->setUniform("colDiffuse", material->colDiffuse);
-    }
-
-    if (material->materialInfo.has.colSpecular && shaderProgram->materialInfo.has.colSpecular) {
-        shaderProgram->setUniform("colSpecular", material->colSpecular);
-    }
-
-    if (material->materialInfo.has.colTransparent && shaderProgram->materialInfo.has.colTransparent) {
-        shaderProgram->setUniform("colTransparent", material->colTransparent);
-    }
-
-    if (material->materialInfo.has.opacity && shaderProgram->materialInfo.has.opacity) {
-        shaderProgram->setUniform("opacity", material->opacity);
-    }
-
-    if (material->materialInfo.has.shininess && shaderProgram->materialInfo.has.shininess) {
-        shaderProgram->setUniform("shininess", material->shininess);
-    }
-
-    if (material->materialInfo.has.shininessStrength && shaderProgram->materialInfo.has.shininessStrength) {
-        shaderProgram->setUniform("shininessStrength", material->shininessStrength);
-    }
-
-//    if (material->materialInfo.has.reserved_value && shaderProgram->materialInfo.has.reserved_value) {
-//        shaderProgram->setUniform("reserved_value", material->reserved_value);
-//    }
-
-    if (material->materialInfo.has.texEnvironmentMap && shaderProgram->materialInfo.has.texEnvironmentMap) {
-        if (material->texEnvironmentMap != nullptr) {
-            material->texEnvironmentMap->bind();
-            shaderProgram->setUniform("texEnvironmentMap", material->texEnvironmentMap);
-        } else {
-            std::cerr << "WARNING: material->materialInfo.has.texEnvironmentMap was true, but texEnvironmentMap was null.";
-        }
-    }
-
-    if (material->materialInfo.has.texDiffuse && shaderProgram->materialInfo.has.texDiffuse) {
-        material->texDiffuse->bind();
-        shaderProgram->setUniform("texDiffuse", material->texDiffuse);
-    }
-
-//    if (material->materialInfo.has.texSpecular && shaderProgram->materialInfo.has.texSpecular) {
-//        material->texSpecular->bind();
-//        shaderProgram->setUniform("texSpecular", material->texSpecular);
-//    }
-//
-//    if (material->materialInfo.has.texAmbient && shaderProgram->materialInfo.has.texAmbient) {
-//        material->texAmbient->bind();
-//        shaderProgram->setUniform("texAmbient", material->texAmbient);
-//    }
-//
-//    if (material->materialInfo.has.texHeight && shaderProgram->materialInfo.has.texHeight) {
-//        material->texHeight->bind();
-//        shaderProgram->setUniform("texHeight", material->texHeight);
-//    }
-//
-//    if (material->materialInfo.has.texNormals && shaderProgram->materialInfo.has.texNormals) {
-//        material->texNormals->bind();
-//        shaderProgram->setUniform("texNormals", material->texNormals);
-//    }
-//
-//    if (material->materialInfo.has.texShininess && shaderProgram->materialInfo.has.texShininess) {
-//        material->texShininess->bind();
-//        shaderProgram->setUniform("texShininess", material->texShininess);
-//    }
-//
-//    if (material->materialInfo.has.texOpacity && shaderProgram->materialInfo.has.texOpacity) {
-//        material->texOpacity->bind();
-//        shaderProgram->setUniform("texOpacity", material->texOpacity);
-//    }
-
 }
 
 

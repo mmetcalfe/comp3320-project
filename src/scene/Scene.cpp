@@ -203,15 +203,15 @@ namespace scene {
 
     void Scene::deferredRender() {
         // Requires:
-        //  - A g-buffer class to store framebuffers for each attribute;
-        //  - Code to bind each framebuffer to a separate fragdatalocation;
-        //  - A g-buffer shader program that populates the g-buffer when rendering geometry;
-        //  - A VAO for each mesh to support the g-buffer shader program;
+        //  + A g-buffer class to store framebuffers for each attribute;
+        //  + Code to bind each framebuffer to a separate fragdatalocation;
+        //  + A g-buffer shader program that populates the g-buffer when rendering geometry;
+        //  + A VAO for each mesh to support the g-buffer shader program;
         //  - Deferred shading programs that take input from the g-buffer instead of the vertex shader, etc.;
-
 
         // Render all geometry to g-buffer:
         gBuffer->bind();
+        // TODO: Refactor enabling of framebuffer colour attachments.
         GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
         glDrawBuffers(3,  attachments);
 
@@ -230,6 +230,22 @@ namespace scene {
             auto sharedLight = light.lock();
 
             auto lightCamera = prepareShadowMap(lightNum, sharedLight);
+
+
+//            NUGL::Framebuffer::useDefault();
+//            glViewport(0, 0, framebufferSize.x, framebufferSize.y);
+//            glEnable(GL_BLEND);
+//            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+//            gBuffer->bindTextures();
+//            screen->screenProgram->use();
+//            screen->screenProgram->setUniform("texDepthStencil", framebuffer->textureAttachments[GL_DEPTH_STENCIL_ATTACHMENT]);
+//            screen->screenProgram->setUniform("texNormal", framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
+//            screen->screenProgram->setUniform("texAlbedoRoughness", framebuffer->textureAttachments[GL_COLOR_ATTACHMENT1]);
+//            screen->screenProgram->setUniform("outEnvMapColSpecIntensity", framebuffer->textureAttachments[GL_COLOR_ATTACHMENT2]);
+//            screen->screenProgram->setUniform("model", glm::mat4());
+//            screen->render();
+//            glDisable(GL_BLEND);
+
 
             // Render the light's contribution to the framebuffer:
             framebuffer->bind();
@@ -251,8 +267,13 @@ namespace scene {
 
         profiler.split("deferred lighting");
 
+        // Render g-buffer thumbnails:
+        drawGBufferThumbnails();
+    }
+
+    void Scene::drawGBufferThumbnails() {
         int texNum = 0;
-        for (auto pair : gBuffer->textureAttachments) {
+        for (auto& pair : gBuffer->textureAttachments) {
             auto tex = pair.second;
 
             screen->screenProgram->use();

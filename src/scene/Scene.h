@@ -61,6 +61,8 @@ namespace scene {
         void prepareGBuffer(glm::ivec2 ivec2);
 
         void drawModels(std::shared_ptr<NUGL::ShaderProgram> shared_ptr);
+
+        void drawGBufferThumbnails();
     };
 
 }

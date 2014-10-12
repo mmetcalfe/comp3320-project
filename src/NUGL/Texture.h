@@ -1,8 +1,8 @@
 #pragma once
 #include <memory>
-#include <stdexcept>
 #include <vector>
 #include <sstream>
+#include <stdexcept>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -12,8 +12,9 @@
 
 #include <boost/filesystem.hpp>
 
-#include "utility/make_unique.h"
 #include "utility/debug.h"
+#include "utility/strutil.h"
+#include "utility/make_unique.h"
 
 namespace NUGL {
     class Texture {

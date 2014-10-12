@@ -25,6 +25,15 @@ namespace NUGL {
             checkForAndPrintGLError(__FILE__, __LINE__);
         }
 
+        inline void bindTextures() {
+            for (auto& pair : textureAttachments) {
+                auto tex = pair.second;
+                tex->bind();
+            }
+
+            checkForAndPrintGLError(__FILE__, __LINE__);
+        }
+
         static inline void useDefault() {
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
