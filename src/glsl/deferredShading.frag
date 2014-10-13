@@ -1,7 +1,7 @@
 #version 330 core
 
 in vec2 Texcoord;
-in vec3 Position;
+//in vec3 Position;
 
 out vec4 outColor;
 
@@ -97,12 +97,11 @@ vec3 eyeSpacePosFromDepth(in float depth, in vec2 texcoord) {
 
     // Get x/w and y/w from the viewport position
     float x = texcoord.x * 2 - 1;
-    float y = (1 - texcoord.y) * 2 - 1;
-    float z = depth;
+    float y = texcoord.y * 2 - 1;
+    float z = depth * 2 - 1;
 
     // Construct clip-space position:
-//    vec4 clipPos = vec4(x, y, z, 1.0f);
-    vec4 clipPos = vec4(Position.xy, z, 1.0f);
+    vec4 clipPos = vec4(x, y, z, 1.0f);
 
     // Transform by the inverse projection matrix
     vec4 viewPos =  projInverse * clipPos;
@@ -147,7 +146,7 @@ void main() {
     // Don't show lighting on surfaces that are facing the wrong way:
     float lightDot = -dot(lightVec, normal);
     float normalDirTest = 1;
-    #define DOT_CUTOFF 0.11
+    #define DOT_CUTOFF 0.01
     if (lightDot < DOT_CUTOFF) {
         // Use a ramp near zero to remove noise when the light is very near the plane of the surface.
         normalDirTest = lightDot > 0 ? (1.0 / DOT_CUTOFF) * lightDot : 0;

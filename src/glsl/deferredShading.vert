@@ -4,7 +4,7 @@ in vec3 position;
 in vec2 texcoord;
 
 out vec2 Texcoord;
-out vec3 Position;
+//out vec3 Position;
 
 uniform mat4 model;
 
@@ -13,5 +13,5 @@ void main() {
 
     vec4 transformed = model * vec4(position.xy, 0, 1);
     gl_Position = vec4(transformed.xy, 0.0, 1.0);
-    Position = vec3(transformed.xy, 0.0);
+//    Position = vec3(transformed.xy, 0.0);
 }
