@@ -7,6 +7,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+// Workaround for png++ header bug
+#include <cstring>
+
 #include <png++/png.hpp>
 #include <jpeglib.h>
 
