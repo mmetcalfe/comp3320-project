@@ -47,6 +47,7 @@ namespace scene {
         int reflectionMapSize = 128;
         glm::ivec2 windowSize = {800, 600};
         glm::ivec2 framebufferSize = {800, 600};
+        bool useDeferredRendering = true;
 
         void renderReflectionMap(std::shared_ptr<Model> shared_ptr);
         void renderDynamicReflectionMaps();

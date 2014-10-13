@@ -194,8 +194,10 @@ namespace scene {
         NUGL::Framebuffer::useDefault();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-//        forwardRender();
-        deferredRender();
+        if (useDeferredRendering)
+            deferredRender();
+        else
+            forwardRender();
 
         profiler.printEvery(1);
     }

@@ -53,14 +53,10 @@ void framebufferSizeCallback(GLFWwindow* window, int fbWidth, int fbHeight) {
 //    std::cout << __func__ << ": [" << x << ", " << y << "]" << std::endl;
 //}
 
-//void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
-//    std::cout << __func__ << ", Key: {" << std::endl;
-//    std::cout << "  key: " << key << std::endl;
-//    std::cout << "  scancode: " << scancode << std::endl;
-//    std::cout << "  action: " << action << std::endl;
-//    std::cout << "  mods: " << mods << std::endl;
-//    std::cout << "  }" << std::endl;
-//}
+void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if (action == GLFW_PRESS && key == GLFW_KEY_TAB)
+        mainScene->useDeferredRendering = !mainScene->useDeferredRendering;
+}
 
 int main(int argc, char** argv) {
     glfwInit();
@@ -98,7 +94,7 @@ int main(int argc, char** argv) {
 
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
 //    glfwSetCursorPosCallback(window, cursorPositionCallback);
-//    glfwSetKeyCallback(window, keyCallback);
+    glfwSetKeyCallback(window, keyCallback);
 
     checkForAndPrintGLError(__FILE__, __LINE__);
 
