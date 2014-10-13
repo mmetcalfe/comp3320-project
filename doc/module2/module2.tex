@@ -1,0 +1,157 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[11pt]{scrartcl} % use larger type; default would be 10pt
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+\usepackage[title,titletoc,header]{appendix}
+\usepackage{multicol}
+% \usepackage{titling}
+\usepackage{longtable}
+
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage[a4paper]{geometry} % to change the page dimensions
+% \geometry{a4paper, margin=1.3in} % or letterpaper (US) or a5paper or....
+% \geometry{margin=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+
+\usepackage{pgfgantt} % gantt charts
+% \usepackage[export]{adjustbox}[2011/08/13] % For centering wide figures
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+
+\newcommand{\code}[1]{{\texttt{#1}}}
+\newcommand{\codefile}[1]{{\textit{#1}}}
+\newcommand{\program}[1]{\code{#1}}
+\newcommand{\taskname}[1]{{\textit{#1}}}
+
+%%% END Article customizations
+
+% \setlength{\parindent}{0pt}
+% \setlength{\parskip}{2ex plus 0.5ex minus 0.3ex}
+
+%%% The "real" document content comes below...
+
+% TODO: Catchy project title
+\title{Computer Graphics Module 2 Update}
+\subtitle{A 3D testing environment for an enhanced virtual reality system}
+\author{ Mitchell Metcalfe, James Ross-Gowan, Matthew Bray }
+
+\date{\today} % Activate to display a given date or no date (if empty),
+            % otherwise the current date is printed
+\rhead{ COMP3320, Module 2, \today }
+
+\begin{document}
+% \newgeometry{top=2cm}
+\maketitle
+% \vspace{-1.5 cm}
+% \tableofcontents
+% \restoregeometry
+
+\begin{abstract}
+
+    This report serves as an update to our team's graphics project proposal -
+    last updated in Module 1.  We outline what we have achieved, and the
+    changes we have made to what we propose to acheive in the remaining project
+    timeframe.
+
+\end{abstract}
+
+\section*{Project Schedule}
+    
+    Due to time constraints imposed by other courses, not all work planned for Module 2 has been completed.
+
+    Two of the four tasks planned for Module 2 have been completed successfully and on schedule, these being \taskname{Procedurally generated asteroids} and 
+    \taskname{Dynamic reflection mapping}.
+
+    Due to the increasingly sluggish performance of the game as new features are added, it was decided that we should begin using deferred rendering to render the graphics as opposed to forward rendering. Work on this improvement is nearly complete (see the \taskname{Deferred shading} task on the Gantt chart).
+
+    The tasks \taskname{Spaceship model (exterior)} and \taskname{Procedurally
+    generated planets} have been removed from the scope of the project, as well
+    as the optional tasks \taskname{Screen-space ambient occlusion},
+    \taskname{Integrate motion tracking system}, and \taskname{Add Oculus Rift
+    support}.
+
+    Unfortunately, due to an extended period of illness, one of our team
+    members, Matthew Bray, had to drop COMP3320 before he could complete any of
+    his assigned work.
+    Matthew was assigned the two major content creation tasks, \taskname{Robot model}, and \taskname{Spaceship model (interior)},
+    which have been rescheduled for the Project Deadline.
+
+    Only three tasks remain to be completed to meet the requirements of the
+    project: \taskname{Soft shadows}, \taskname{Robot model}, and
+    \taskname{Spaceship model (interior)}.
+
+    The updated Gantt chart in Figure~\ref{gantt:module2} specifies when
+    we completed each of the tasks in module 2, and
+    presents a program to achieve the revised project schedule.
+    The original Gantt charts from the proposal and from Module 1 are included as Figure~\ref{gantt:proposal} and Figure~\ref{gantt:module1} respectively.
+
+    \begin{figure}[H]
+        \makebox[\textwidth][c]{\resizebox{0.95\paperwidth}{!}{\input{module2_gantt.tex}}}
+        \caption[Project Schedule]{
+            A Gantt chart illustrating the planned project schedule.
+            Patterned grey bars represent optional tasks.
+        }
+        \label{gantt:module2}
+    \end{figure}
+
+    \begin{figure}[H]
+        \makebox[\textwidth][c]{\resizebox{0.95\paperwidth}{!}{\input{module1_gantt.tex}}}
+        \caption[Module 1 Schedule]{
+            The updated Gantt chart presented in Module 1.
+            Patterned grey bars represent optional tasks.
+        }
+        \label{gantt:module1}
+    \end{figure}
+
+    \begin{figure}[H]
+        \makebox[\textwidth][c]{\resizebox{0.95\paperwidth}{!}{\input{proposal_gantt.tex}}}
+        \caption[Proposal Schedule]{
+            The original Gantt chart from the project proposal
+            Patterned grey bars represent optional tasks.
+        }
+        \label{gantt:proposal}
+    \end{figure}
+\end{document}
+
