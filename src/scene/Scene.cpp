@@ -331,7 +331,10 @@ namespace scene {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
         screen->setTexture(framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
-        screen->render(2, 0.5, 0.5);
+        if (useDeferredRendering)
+            screen->render(2, 0.5, 0.5);
+        else
+            screen->render();
 //        screen->render(4, 3, 1);
         screen->removeTexture();
 
