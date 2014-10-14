@@ -174,12 +174,7 @@ namespace scene {
                 if (model == drawModel)
                     continue;
 
-                drawModel->shadowMapProgram = shadowMapProgram;
-//                auto prog = drawModel->environmentMapProgram;
-//                drawModel->environmentMapProgram = nullptr;
-//                drawModel->draw(mapCamera);
                 drawModel->draw(mapCamera, sharedLight, nullptr);
-//                drawModel->environmentMapProgram = prog;
             }
         }
     }
@@ -217,7 +212,7 @@ namespace scene {
         GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
         glDrawBuffers(3,  attachments);
 
-        glViewport(0, 0, windowSize.x, windowSize.y);
+        glViewport(0, 0, camera->frameWidth, camera->frameHeight);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         drawModels(gBufferProgram);
@@ -252,15 +247,6 @@ namespace scene {
             screen->setTexture(framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
             screen->render(deferredShadingProgram);
             profiler.split("deferred light ", lightNum);
-
-//
-//            // Render the light's contribution to the framebuffer:
-//            framebuffer->bind();
-//            glViewport(0, 0, camera->frameWidth, camera->frameHeight);
-//            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-//            drawModels(sharedLight, lightCamera);
-//
-//            profiler.split("framebuffer ", lightNum);
 
             // Add the light's contribution to the screen:
             addFramebufferToScreen();
@@ -343,30 +329,32 @@ namespace scene {
 
     std::shared_ptr<LightCamera> Scene::prepareShadowMap(int lightNum, std::shared_ptr<Light> sharedLight) {
         std::shared_ptr<LightCamera> lightCamera;
+
         if (sharedLight->type == Light::Type::spot) {
-                lightCamera = LightCamera::fromLight(*sharedLight, shadowMapSize);
-                // Render light's perspective into shadowMap.
-                shadowMapFramebuffer->bind();
-                glViewport(0, 0, lightCamera->frameWidth, lightCamera->frameHeight);
+            lightCamera = LightCamera::fromLight(*sharedLight, shadowMapSize);
+            // Render light's perspective into shadowMap.
+            shadowMapFramebuffer->bind();
+            glViewport(0, 0, lightCamera->frameWidth, lightCamera->frameHeight);
 
 //                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                glClear(GL_DEPTH_BUFFER_BIT);
+            glClear(GL_DEPTH_BUFFER_BIT);
 
-                // Front-face culling:
-                glEnable(GL_CULL_FACE);
-                glCullFace(GL_FRONT);
+            // Front-face culling:
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_FRONT);
 
-                for (auto model : models) {
-                    model->shadowMapProgram = shadowMapProgram;
-                    model->draw(*lightCamera, shadowMapProgram);
-                }
-
-                glDisable(GL_CULL_FACE);
-
-                lightCamera->shadowMap = shadowMapFramebuffer->textureAttachments[GL_DEPTH_ATTACHMENT];
-
-                profiler.split("shadow map ", lightNum);
+            for (auto model : models) {
+//                    model->shadowMapProgram = shadowMapProgram;
+                model->draw(*lightCamera, shadowMapProgram);
             }
+
+            glDisable(GL_CULL_FACE);
+
+            lightCamera->shadowMap = shadowMapFramebuffer->textureAttachments[GL_DEPTH_ATTACHMENT];
+
+            profiler.split("shadow map ", lightNum);
+        }
+
         return lightCamera;
     }
 

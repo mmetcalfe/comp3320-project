@@ -56,6 +56,9 @@ void framebufferSizeCallback(GLFWwindow* window, int fbWidth, int fbHeight) {
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (action == GLFW_PRESS && key == GLFW_KEY_TAB)
         mainScene->useDeferredRendering = !mainScene->useDeferredRendering;
+
+    if (action == GLFW_PRESS && key == GLFW_KEY_T)
+        mainScene->profiler.glFinishEnabled = !mainScene->profiler.glFinishEnabled;
 }
 
 int main(int argc, char** argv) {
@@ -207,22 +210,22 @@ int main(int argc, char** argv) {
     lightModel->lights.push_back(light);
     mainScene->addModel(lightModel);
 
-//    lightModel = std::make_shared<scene::Model>("spotlight 2");
-//    light = std::make_shared<scene::Light>();
-//    light->type = scene::Light::Type::spot;
-//    light->pos = {50, 200, 40};
-//    light->dir = {0, -1, 0};
-//    light->attenuationConstant = 0;
-//    light->attenuationLinear = 0;
-//    light->attenuationQuadratic = 1;
-//    light->colDiffuse = glm::vec3(5000);
-//    light->colSpecular = {2, 2, 2};
-//    light->colAmbient = {0, 0, 0};
-//    light->angleConeInner = 1;
-//    light->angleConeOuter = 1;
-//    lightModel->lights.push_back(light);
-//    mainScene->addModel(lightModel);
-
+    lightModel = std::make_shared<scene::Model>("spotlight 2");
+    light = std::make_shared<scene::Light>();
+    light->type = scene::Light::Type::spot;
+    light->pos = {50, 200, 40};
+    light->dir = {0, -1, 0};
+    light->attenuationConstant = 0;
+    light->attenuationLinear = 0;
+    light->attenuationQuadratic = 1;
+    light->colDiffuse = glm::vec3(5000);
+    light->colSpecular = {2, 2, 2};
+    light->colAmbient = {0, 0, 0};
+    light->angleConeInner = 1;
+    light->angleConeOuter = 1;
+    lightModel->lights.push_back(light);
+    mainScene->addModel(lightModel);
+//
 //    lightModel = std::make_shared<scene::Model>("point light 1");
 //    light = std::make_shared<scene::Light>();
 //    light->type = scene::Light::Type::point;
@@ -233,7 +236,7 @@ int main(int argc, char** argv) {
 //    light->attenuationQuadratic = 0;
 //    light->colDiffuse = {1, 1, 1};
 //    light->colSpecular = {1, 1, 1};
-//    light->colAmbient = {0.2, 0.2, 0.2};
+//    light->colAmbient = {0, 0, 0};
 //    light->angleConeInner = 1;
 //    light->angleConeOuter = 1;
 //    lightModel->lights.push_back(light);
@@ -389,21 +392,17 @@ int main(int argc, char** argv) {
         // Swap front and back buffers:
 //        glfwSwapInterval(1); // v-sync
         glfwSwapBuffers(window);
-
         mainScene->profiler.split("glfwSwapBuffers");
 
         // Poll for and process events:
         glfwPollEvents();
         mainScene->profiler.split("glfwPollEvents");
 
-//        std::cout << mainScene->camera->dir << std::endl;
-//        std::cout << mainScene->camera->pos << std::endl;
         mainScene->camera->processPlayerInput(window);
         mainScene->profiler.split("processPlayerInput");
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
             glfwSetWindowShouldClose(window, GL_TRUE);
-//        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
     // Clean up GLFW:

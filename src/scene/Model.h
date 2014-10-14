@@ -37,7 +37,7 @@ namespace scene {
         std::shared_ptr<NUGL::ShaderProgram> flatProgram;
         std::shared_ptr<NUGL::ShaderProgram> textureProgram;
         std::shared_ptr<NUGL::ShaderProgram> environmentMapProgram;
-        std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram;
+//        std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram;
 
         // TODO: Improve environment map management.
         bool dynamicReflections = false;

@@ -12,6 +12,7 @@ public:
     inline Profiler(unsigned sampleLimit = 100) {
         this->sampleLimit = sampleLimit;
         lastPrint = std::chrono::system_clock::now();
+        glFinishEnabled = true;
         reset();
     };
 
@@ -21,7 +22,8 @@ public:
 
     inline void split(std::string label) {
         // Wait until the effects of all previously called GL commands are complete.
-        glFinish();
+        if (glFinishEnabled)
+            glFinish();
 
         auto end = std::chrono::system_clock::now();
         durationMap[label].push_front(std::chrono::duration_cast<std::chrono::microseconds>(end - start));
@@ -60,7 +62,9 @@ public:
 
     inline void print() {
         // TODO: Sort the output by order added / duration.
-        std::cout << "Times:" << std::endl;
+        std::cout << "Times:"
+                << " (glFinishEnabled: " << std::boolalpha << glFinishEnabled << " (T to toggle))"
+                << std::endl;
         for (const auto& pair : durationMap) {
             std::cout << "  "
                     <<  std::setw(20)
@@ -87,4 +91,5 @@ public:
     std::chrono::system_clock::time_point lastPrint;
     unsigned sampleLimit;
     std::map<std::string, std::deque<std::chrono::microseconds>> durationMap;
+    bool glFinishEnabled;
 };
