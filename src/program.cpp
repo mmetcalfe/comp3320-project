@@ -43,7 +43,7 @@ void framebufferSizeCallback(GLFWwindow* window, int fbWidth, int fbHeight) {
     mainScene->windowSize = {width, height};
     mainScene->prepareFramebuffer(mainScene->windowSize);
 
-    mainScene->camera->frameWidth = fbWidth;
+    mainScene->camera->frameHeight = fbHeight;
     mainScene->camera->frameHeight = fbHeight;
     mainScene->camera->prepareTransforms();
 }
@@ -359,6 +359,7 @@ int main(int argc, char** argv) {
 
     // Setup Camera:
 //    mainScene->camera->pos = {15, 120, 40};
+    mainScene->camera->near_ = 1;
     mainScene->camera->pos = {37.2, 156, 38.1};
     mainScene->camera->dir = {0.415, -0.646, -0.64};
     mainScene->camera->fov = M_PI_4;

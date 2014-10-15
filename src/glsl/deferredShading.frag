@@ -40,7 +40,7 @@ uniform Light light;
 
 
 float phong(in vec3 incident, in vec3 reflection, in float shininess) {
-    return pow(dot(-incident, reflection), shininess);
+    return pow(clamp(dot(-incident, reflection), 0, 1), shininess);
 }
 
 float calculateIntensity(in float lightDist) {
@@ -50,8 +50,14 @@ float calculateIntensity(in float lightDist) {
     return 1.0 / denom;
 }
 
+
+float rand(in vec4 seed) {
+    float dot_product = dot(seed, vec4(12.9898, 78.233, 45.164, 94.673));
+    return fract(sin(dot_product) * 43758.5453);
+}
+
 float doShadowMapping(in vec4 eyeSpacePosition) {
-    float isLit = 1.0;
+    float lightVisibility = 1.0;
     if (light.hasShadowMap) {
         vec4 lightClipPos = light.proj * light.view * viewInverse * eyeSpacePosition;
 //      vec4 lightClipPos = light.proj * light.view * inverse(view) * eyeSpacePosition;
@@ -65,11 +71,38 @@ float doShadowMapping(in vec4 eyeSpacePosition) {
 //        vec4 shadowLookup = transformedClipPos;
 //        vec4 shadowLookup = transformedClipPos / transformedClipPos.w;
 
-        float shadowDepth = texture(light.texShadowMap, shadowLookup.xy).x;
-//        float shadowDepth = texture(light.texShadowMap, shadowLookup.xy / shadowLookup.w).z;
+//        float shadowDepth = texture(light.texShadowMap, shadowLookup.xy).x;
+////        float shadowDepth = texture(light.texShadowMap, shadowLookup.xy / shadowLookup.w).z;
         float bias = 0.0;
-        isLit = shadowDepth < ((lightClipPos.z - bias) / lightClipPos.w) * 0.5 + 0.5 ? 0 : 1;
-//        float isLit = textureProj(light.texShadowMap, shadowLookup.xyw).z < (shadowLookup.z - bias) / shadowLookup.w;// ? 0 : 1;
+//        lightVisibility = shadowDepth < ((lightClipPos.z - bias) / lightClipPos.w) * 0.5 + 0.5 ? 0 : 1;
+////        float lightVisibility = textureProj(light.texShadowMap, shadowLookup.xyw).z < (shadowLookup.z - bias) / shadowLookup.w;// ? 0 : 1;
+
+        vec2 poissonDisk[4] = vec2[](
+                vec2( -0.94201624, -0.39906216 ),
+                vec2( 0.94558609, -0.76890725 ),
+                vec2( -0.094184101, -0.92938870 ),
+                vec2( 0.34495938, 0.29387760 )
+        );
+
+        float samples = 16;
+        for (int i = 0; i < samples; i++) {
+//            int index = int(4.0 * rand(vec4(eyeSpacePosition.xyz, i))) % 4;
+//            vec2 stratifiedCoord = vec2(shadowLookup.xy + poissonDisk[index] / 700.0); //,  (shadowLookup.z - bias ) / shadowLookup.w);
+//            vec2 stratifiedCoord = vec2(shadowLookup.xy + poissonDisk[index] / 700.0); //,  (shadowLookup.z - bias ) / shadowLookup.w);
+            vec2 offset = vec2(rand(vec4(eyeSpacePosition.xyz, i)), rand(vec4(eyeSpacePosition.xyz, i + samples)));
+
+//            float l = clamp(length(offset), 0, 1);
+//            offset = normalize(offset) * l;
+//            vec2 stratifiedCoord = vec2(shadowLookup.xy + normalize(offset) / 300.0);
+            vec2 stratifiedCoord = vec2(shadowLookup.xy + offset / 300.0);
+
+            float occluderDepth = texture(light.texShadowMap, stratifiedCoord.xy).x;
+
+            if (occluderDepth < ((lightClipPos.z - bias) / lightClipPos.w) * 0.5 + 0.5)
+                lightVisibility -= 1.0/samples;// * (1.0 - texture(light.texShadowMap, stratifiedCoord));
+        }
+
+        lightVisibility = clamp(lightVisibility, 0.0, 1.0);
 
         // Apply the view frustum:
         float upper = 1;
@@ -78,10 +111,10 @@ float doShadowMapping(in vec4 eyeSpacePosition) {
                 shadowLookup.y < lower || shadowLookup.y > upper
                 || shadowLookup.z > upper // || shadowLookup.z < lower
                 ) {
-            isLit = 0;
+            lightVisibility = 0;
 //            outColor = vec4(0.5, 0, 0, 1);
         } else if (shadowLookup.z < lower) {
-            isLit = 1;
+            lightVisibility = 1;
 //            outColor = vec4(1, 0, 0, 1);
         }
 
@@ -89,7 +122,7 @@ float doShadowMapping(in vec4 eyeSpacePosition) {
 //        return;
     }
 
-    return isLit;
+    return lightVisibility;
 }
 
 // Based on code from: http://mynameismjp.wordpress.com/2009/03/10/reconstructing-position-from-depth/
@@ -109,6 +142,7 @@ vec3 eyeSpacePosFromDepth(in float depth, in vec2 texcoord) {
     // Divide by w to get the view-space position
     return viewPos.xyz / viewPos.w;
 }
+
 
 void main() {
     vec3 colSpecular = vec3(1.0, 1.0, 1.0);
@@ -163,13 +197,9 @@ void main() {
     vec3 outReflect = vec3(0, 0, 0);
     if (roughness > 0) {
         vec3 viewReflect = reflect(incident, normal);
-        float phongViewSpecular = phong(incident, viewReflect, roughness);
-//        vec4 tmp_sampleCoord = modelViewInverse * vec4(viewReflect, 0);
-//        vec4 tmp_sampleCoord = viewInverse * vec4(viewReflect, 0); // May be better?
-//        vec3 sampleCoord = tmp_sampleCoord.xyz;
-//        vec4 reflectCol = texture(texEnvironmentMap, sampleCoord);
-//        vec3 envReflectCol = reflectCol.rgb * phongViewSpecular;
-        vec3 envReflectCol = envMapCol.rgb * phongViewSpecular;
+//        float phongViewSpecular = phong(incident, viewReflect, roughness);
+//        vec3 envReflectCol = envMapCol.rgb * phongViewSpecular;
+        vec3 envReflectCol = envMapCol.rgb;
         outReflect = envReflectCol * colSpecular;
     }
 
@@ -183,7 +213,7 @@ void main() {
     }
 
     // Shadow mapping:
-    float isLit = doShadowMapping(vec4(eyeSpacePosition, 1));
+    float lightVisibility = doShadowMapping(vec4(eyeSpacePosition, 1));
 
     // Diffuse component:
 //    vec4 texCol = texture(texDiffuse, Texcoord);
@@ -196,7 +226,7 @@ void main() {
 
     // Final colour:
     float intensity = calculateIntensity(length(lightVecRaw));
-    vec3 finalColor = outAmbient + outReflect + (outDiffuse + outSpecular) * intensity * isLit * normalDirTest;
+    vec3 finalColor = outAmbient + outReflect + (outDiffuse + outSpecular) * intensity * lightVisibility * normalDirTest;
 
     outColor = vec4(finalColor, 1.0);
 }
