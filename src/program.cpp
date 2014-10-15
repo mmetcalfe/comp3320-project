@@ -35,16 +35,16 @@ void framebufferSizeCallback(GLFWwindow* window, int fbWidth, int fbHeight) {
     int width, height;
     glfwGetWindowSize(window, &width, &height);
 
-    std::cout << "Resize to: windowSize = (" << width << ", " << height << "), fbSize = (" << fbWidth << ", " << fbHeight << ")." << std::endl;
-
-    glViewport(0, 0, fbWidth, fbHeight);
+    std::cerr << "Resize to: windowSize = (" << width << ", " << height << "), fbSize = (" << fbWidth << ", " << fbHeight << ")." << std::endl;
 
     mainScene->framebufferSize = {fbWidth, fbHeight};
+
     mainScene->windowSize = {width, height};
     mainScene->prepareFramebuffer(mainScene->windowSize);
+    mainScene->prepareGBuffer(mainScene->windowSize);
 
-    mainScene->camera->frameHeight = fbHeight;
-    mainScene->camera->frameHeight = fbHeight;
+    mainScene->camera->frameWidth = width;
+    mainScene->camera->frameHeight = height;
     mainScene->camera->prepareTransforms();
 }
 
@@ -79,8 +79,8 @@ int main(int argc, char** argv) {
     glfwWindowHint(GLFW_STENCIL_BITS, 8);
 
     // Windowed:
-    int screenWidth = 800;
-    int screenHeight = 600;
+    int screenWidth = 700;
+    int screenHeight = 700;
     GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "OpenGL", nullptr, nullptr);
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(window, &fbWidth, &fbHeight);

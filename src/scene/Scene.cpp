@@ -23,18 +23,18 @@ namespace scene {
         screen = std::make_unique<utility::PostprocessingScreen>(screenProgram);
     }
 
-    void Scene::prepareFramebuffer(glm::ivec2 windowSize) {
-        auto tex = NUGL::Texture::createTexture(GL_TEXTURE0, GL_TEXTURE_2D, windowSize.x, windowSize.y, GL_RGB);
+    void Scene::prepareFramebuffer(glm::ivec2 size) {
+        auto tex = NUGL::Texture::createTexture(GL_TEXTURE0, GL_TEXTURE_2D, size.x, size.y, GL_RGB);
 
         auto rbo  = std::make_unique<NUGL::Renderbuffer>();
-        rbo->setStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, windowSize.x, windowSize.y);
+        rbo->setStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, size.x, size.y);
 
         framebuffer = std::make_unique<NUGL::Framebuffer>();
         framebuffer->attach(std::move(tex));
         framebuffer->attach(std::move(rbo));
     }
 
-    void Scene::prepareGBuffer(glm::ivec2 windowSize) {
+    void Scene::prepareGBuffer(glm::ivec2 size) {
         /*
          * G-Buffer format:
          * |--------+--------+--------+--------|--------|
@@ -53,10 +53,10 @@ namespace scene {
          */
 
         GLenum unit = GL_TEXTURE8;
-        auto depthTex = NUGL::Texture::createTexture(unit++, GL_TEXTURE_2D, windowSize.x, windowSize.y, GL_DEPTH24_STENCIL8, GL_DEPTH_COMPONENT);
-        auto normalsTex = NUGL::Texture::createTexture(unit++, GL_TEXTURE_2D, windowSize.x, windowSize.y, GL_RG16F);
-        auto albedoTex = NUGL::Texture::createTexture(unit++, GL_TEXTURE_2D, windowSize.x, windowSize.y, GL_RGBA8);
-        auto envMapColTex = NUGL::Texture::createTexture(unit++, GL_TEXTURE_2D, windowSize.x, windowSize.y, GL_RGBA8);
+        auto depthTex = NUGL::Texture::createTexture(unit++, GL_TEXTURE_2D, size.x, size.y, GL_DEPTH24_STENCIL8, GL_DEPTH_COMPONENT);
+        auto normalsTex = NUGL::Texture::createTexture(unit++, GL_TEXTURE_2D, size.x, size.y, GL_RG16F);
+        auto albedoTex = NUGL::Texture::createTexture(unit++, GL_TEXTURE_2D, size.x, size.y, GL_RGBA8);
+        auto envMapColTex = NUGL::Texture::createTexture(unit++, GL_TEXTURE_2D, size.x, size.y, GL_RGBA8);
 
         checkForAndPrintGLError(__FILE__, __LINE__);
 
@@ -229,7 +229,7 @@ namespace scene {
             auto lightCamera = prepareShadowMap(lightNum, sharedLight);
 
             framebuffer->bind();
-            glViewport(0, 0, windowSize.x, windowSize.y);
+            glViewport(0, 0, camera->frameWidth, camera->frameHeight);
             gBuffer->bindTextures();
             deferredShadingProgram->use();
             deferredShadingProgram->setUniform("texDepthStencil", gBuffer->textureAttachments[GL_DEPTH_STENCIL_ATTACHMENT]);
@@ -291,6 +291,9 @@ namespace scene {
     }
 
     void Scene::drawGBufferThumbnails() {
+        NUGL::Framebuffer::useDefault();
+        glViewport(0, 0, framebufferSize.x, framebufferSize.y);
+
         int texNum = 0;
         for (auto& pair : gBuffer->textureAttachments) {
             auto tex = pair.second;
@@ -306,6 +309,9 @@ namespace scene {
     }
 
     void Scene::drawShadowMapThumbnail(int lightNum) {
+        NUGL::Framebuffer::useDefault();
+        glViewport(0, 0, framebufferSize.x, framebufferSize.y);
+
         screen->setTexture(shadowMapFramebuffer->textureAttachments[GL_DEPTH_ATTACHMENT]);
         screen->render(4, lightNum, 3);
         screen->removeTexture();

@@ -197,9 +197,9 @@ void main() {
     vec3 outReflect = vec3(0, 0, 0);
     if (roughness > 0) {
         vec3 viewReflect = reflect(incident, normal);
-//        float phongViewSpecular = phong(incident, viewReflect, roughness);
-//        vec3 envReflectCol = envMapCol.rgb * phongViewSpecular;
-        vec3 envReflectCol = envMapCol.rgb;
+        float phongViewSpecular = phong(incident, viewReflect, roughness);
+        vec3 envReflectCol = envMapCol.rgb * phongViewSpecular;
+//        vec3 envReflectCol = envMapCol.rgb;
         outReflect = envReflectCol * colSpecular;
     }
 
