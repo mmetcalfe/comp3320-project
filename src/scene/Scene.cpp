@@ -188,6 +188,7 @@ namespace scene {
         // Clear the screen:
         NUGL::Framebuffer::useDefault();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
 
         if (useDeferredRendering)
             deferredRender();
@@ -208,18 +209,32 @@ namespace scene {
 
         // Render all geometry to g-buffer:
         gBuffer->bind();
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // TODO: Refactor enabling of framebuffer colour attachments.
         GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
         glDrawBuffers(3,  attachments);
-
         glViewport(0, 0, camera->frameWidth, camera->frameHeight);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         drawModels(gBufferProgram);
 
         profiler.split("render g-buffer");
 
         // Attach g-buffer uniforms to the deferred shaders:
+        gBuffer->bindTextures();
+        deferredShadingProgram->use();
+        deferredShadingProgram->setUniform("texDepthStencil", gBuffer->textureAttachments[GL_DEPTH_STENCIL_ATTACHMENT]);
+        deferredShadingProgram->setUniform("texNormal", gBuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
+        deferredShadingProgram->setUniform("texAlbedoRoughness", gBuffer->textureAttachments[GL_COLOR_ATTACHMENT1]);
+        deferredShadingProgram->setUniform("texEnvMapColSpecIntensity", gBuffer->textureAttachments[GL_COLOR_ATTACHMENT2]);
+        glm::mat4 projInverse = glm::inverse(camera->proj);
+        deferredShadingProgram->setUniform("projInverse", projInverse);
+        glm::mat4 viewInverse = glm::inverse(camera->view);
+        deferredShadingProgram->setUniform("viewInverse", viewInverse);
+        deferredShadingProgram->setUniform("view", camera->view);
+
+        // Clear the framebuffer:
+        framebuffer->bind();
+        glClear(GL_COLOR_BUFFER_BIT);
+
 
         // Run the deferred shader over the framebuffer for each light:
         int lightNum = 1;
@@ -230,26 +245,22 @@ namespace scene {
 
             framebuffer->bind();
             glViewport(0, 0, camera->frameWidth, camera->frameHeight);
+//            glClear(GL_COLOR_BUFFER_BIT);
+
             gBuffer->bindTextures();
-            deferredShadingProgram->use();
-            deferredShadingProgram->setUniform("texDepthStencil", gBuffer->textureAttachments[GL_DEPTH_STENCIL_ATTACHMENT]);
-            deferredShadingProgram->setUniform("texNormal", gBuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
-            deferredShadingProgram->setUniform("texAlbedoRoughness", gBuffer->textureAttachments[GL_COLOR_ATTACHMENT1]);
-            deferredShadingProgram->setUniform("texEnvMapColSpecIntensity", gBuffer->textureAttachments[GL_COLOR_ATTACHMENT2]);
-            glm::mat4 projInverse = glm::inverse(camera->proj);
-            deferredShadingProgram->setUniform("projInverse", projInverse);
-            glm::mat4 viewInverse = glm::inverse(camera->view);
-            deferredShadingProgram->setUniform("viewInverse", viewInverse);
-            deferredShadingProgram->setUniform("view", camera->view);
+            screen->setTexture(framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
 
             Model::setLightUniformsOnShaderProgram(deferredShadingProgram, sharedLight, lightCamera);
 
-            screen->setTexture(framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
             screen->render(deferredShadingProgram);
+            glDisable(GL_BLEND);
+
             profiler.split("deferred light ", lightNum);
 
-            // Add the light's contribution to the screen:
-            addFramebufferToScreen();
+//            // Add the light's contribution to the screen:
+//            addFramebufferToScreen();
 
             // Render a tiny shadow map:
             drawShadowMapThumbnail(lightNum - 1);
@@ -258,7 +269,23 @@ namespace scene {
             lightNum++;
         }
 
+
+        // Render skybox and transparent meshes:
+        framebuffer->bind();
+        glViewport(0, 0, camera->frameWidth, camera->frameHeight);
+        framebuffer->attach(gBuffer->textureAttachments[GL_DEPTH_STENCIL_ATTACHMENT], GL_TEXTURE_2D, GL_DEPTH_STENCIL_ATTACHMENT);
+        skyBox->draw(*camera, skyBox->environmentMapProgram);
+
+
+        // Restore the framebuffer's depth attachment:
+        framebuffer->attach(std::move(framebuffer->renderbufferAttachment));
+
+
         profiler.split("deferred lighting");
+
+
+        addFramebufferToScreen();
+
 
         // Render g-buffer thumbnails:
         drawGBufferThumbnails();

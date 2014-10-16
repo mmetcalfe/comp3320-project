@@ -356,6 +356,7 @@ int main(int argc, char** argv) {
     skyBox->createMeshBuffers();
     skyBox->createVertexArrays();
     mainScene->addModel(skyBox);
+    mainScene->skyBox = skyBox;
 
     // Setup Camera:
 //    mainScene->camera->pos = {15, 120, 40};
@@ -372,8 +373,6 @@ int main(int argc, char** argv) {
     mainScene->camera->frameHeight = screenHeight;
     mainScene->camera->prepareTransforms();
     mainScene->camera->initializeAngles();
-
-    glEnable(GL_DEPTH_TEST);
 
     // Backface culling:
 //    glEnable (GL_CULL_FACE); // cull face

@@ -27,6 +27,8 @@ namespace scene {
         void prepareReflectionFramebuffer(int size);
 
         std::vector<std::shared_ptr<Model>> models;
+        std::shared_ptr<Model> skyBox;
+
         /**
          * Weak pointers to all lights attached to all models in the scene.
          */

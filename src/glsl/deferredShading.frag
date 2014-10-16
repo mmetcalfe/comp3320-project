@@ -128,7 +128,7 @@ float doShadowMapping(in vec4 eyeSpacePosition) {
 // Based on code from: http://mynameismjp.wordpress.com/2009/03/10/reconstructing-position-from-depth/
 vec3 eyeSpacePosFromDepth(in float depth, in vec2 texcoord) {
 
-    // Get x/w and y/w from the viewport position
+    // Get x/w and y/w from the viewport position:
     float x = texcoord.x * 2 - 1;
     float y = texcoord.y * 2 - 1;
     float z = depth * 2 - 1;
@@ -136,10 +136,10 @@ vec3 eyeSpacePosFromDepth(in float depth, in vec2 texcoord) {
     // Construct clip-space position:
     vec4 clipPos = vec4(x, y, z, 1.0f);
 
-    // Transform by the inverse projection matrix
+    // Transform by the inverse projection matrix:
     vec4 viewPos =  projInverse * clipPos;
 
-    // Divide by w to get the view-space position
+    // Divide by w to get the view-space position:
     return viewPos.xyz / viewPos.w;
 }
 

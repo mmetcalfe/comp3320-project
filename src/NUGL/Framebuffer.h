@@ -59,9 +59,9 @@ namespace NUGL {
         }
 
         std::unordered_map<GLenum, std::shared_ptr<Texture>> textureAttachments;
+        std::unique_ptr<Renderbuffer> renderbufferAttachment;
 
     private:
         GLuint bufferId;
-        std::unique_ptr<Renderbuffer> renderbufferAttachment;
     };
 }
