@@ -29,6 +29,7 @@ struct Light {
     vec3 colAmbient;
     float angleConeInner;
     float angleConeOuter;
+    float fov;
 
     bool hasShadowMap;
     sampler2D texShadowMap;
@@ -215,6 +216,12 @@ void main() {
     // Shadow mapping:
     float lightVisibility = doShadowMapping(vec4(eyeSpacePosition, 1));
 
+    float spotFactor = 1.0;
+    if (light.hasShadowMap) {
+        float lightDirDot = dot((viewInverse * vec4(lightVec, 0)).xyz, light.dir);
+        spotFactor = lightDirDot > cos(light.fov / 2.0) ? 1.0 : 0.0;
+    }
+
     // Diffuse component:
 //    vec4 texCol = texture(texDiffuse, Texcoord);
 //    vec3 outDiffuse = texCol.rgb * colDiffuse * light.colDiffuse * clamp(lightDot, 0, 1);
@@ -226,7 +233,7 @@ void main() {
 
     // Final colour:
     float intensity = calculateIntensity(length(lightVecRaw));
-    vec3 finalColor = outAmbient + outReflect + (outDiffuse + outSpecular) * intensity * lightVisibility * normalDirTest;
+    vec3 finalColor = outAmbient + outReflect + (outDiffuse + outSpecular) * intensity * lightVisibility * normalDirTest * spotFactor;
 
     outColor = vec4(finalColor, 1.0);
 }

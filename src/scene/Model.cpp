@@ -493,12 +493,14 @@ void Model::setLightUniformsOnShaderProgram(std::shared_ptr<NUGL::ShaderProgram>
                 program->use();
 
                 if (lightCamera != nullptr) {
-                    program->setUniform("light.hasShadowMap", true);
-                    program->setUniform("light.texShadowMap", lightCamera->shadowMap);
-                    program->setUniform("light.view", lightCamera->view);
-                    program->setUniform("light.proj", lightCamera->proj);
+                    program->setUniformIfActive("light.hasShadowMap", true);
+                    program->setUniformIfActive("light.texShadowMap", lightCamera->shadowMap);
+                    program->setUniformIfActive("light.view", lightCamera->view);
+                    program->setUniformIfActive("light.proj", lightCamera->proj);
+                    program->setUniformIfActive("light.fov", lightCamera->fov);
                 } else {
-                    program->setUniform("light.hasShadowMap", false);
+                    program->setUniformIfActive("light.hasShadowMap", false);
+                    program->setUniformIfActive("light.fov", 20.0f); // More than 2*Pi
                 }
             }
         }
