@@ -158,6 +158,8 @@ Material copyAiMaterial(const std::string &fileName, const aiMaterial *srcMateri
         material.materialInfo.has.opacity = true;
         material.opacity = aiOpacity;
 //        std::cerr << __FILE__ << ", " << __LINE__ << ": opacity " << aiOpacity << " " << fileName << std::endl;
+    } else {
+        material.opacity = 1;
     }
 
     float aiShininess;

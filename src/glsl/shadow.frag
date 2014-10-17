@@ -13,6 +13,7 @@ uniform mat4 view;
 uniform mat4 viewInverse;
 
 // Material uniforms
+uniform float opacity;
 uniform vec3 colAmbient;
 uniform vec3 colDiffuse;
 uniform vec3 colSpecular;
@@ -154,5 +155,6 @@ void main() {
     float intensity = calculateIntensity(length(lightVecRaw));
     vec3 finalColor = outAmbient + outReflect + (outDiffuse + outSpecular) * intensity * isLit * normalDirTest;
 
-    outColor = vec4(finalColor, 1.0);
+    outColor = vec4(finalColor, opacity);
+//    outColor = vec4(eyeSpaceNormal, 1.0);
 }

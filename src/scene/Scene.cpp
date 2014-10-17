@@ -214,7 +214,10 @@ namespace scene {
         GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
         glDrawBuffers(3,  attachments);
         glViewport(0, 0, camera->frameWidth, camera->frameHeight);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
         drawModels(gBufferProgram);
+        glDisable(GL_CULL_FACE);
 
         profiler.split("render g-buffer");
 
@@ -234,7 +237,7 @@ namespace scene {
         // Clear the framebuffer:
         framebuffer->bind();
         glClear(GL_COLOR_BUFFER_BIT);
-
+        glDisable(GL_CULL_FACE);
 
         // Run the deferred shader over the framebuffer for each light:
         int lightNum = 1;
@@ -290,7 +293,10 @@ namespace scene {
             glViewport(0, 0, camera->frameWidth, camera->frameHeight);
 
             glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+//            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            checkForAndPrintGLError(__FILE__, __LINE__);
+
             drawModels(sharedLight, lightCamera, true);
             glDisable(GL_BLEND);
 
