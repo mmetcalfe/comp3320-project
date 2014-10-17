@@ -54,7 +54,7 @@ namespace scene {
         void renderReflectionMap(std::shared_ptr<Model> shared_ptr);
         void renderDynamicReflectionMaps();
 
-        void drawModels(std::shared_ptr<Light> sharedLight, std::shared_ptr<LightCamera> lightCamera);
+        void drawModels(std::shared_ptr<Light> sharedLight, std::shared_ptr<LightCamera> lightCamera, bool transparentOnly = false);
 
         std::shared_ptr<LightCamera> prepareShadowMap(int lightNum, std::shared_ptr<Light> sharedLight);
 

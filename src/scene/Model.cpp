@@ -157,6 +157,7 @@ Material copyAiMaterial(const std::string &fileName, const aiMaterial *srcMateri
     if (!srcMaterial->Get(AI_MATKEY_OPACITY, aiOpacity)) {
         material.materialInfo.has.opacity = true;
         material.opacity = aiOpacity;
+//        std::cerr << __FILE__ << ", " << __LINE__ << ": opacity " << aiOpacity << " " << fileName << std::endl;
     }
 
     float aiShininess;
@@ -384,19 +385,19 @@ glm::mat4 Model::buildModelTransform(glm::vec3 pos, glm::vec3 dir, glm::vec3 up,
     return glm::inverse(orientation) * model;
 }
 
-void Model::draw(Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program) {
+void Model::draw(Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program, bool transparentOnly) {
     transform = buildModelTransform(pos, dir, up, scale);
 
-    drawNodeWithProgram(rootNode, transform, camera, program);
+    drawNodeWithProgram(rootNode, transform, camera, program, transparentOnly);
 }
 
-void Model::draw(Camera &camera, std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera) {
+void Model::draw(Camera &camera, std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera, bool transparentOnly) {
     transform = buildModelTransform(pos, dir, up, scale);
 
-    drawNode(rootNode, transform, camera, light, lightCamera);
+    drawNode(rootNode, transform, camera, light, lightCamera, transparentOnly);
 }
 
-void Model::drawNodeWithProgram(Model::Node &node, glm::mat4 parentNodeTransform, Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program) {
+void Model::drawNodeWithProgram(Model::Node &node, glm::mat4 parentNodeTransform, Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program, bool transparentOnly) {
     glm::mat4 model = parentNodeTransform * node.transform;
 
     program->use();
@@ -405,16 +406,19 @@ void Model::drawNodeWithProgram(Model::Node &node, glm::mat4 parentNodeTransform
     for (int index : node.meshes) {
         auto &mesh = meshes[index];
 
+        if (transparentOnly == (mesh.material->opacity == 1))
+            continue;
+
         mesh.draw(program);
     }
 
     for (auto &child : node.children) {
-        drawNodeWithProgram(child, model, camera, program);
+        drawNodeWithProgram(child, model, camera, program, transparentOnly);
     }
 }
 
 void Model::drawNode(Model::Node &node, glm::mat4 parentNodeTransform, Camera &camera, std::shared_ptr<Light> light,
-                    std::shared_ptr<LightCamera> lightCamera) {
+                    std::shared_ptr<LightCamera> lightCamera, bool transparentOnly) {
     glm::mat4 model = parentNodeTransform * node.transform;
 
     // TODO: Find a better way of managing shader programs!
@@ -424,11 +428,14 @@ void Model::drawNode(Model::Node &node, glm::mat4 parentNodeTransform, Camera &c
     for (int index : node.meshes) {
         auto &mesh = meshes[index];
 
+        if (transparentOnly == (mesh.material->opacity == 1))
+            continue;
+
         mesh.draw(mesh.shaderProgram);
     }
 
     for (auto &child : node.children) {
-        drawNode(child, model, camera, light, lightCamera);
+        drawNode(child, model, camera, light, lightCamera, transparentOnly);
     }
 }
 

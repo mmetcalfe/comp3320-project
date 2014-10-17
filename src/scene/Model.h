@@ -56,12 +56,12 @@ namespace scene {
 
         void createVertexArrays();
 
-        void draw(Camera &camera, std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera);
+        void draw(Camera &camera, std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera, bool transparentOnly = false);
         void drawNode(Model::Node &node, glm::mat4 parentModel, Camera &camera, std::shared_ptr<Light> light,
-                std::shared_ptr<LightCamera> lightCamera);
+                std::shared_ptr<LightCamera> lightCamera, bool transparentOnly = false);
 
-        void draw(Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program);
-        void drawNodeWithProgram(Model::Node &node, glm::mat4 parentModel, Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program);
+        void draw(Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program, bool transparentOnly = false);
+        void drawNodeWithProgram(Model::Node &node, glm::mat4 parentModel, Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program, bool transparentOnly = false);
 
         static std::shared_ptr<Model> loadFromFile(const std::string &fileName);
 

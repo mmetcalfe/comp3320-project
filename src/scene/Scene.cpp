@@ -265,17 +265,38 @@ namespace scene {
             // Render a tiny shadow map:
             drawShadowMapThumbnail(lightNum - 1);
 
-            profiler.split("light ", lightNum);
+            profiler.split("drawShadowMapThumbnail ", lightNum);
             lightNum++;
         }
 
 
-        // Render skybox and transparent meshes:
+        // Draw skybox and transparent meshes:
+        // (use the depth buffer from the g-buffer)
         framebuffer->bind();
         glViewport(0, 0, camera->frameWidth, camera->frameHeight);
         framebuffer->attach(gBuffer->textureAttachments[GL_DEPTH_STENCIL_ATTACHMENT], GL_TEXTURE_2D, GL_DEPTH_STENCIL_ATTACHMENT);
+
+        // Draw skybox first:
         skyBox->draw(*camera, skyBox->environmentMapProgram);
 
+        // Draw all transparent meshes:
+        lightNum = 1;
+        for (auto light : lights) {
+            auto sharedLight = light.lock();
+
+            auto lightCamera = prepareShadowMap(lightNum, sharedLight);
+
+            framebuffer->bind();
+            glViewport(0, 0, camera->frameWidth, camera->frameHeight);
+
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+            drawModels(sharedLight, lightCamera, true);
+            glDisable(GL_BLEND);
+
+            profiler.split("transparent: light ", lightNum);
+            lightNum++;
+        }
 
         // Restore the framebuffer's depth attachment:
         framebuffer->attach(std::move(framebuffer->renderbufferAttachment));
@@ -391,9 +412,9 @@ namespace scene {
         return lightCamera;
     }
 
-    void Scene::drawModels(std::shared_ptr<Light> sharedLight, std::shared_ptr<LightCamera> lightCamera) {
+    void Scene::drawModels(std::shared_ptr<Light> sharedLight, std::shared_ptr<LightCamera> lightCamera, bool transparentOnly) {
         for (auto model : models) {
-            model->draw(*camera, sharedLight, lightCamera);
+            model->draw(*camera, sharedLight, lightCamera, transparentOnly);
         }
     }
 
