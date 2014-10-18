@@ -70,11 +70,11 @@ std::shared_ptr<Model> createAsteroid() {
     std::mt19937 mt(rd());
     std::uniform_real_distribution<float> distrib(-1, 1);
 
-//    for (unsigned i = 0; i < mesh.vertices.size(); i ++)
-//        mesh.vertices[i] = mesh.vertices[i] + 0.1f * distrib(mt);
-//
-//    for (int i = 0; i < 4; i ++)
-//        subdivide(mt, mesh);
+    for (unsigned i = 0; i < mesh.vertices.size(); i ++)
+        mesh.vertices[i] = mesh.vertices[i] + 0.1f * distrib(mt);
+
+    for (int i = 0; i < 4; i ++)
+        subdivide(mt, mesh);
 
     for (unsigned i = 0; i < mesh.vertices.size(); i ++) {
         glm::vec3 normal = { 0, 0, 0 };

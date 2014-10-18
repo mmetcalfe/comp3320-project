@@ -209,10 +209,10 @@ namespace scene {
 
         // Render all geometry to g-buffer:
         gBuffer->bind();
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // TODO: Refactor enabling of framebuffer colour attachments.
         GLuint attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
         glDrawBuffers(3,  attachments);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glViewport(0, 0, camera->frameWidth, camera->frameHeight);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
@@ -238,6 +238,14 @@ namespace scene {
         framebuffer->bind();
         glClear(GL_COLOR_BUFFER_BIT);
         glDisable(GL_CULL_FACE);
+
+
+        // Render the environment map:
+        framebuffer->bind();
+        glViewport(0, 0, camera->frameWidth, camera->frameHeight);
+        screen->setTexture(gBuffer->textureAttachments[GL_COLOR_ATTACHMENT2]);
+        screen->render();
+        screen->removeTexture();
 
         // Run the deferred shader over the framebuffer for each light:
         int lightNum = 1;
@@ -266,7 +274,8 @@ namespace scene {
 //            addFramebufferToScreen();
 
             // Render a tiny shadow map:
-            drawShadowMapThumbnail(lightNum - 1);
+            if (sharedLight->type == scene::Light::Type::spot)
+                drawShadowMapThumbnail(lightNum - 1);
 
             profiler.split("drawShadowMapThumbnail ", lightNum);
             lightNum++;

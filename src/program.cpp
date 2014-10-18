@@ -205,8 +205,8 @@ int main(int argc, char** argv) {
     light->attenuationQuadratic = 1;
     light->angleConeOuter = 2;
     light->angleConeInner = 1;
-    light->colDiffuse = glm::vec3(1000);
-    light->colSpecular = {2, 2, 2};
+    light->colDiffuse = glm::vec3(1000, 1000, 500);
+    light->colSpecular = glm::vec3(1000, 1000, 500);
     light->colAmbient = {0, 0, 0};
     lightModel->lights.push_back(light);
     mainScene->addModel(lightModel);
@@ -219,8 +219,8 @@ int main(int argc, char** argv) {
     light->attenuationConstant = 0;
     light->attenuationLinear = 0;
     light->attenuationQuadratic = 1;
-    light->colDiffuse = glm::vec3(5000);
-    light->colSpecular = glm::vec3(100);
+    light->colDiffuse = glm::vec3(2000);
+    light->colSpecular = glm::vec3(2000);
     light->colAmbient = {0, 0, 0};
     light->angleConeInner = 1;
     light->angleConeOuter = 1;
@@ -236,7 +236,7 @@ int main(int argc, char** argv) {
     light->attenuationLinear = 0;
     light->attenuationQuadratic = 1;
     light->colDiffuse = glm::vec3(1000);
-    light->colSpecular = {1, 1, 0.5};
+    light->colSpecular = glm::vec3(1000);
     light->colAmbient = {0, 0, 0};
     light->angleConeInner = 1;
     light->angleConeOuter = 1;
@@ -252,7 +252,7 @@ int main(int argc, char** argv) {
     light->attenuationLinear = 0.05;
     light->attenuationQuadratic = 1;
     light->colDiffuse = glm::vec3(1000);
-    light->colSpecular = {1, 0.5, 0.5};
+    light->colSpecular = glm::vec3(1000);
     light->colAmbient = {0, 0, 0};
     light->angleConeInner = 1;
     light->angleConeOuter = 1;
@@ -333,16 +333,21 @@ int main(int argc, char** argv) {
     cubeModel->setEnvironmentMap(cubeMap);
     cubeModel->createMeshBuffers();
     cubeModel->createVertexArrays();
-    cubeModel->pos = {15, 120, 40};
-    cubeModel->scale = glm::vec3(3);
+//    cubeModel->pos = {15, 120, 40};
+//    cubeModel->scale = glm::vec3(3);
+    cubeModel->pos = {15, 120, 60};
+    cubeModel->scale = glm::vec3(10);
+    cubeModel->materials[0]->materialInfo.has.shininess = true;
+    cubeModel->materials[0]->shininess = 0.001;
+    cubeModel->materials[0]->colSpecular = glm::vec3(1);
     mainScene->addModel(cubeModel);
 
     auto asteroidModel = scene::createAsteroid();
     asteroidModel->flatProgram = flatProgram;
     asteroidModel->textureProgram = textureProgram;
     asteroidModel->environmentMapProgram = reflectProgram;
-    asteroidModel->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
-    asteroidModel->dynamicReflections = true;
+//    asteroidModel->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
+//    asteroidModel->dynamicReflections = true;
     asteroidModel->createMeshBuffers();
     asteroidModel->createVertexArrays();
     asteroidModel->pos = {50, 120, 40};
@@ -385,6 +390,8 @@ int main(int argc, char** argv) {
         if (frameTimer.frameUpdate(glfwGetTime())) {
             glfwSetWindowTitle(window, frameTimer.timeStr.c_str());
         }
+
+        cubeModel->dir = glm::vec3(std::cos(glfwGetTime()), std::sin(glfwGetTime()), 0);
 
         skyBox->pos = mainScene->camera->pos;
 

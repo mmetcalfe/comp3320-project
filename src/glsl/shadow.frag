@@ -124,12 +124,10 @@ void main() {
     if (shininess > 0) {
         vec3 viewReflect = reflect(incident, normal);
         float phongViewSpecular = phong(incident, viewReflect, shininess);
-        vec4 tmp_sampleCoord = modelViewInverse * vec4(viewReflect, 0);
-//        vec4 tmp_sampleCoord = viewInverse * vec4(viewReflect, 0); // May be better?
-        vec3 sampleCoord = tmp_sampleCoord.xyz;
-        vec4 reflectCol = texture(texEnvironmentMap, sampleCoord);
-        vec3 envReflectCol = reflectCol.rgb * phongViewSpecular;
-        outReflect = envReflectCol * colSpecular;
+        vec4 sampleCoord = viewInverse * vec4(viewReflect, 0);
+        sampleCoord = vec4(sampleCoord.x, sampleCoord.z, -sampleCoord.y, 1);
+        vec4 reflectCol = texture(texEnvironmentMap, sampleCoord.xyz);
+        outReflect = reflectCol.rgb * colSpecular * phongViewSpecular;
     }
 
     // Specular reflection:

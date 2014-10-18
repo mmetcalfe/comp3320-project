@@ -27,6 +27,7 @@ out vec4 outAlbedoRoughness;
 out vec4 outEnvMapColSpecIntensity;
 
 uniform mat4 modelViewInverse;
+uniform mat4 viewInverse;
 
 // Material uniforms
 uniform vec3 colDiffuse;
@@ -35,6 +36,10 @@ uniform float shininess;
 //uniform float shininessStrength;
 uniform samplerCube texEnvironmentMap;
 uniform sampler2D texDiffuse;
+
+float phong(in vec3 incident, in vec3 reflection, in float shininess) {
+    return pow(clamp(dot(-incident, reflection), 0, 1), shininess);
+}
 
 void main() {
     // Face normal in eye space:
@@ -45,14 +50,16 @@ void main() {
     outNormal.xy = normal.xy;
 
     // Environment map reflection:
-    outEnvMapColSpecIntensity.rgba = vec4(0, 0, 0, 0);
     if (shininess > 0) {
         vec3 viewReflect = reflect(incident, normal);
-        vec4 sampleCoord = modelViewInverse * vec4(viewReflect, 0);
+        float phongViewSpecular = phong(incident, viewReflect, shininess);
+        vec4 sampleCoord = viewInverse * vec4(viewReflect, 0);
+        sampleCoord = vec4(sampleCoord.x, sampleCoord.z, -sampleCoord.y, 1);
         vec4 reflectCol = texture(texEnvironmentMap, sampleCoord.xyz);
-        outEnvMapColSpecIntensity.rgb = reflectCol.rgb * colSpecular;
+        outEnvMapColSpecIntensity.rgb = reflectCol.rgb * colSpecular * phongViewSpecular;
+    } else {
+        outEnvMapColSpecIntensity.rgba = vec4(0, 0, 0, 0);
     }
-//    outEnvMapColSpecIntensity = vec4(eyeSpacePosition.rgb/100.0, 0.0);
 
     // Diffuse albedo:
     vec4 texCol = texture(texDiffuse, Texcoord);

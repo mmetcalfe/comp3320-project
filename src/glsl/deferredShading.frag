@@ -61,46 +61,24 @@ float doShadowMapping(in vec4 eyeSpacePosition) {
     float lightVisibility = 1.0;
     if (light.hasShadowMap) {
         vec4 lightClipPos = light.proj * light.view * viewInverse * eyeSpacePosition;
-//      vec4 lightClipPos = light.proj * light.view * inverse(view) * eyeSpacePosition;
 
         vec3 lightClipPosDivided = lightClipPos.xyz / lightClipPos.w;
         vec3 shadowLookup = (lightClipPosDivided * 0.5) + 0.5;
-//        vec4 shadowLookup = lightClipPos;
 
-//        vec4 transformedClipPos = (lightClipPos * 0.5) + 0.5;
-//        transformedClipPos.w = lightClipPos.w;
-//        vec4 shadowLookup = transformedClipPos;
-//        vec4 shadowLookup = transformedClipPos / transformedClipPos.w;
-
-//        float shadowDepth = texture(light.texShadowMap, shadowLookup.xy).x;
-////        float shadowDepth = texture(light.texShadowMap, shadowLookup.xy / shadowLookup.w).z;
         float bias = 0.0;
-//        lightVisibility = shadowDepth < ((lightClipPos.z - bias) / lightClipPos.w) * 0.5 + 0.5 ? 0 : 1;
-////        float lightVisibility = textureProj(light.texShadowMap, shadowLookup.xyw).z < (shadowLookup.z - bias) / shadowLookup.w;// ? 0 : 1;
-
-        vec2 poissonDisk[4] = vec2[](
-                vec2( -0.94201624, -0.39906216 ),
-                vec2( 0.94558609, -0.76890725 ),
-                vec2( -0.094184101, -0.92938870 ),
-                vec2( 0.34495938, 0.29387760 )
-        );
-
         float samples = 16;
+        float radius = 1.0 / 300.0;
         for (int i = 0; i < samples; i++) {
 //            int index = int(4.0 * rand(vec4(eyeSpacePosition.xyz, i))) % 4;
 //            vec2 stratifiedCoord = vec2(shadowLookup.xy + poissonDisk[index] / 700.0); //,  (shadowLookup.z - bias ) / shadowLookup.w);
-//            vec2 stratifiedCoord = vec2(shadowLookup.xy + poissonDisk[index] / 700.0); //,  (shadowLookup.z - bias ) / shadowLookup.w);
             vec2 offset = vec2(rand(vec4(eyeSpacePosition.xyz, i)), rand(vec4(eyeSpacePosition.xyz, i + samples)));
 
-//            float l = clamp(length(offset), 0, 1);
-//            offset = normalize(offset) * l;
-//            vec2 stratifiedCoord = vec2(shadowLookup.xy + normalize(offset) / 300.0);
-            vec2 stratifiedCoord = vec2(shadowLookup.xy + offset / 300.0);
+            vec2 stratifiedCoord = vec2(shadowLookup.xy + offset * radius);
 
             float occluderDepth = texture(light.texShadowMap, stratifiedCoord.xy).x;
 
             if (occluderDepth < ((lightClipPos.z - bias) / lightClipPos.w) * 0.5 + 0.5)
-                lightVisibility -= 1.0/samples;// * (1.0 - texture(light.texShadowMap, stratifiedCoord));
+                lightVisibility -= 1.0 / samples;
         }
 
         lightVisibility = clamp(lightVisibility, 0.0, 1.0);
@@ -113,14 +91,9 @@ float doShadowMapping(in vec4 eyeSpacePosition) {
                 || shadowLookup.z > upper // || shadowLookup.z < lower
                 ) {
             lightVisibility = 0;
-//            outColor = vec4(0.5, 0, 0, 1);
         } else if (shadowLookup.z < lower) {
             lightVisibility = 1;
-//            outColor = vec4(1, 0, 0, 1);
         }
-
-//        outColor = vec4(shadowDepth, shadowDepth, shadowDepth, 1);
-//        return;
     }
 
     return lightVisibility;
@@ -144,10 +117,21 @@ vec3 eyeSpacePosFromDepth(in float depth, in vec2 texcoord) {
     return viewPos.xyz / viewPos.w;
 }
 
+float calcSpotlightFactor(in vec3 lightVec) {
+    float spotFactor = 1.0;
+
+    if (light.hasShadowMap) {
+        float lightDirDot = dot((viewInverse * vec4(lightVec, 0)).xyz, light.dir);
+        spotFactor = lightDirDot > cos(light.fov / 2.0) ? 1.0 : 0.0;
+    }
+
+    return spotFactor;
+}
 
 void main() {
     vec3 colSpecular = vec3(1.0, 1.0, 1.0);
 
+    // Extract g-buffer components:
     vec4 depthStencil = texture(texDepthStencil, Texcoord);
     vec4 normalXY = texture(texNormal, Texcoord);
     vec4 albedoRoughness = texture(texAlbedoRoughness, Texcoord);
@@ -165,15 +149,8 @@ void main() {
     float specIntensity = envMapColSpecIntensity.a;
 
     vec3 eyeSpacePosition = eyeSpacePosFromDepth(depth, Texcoord);
-//
-//    outColor = vec4(albedo, 1.0);
-//
-//    outColor = vec4(envMapCol, 1.0);
-//    outColor = vec4(eyeSpacePos, 1.0);
-//    outColor = vec4(eyeSpacePos, 1.0);
-//    outColor = vec4(normal, 1.0);
 
-    // face normal in eye space:
+    // Normal and light vectors:
     vec3 normal = normalize(eyeSpaceNormal.xyz);
     vec3 lightVecRaw = eyeSpacePosition.xyz - (view * vec4(light.pos, 1)).xyz;
     vec3 lightVec = normalize(lightVecRaw);
@@ -194,46 +171,29 @@ void main() {
 
     vec3 incident = normalize(eyeSpacePosition.xyz);
 
-    // Environment map reflection:
-    vec3 outReflect = vec3(0, 0, 0);
-    if (roughness > 0) {
-        vec3 viewReflect = reflect(incident, normal);
-        float phongViewSpecular = phong(incident, viewReflect, roughness);
-        vec3 envReflectCol = envMapCol.rgb * phongViewSpecular;
-//        vec3 envReflectCol = envMapCol.rgb;
-        outReflect = envReflectCol * colSpecular;
-    }
-
     // Specular reflection:
     vec3 outSpecular = vec3(0, 0, 0);
     if (roughness > 0) {
         vec3 lightReflect = reflect(lightVec, normal);
         float phongSpecular = phong(incident, lightReflect, roughness);
-        vec3 phongHighlightCol = light.colSpecular * phongSpecular;
-        outSpecular = phongHighlightCol * colSpecular;
+        outSpecular = colSpecular * light.colSpecular * phongSpecular;
     }
 
     // Shadow mapping:
     float lightVisibility = doShadowMapping(vec4(eyeSpacePosition, 1));
 
-    float spotFactor = 1.0;
-    if (light.hasShadowMap) {
-        float lightDirDot = dot((viewInverse * vec4(lightVec, 0)).xyz, light.dir);
-        spotFactor = lightDirDot > cos(light.fov / 2.0) ? 1.0 : 0.0;
-    }
+    // Spotlight cone:
+    float spotFactor = calcSpotlightFactor(lightVec);
 
     // Diffuse component:
-//    vec4 texCol = texture(texDiffuse, Texcoord);
-//    vec3 outDiffuse = texCol.rgb * colDiffuse * light.colDiffuse * clamp(lightDot, 0, 1);
     vec3 outDiffuse = albedo * light.colDiffuse * clamp(lightDot, 0, 1);
 
     // Ambient component:
-//    vec3 outAmbient = colAmbient * light.colAmbient;
     vec3 outAmbient = albedo * light.colAmbient;
 
     // Final colour:
     float intensity = calculateIntensity(length(lightVecRaw));
-    vec3 finalColor = outAmbient + outReflect + (outDiffuse + outSpecular) * intensity * lightVisibility * normalDirTest * spotFactor;
+    vec3 finalColor = outAmbient + (outDiffuse + outSpecular) * intensity * lightVisibility * normalDirTest * spotFactor;
 
     outColor = vec4(finalColor, 1.0);
 }
