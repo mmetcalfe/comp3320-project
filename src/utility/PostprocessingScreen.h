@@ -14,8 +14,11 @@ namespace utility {
     class PostprocessingScreen {
     public:
 
-        inline PostprocessingScreen(std::shared_ptr<NUGL::ShaderProgram> screenProgram) {
+        inline PostprocessingScreen(
+                std::shared_ptr<NUGL::ShaderProgram> screenProgram,
+                std::shared_ptr<NUGL::ShaderProgram> screenAlphaProgram) {
             this->screenProgram = screenProgram;
+            this->screenAlphaProgram = screenAlphaProgram;
 
             auto mesh = std::make_unique<scene::Mesh>();
             mesh->materialIndex = 0;
@@ -62,6 +65,10 @@ namespace utility {
             render(screenProgram, gridDim, gridX, gridY);
         }
 
+        inline void renderAlpha(float gridDim = 1, float gridX = 0, float gridY = 0) {
+            render(screenAlphaProgram, gridDim, gridX, gridY);
+        }
+
         inline void render(std::shared_ptr<NUGL::ShaderProgram> program, float gridDim = 1, float gridX = 0, float gridY = 0) {
             if (!screenMesh->isTextured()) {
                 std::stringstream errMsg;
@@ -85,6 +92,7 @@ namespace utility {
         }
 
         std::shared_ptr<NUGL::ShaderProgram> screenProgram;
+        std::shared_ptr<NUGL::ShaderProgram> screenAlphaProgram;
 
     private:
         std::unique_ptr<scene::Mesh> screenMesh;

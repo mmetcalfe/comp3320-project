@@ -14,7 +14,10 @@ namespace scene {
 
     class Scene {
     public:
-        Scene(std::shared_ptr<NUGL::ShaderProgram> screenProgram, glm::ivec2 windowSize, glm::ivec2 framebufferSize);
+        Scene(std::shared_ptr<NUGL::ShaderProgram> screenProgram,
+                std::shared_ptr<NUGL::ShaderProgram> screenAlphaProgram,
+                glm::ivec2 windowSize,
+                glm::ivec2 framebufferSize);
 
         void render();
         void forwardRender();

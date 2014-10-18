@@ -8,7 +8,10 @@
 
 namespace scene {
 
-    Scene::Scene(std::shared_ptr<NUGL::ShaderProgram> screenProgram, glm::ivec2 windowSize, glm::ivec2 framebufferSize) : camera(std::make_unique<PlayerCamera>()) {
+    Scene::Scene(std::shared_ptr<NUGL::ShaderProgram> screenProgram,
+            std::shared_ptr<NUGL::ShaderProgram> screenAlphaProgram,
+            glm::ivec2 windowSize, glm::ivec2 framebufferSize)
+            : camera(std::make_unique<PlayerCamera>()) {
         shadowMapSize = 1024;
         reflectionMapSize = 512;
 
@@ -20,7 +23,7 @@ namespace scene {
         prepareReflectionFramebuffer(reflectionMapSize);
         prepareGBuffer(windowSize);
 
-        screen = std::make_unique<utility::PostprocessingScreen>(screenProgram);
+        screen = std::make_unique<utility::PostprocessingScreen>(screenProgram, screenAlphaProgram);
     }
 
     void Scene::prepareFramebuffer(glm::ivec2 size) {
@@ -239,7 +242,6 @@ namespace scene {
         glClear(GL_COLOR_BUFFER_BIT);
         glDisable(GL_CULL_FACE);
 
-
         // Render the environment map:
         framebuffer->bind();
         glViewport(0, 0, camera->frameWidth, camera->frameHeight);
@@ -292,6 +294,8 @@ namespace scene {
         skyBox->draw(*camera, skyBox->environmentMapProgram);
 
         // Draw all transparent meshes:
+        // Disable depth buffer writes:
+        glDepthMask(GL_FALSE);
         lightNum = 1;
         for (auto light : lights) {
             auto sharedLight = light.lock();
@@ -313,15 +317,16 @@ namespace scene {
             lightNum++;
         }
 
+        // Enable depth buffer writes:
+        glDepthMask(GL_TRUE);
+
         // Restore the framebuffer's depth attachment:
         framebuffer->attach(std::move(framebuffer->renderbufferAttachment));
 
 
         profiler.split("deferred lighting");
 
-
         addFramebufferToScreen();
-
 
         // Render g-buffer thumbnails:
         drawGBufferThumbnails();
@@ -363,6 +368,7 @@ namespace scene {
 
             screen->setTexture(tex);
             screen->render(4, texNum, 0);
+//            screen->renderAlpha(4, texNum, 1);
             screen->removeTexture();
 
             texNum++;

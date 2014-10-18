@@ -144,7 +144,7 @@ void main() {
     vec3 eyeSpaceNormal = vec3(normalXY.xy, normalZ);
 
     vec3 albedo = albedoRoughness.rgb;
-    float roughness = albedoRoughness.a;
+    float roughness = albedoRoughness.a * 8; // Map from [0, 1].
     vec3 envMapCol = envMapColSpecIntensity.rgb;
     float specIntensity = envMapColSpecIntensity.a;
 
