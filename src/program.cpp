@@ -210,54 +210,54 @@ int main(int argc, char** argv) {
     light->colAmbient = {0, 0, 0};
     lightModel->lights.push_back(light);
     mainScene->addModel(lightModel);
-
-    lightModel = std::make_shared<scene::Model>("spotlight 2");
-    light = std::make_shared<scene::Light>();
-    light->type = scene::Light::Type::spot;
-    light->pos = {50, 200, 40};
-    light->dir = {0, -1, 0};
-    light->attenuationConstant = 0;
-    light->attenuationLinear = 0;
-    light->attenuationQuadratic = 1;
-    light->colDiffuse = glm::vec3(2000);
-    light->colSpecular = glm::vec3(2000);
-    light->colAmbient = {0, 0, 0};
-    light->angleConeInner = 1;
-    light->angleConeOuter = 1;
-    lightModel->lights.push_back(light);
-    mainScene->addModel(lightModel);
-
-    lightModel = std::make_shared<scene::Model>("point light 1");
-    light = std::make_shared<scene::Light>();
-    light->type = scene::Light::Type::point;
-    light->pos = {0, 0, 40};
-    light->dir = {1, 0, 0};
-    light->attenuationConstant = 0;
-    light->attenuationLinear = 0;
-    light->attenuationQuadratic = 1;
-    light->colDiffuse = glm::vec3(1000);
-    light->colSpecular = glm::vec3(1000);
-    light->colAmbient = {0, 0, 0};
-    light->angleConeInner = 1;
-    light->angleConeOuter = 1;
-    lightModel->lights.push_back(light);
-    mainScene->addModel(lightModel);
-
-    lightModel = std::make_shared<scene::Model>("point light 2");
-    light = std::make_shared<scene::Light>();
-    light->type = scene::Light::Type::point;
-    light->pos = {50, 50, 50};
-    light->dir = {1, 0, 0};
-    light->attenuationConstant = 0;
-    light->attenuationLinear = 0.05;
-    light->attenuationQuadratic = 1;
-    light->colDiffuse = glm::vec3(1000);
-    light->colSpecular = glm::vec3(1000);
-    light->colAmbient = {0, 0, 0};
-    light->angleConeInner = 1;
-    light->angleConeOuter = 1;
-    lightModel->lights.push_back(light);
-    mainScene->addModel(lightModel);
+//
+//    lightModel = std::make_shared<scene::Model>("spotlight 2");
+//    light = std::make_shared<scene::Light>();
+//    light->type = scene::Light::Type::spot;
+//    light->pos = {50, 200, 40};
+//    light->dir = {0, -1, 0};
+//    light->attenuationConstant = 0;
+//    light->attenuationLinear = 0;
+//    light->attenuationQuadratic = 1;
+//    light->colDiffuse = glm::vec3(2000);
+//    light->colSpecular = glm::vec3(2000);
+//    light->colAmbient = {0, 0, 0};
+//    light->angleConeInner = 1;
+//    light->angleConeOuter = 1;
+//    lightModel->lights.push_back(light);
+//    mainScene->addModel(lightModel);
+//
+//    lightModel = std::make_shared<scene::Model>("point light 1");
+//    light = std::make_shared<scene::Light>();
+//    light->type = scene::Light::Type::point;
+//    light->pos = {0, 0, 40};
+//    light->dir = {1, 0, 0};
+//    light->attenuationConstant = 0;
+//    light->attenuationLinear = 0;
+//    light->attenuationQuadratic = 1;
+//    light->colDiffuse = glm::vec3(1000);
+//    light->colSpecular = glm::vec3(1000);
+//    light->colAmbient = {0, 0, 0};
+//    light->angleConeInner = 1;
+//    light->angleConeOuter = 1;
+//    lightModel->lights.push_back(light);
+//    mainScene->addModel(lightModel);
+//
+//    lightModel = std::make_shared<scene::Model>("point light 2");
+//    light = std::make_shared<scene::Light>();
+//    light->type = scene::Light::Type::point;
+//    light->pos = {50, 50, 50};
+//    light->dir = {1, 0, 0};
+//    light->attenuationConstant = 0;
+//    light->attenuationLinear = 0.05;
+//    light->attenuationQuadratic = 1;
+//    light->colDiffuse = glm::vec3(1000);
+//    light->colSpecular = glm::vec3(1000);
+//    light->colAmbient = {0, 0, 0};
+//    light->angleConeInner = 1;
+//    light->angleConeOuter = 1;
+//    lightModel->lights.push_back(light);
+//    mainScene->addModel(lightModel);
 
     // TODO: Find a way to manage texture units!
     auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE2, GL_TEXTURE_CUBE_MAP);
@@ -338,7 +338,7 @@ int main(int argc, char** argv) {
     cubeModel->pos = {15, 120, 60};
     cubeModel->scale = glm::vec3(10);
     cubeModel->materials[0]->materialInfo.has.shininess = true;
-    cubeModel->materials[0]->shininess = 0.001;
+    cubeModel->materials[0]->shininess = 1;
     cubeModel->materials[0]->colSpecular = glm::vec3(1);
     mainScene->addModel(cubeModel);
 

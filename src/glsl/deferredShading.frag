@@ -157,26 +157,23 @@ void main() {
 
     // Don't show lighting on surfaces that are facing the wrong way:
     float lightDot = -dot(lightVec, normal);
-    float normalDirTest = 1;
-    #define DOT_CUTOFF 0.01
-    if (lightDot < DOT_CUTOFF) {
-        // Use a ramp near zero to remove noise when the light is very near the plane of the surface.
-        normalDirTest = lightDot > 0 ? (1.0 / DOT_CUTOFF) * lightDot : 0;
-
-//      // What it looks like without the ramp (causes speckles when the light it coplanar with the surface).
-//        float normalDirTest = lightDot < 0 ? 1 : 0;
-//        outColor = vec4(1, 0, 1, 1) * normalDirTest;
-//        return;
-    }
 
     vec3 incident = normalize(eyeSpacePosition.xyz);
 
     // Specular reflection:
-    vec3 outSpecular = vec3(0, 0, 0);
-    if (roughness > 0) {
+    vec3 outSpecular;
+    if (roughness > 0 && lightDot > 0) {
         vec3 lightReflect = reflect(lightVec, normal);
         float phongSpecular = phong(incident, lightReflect, roughness);
-        outSpecular = colSpecular * light.colSpecular * phongSpecular;
+//        outSpecular = colSpecular * light.colSpecular * phongSpecular;
+
+        // Based on: http://en.wikibooks.org/wiki/GLSL_Programming/Unity/Specular_Highlights_at_Silhouettes
+        vec3 halfVec = normalize(-lightVec - incident);
+        float fresnelFactor = pow(1.0 - max(0.0, dot(halfVec, -incident)), 5.0);
+        vec3 fresnelCol = mix(colSpecular, vec3(1.0), fresnelFactor);
+        outSpecular = fresnelCol * light.colSpecular * phongSpecular;
+    } else {
+        outSpecular = vec3(0, 0, 0);
     }
 
     // Shadow mapping:
@@ -186,14 +183,14 @@ void main() {
     float spotFactor = calcSpotlightFactor(lightVec);
 
     // Diffuse component:
-    vec3 outDiffuse = albedo * light.colDiffuse * clamp(lightDot, 0, 1);
+    vec3 outDiffuse = albedo * light.colDiffuse * max(lightDot, 0);
 
     // Ambient component:
     vec3 outAmbient = albedo * light.colAmbient;
 
     // Final colour:
     float intensity = calculateIntensity(length(lightVecRaw));
-    vec3 finalColor = outAmbient + (outDiffuse + outSpecular) * intensity * lightVisibility * normalDirTest * spotFactor;
+    vec3 finalColor = outAmbient + (outDiffuse + outSpecular) * intensity * lightVisibility * spotFactor;
 
     outColor = vec4(finalColor, 1.0);
 }
