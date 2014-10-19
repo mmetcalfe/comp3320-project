@@ -207,8 +207,8 @@ int main(int argc, char** argv) {
     auto light = std::make_shared<scene::Light>();
     light->type = scene::Light::Type::spot;
     light->pos = {15, 120, 40};
-    light->dir = {1, 0, 0};
-//    light->dir = {0, 0, -1};
+//    light->dir = {1, 0, 0};
+    light->dir = {0, 0, -1};
     light->attenuationConstant = 0;
     light->attenuationLinear = 0;
     light->attenuationQuadratic = 1;

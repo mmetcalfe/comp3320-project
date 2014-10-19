@@ -120,12 +120,21 @@ vec3 eyeSpacePosFromDepth(in float depth, in vec2 texcoord) {
 float calcSpotlightFactor(in vec3 lightVec) {
     float spotFactor = 1.0;
 
-    if (light.hasShadowMap) {
-        float lightDirDot = dot((viewInverse * vec4(lightVec, 0)).xyz, light.dir);
-        spotFactor = lightDirDot > cos(light.fov / 2.0) ? 1.0 : 0.0;
-    }
+    if (!light.hasShadowMap)
+        return 1.0;
 
-    return spotFactor;
+    float minDot = cos(light.angleConeOuter / 2.0); // TODO: precalc.
+    float lightDirDot = dot((viewInverse * vec4(lightVec, 0)).xyz, light.dir);
+
+    if (lightDirDot < minDot)
+        return 0.0;
+
+    float innerDot = cos(light.angleConeInner / 2.0); // TODO: precalc.
+
+    if (lightDirDot > innerDot)
+        return 1.0;
+
+    return (lightDirDot - minDot) / (innerDot - minDot);
 }
 
 void main() {
@@ -169,7 +178,8 @@ void main() {
 
         // Based on: http://en.wikibooks.org/wiki/GLSL_Programming/Unity/Specular_Highlights_at_Silhouettes
         vec3 halfVec = normalize(-lightVec - incident);
-        float fresnelFactor = pow(1.0 - max(0.0, dot(halfVec, -incident)), 5.0);
+        float fresnelExp = 5.0;
+        float fresnelFactor = pow(1.0 - max(0.0, dot(halfVec, -incident)), fresnelExp);
         vec3 fresnelCol = mix(colSpecular, vec3(1.0), fresnelFactor);
         outSpecular = fresnelCol * light.colSpecular * phongSpecular;
     } else {

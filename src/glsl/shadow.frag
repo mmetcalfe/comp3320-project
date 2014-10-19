@@ -106,12 +106,21 @@ float doShadowMapping(in vec4 eyeSpacePosition) {
 float calcSpotlightFactor(in vec3 lightVec) {
     float spotFactor = 1.0;
 
-    if (light.hasShadowMap) {
-        float lightDirDot = dot((viewInverse * vec4(lightVec, 0)).xyz, light.dir);
-        spotFactor = lightDirDot > cos(light.fov / 2.0) ? 1.0 : 0.0;
-    }
+    if (!light.hasShadowMap)
+        return 1.0;
 
-    return spotFactor;
+    float minDot = cos(light.angleConeOuter / 2.0); // TODO: precalc.
+    float lightDirDot = dot((viewInverse * vec4(lightVec, 0)).xyz, light.dir);
+
+    if (lightDirDot < minDot)
+        return 0.0;
+
+    float innerDot = cos(light.angleConeInner / 2.0); // TODO: precalc.
+
+    if (lightDirDot > innerDot)
+        return 1.0;
+
+    return (lightDirDot - minDot) / (innerDot - minDot);
 }
 
 void main() {

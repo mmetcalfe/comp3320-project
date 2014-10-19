@@ -20,7 +20,7 @@ namespace scene {
         glm::vec3 colDiffuse = {1, 1, 1};
         glm::vec3 colSpecular = {1, 1, 1};
         glm::vec3 colAmbient = {0, 0, 0};
-        float angleConeInner = 1;
+        float angleConeInner = 0.8;
         float angleConeOuter = 2;
     };
 
