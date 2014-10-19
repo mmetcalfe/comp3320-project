@@ -28,7 +28,8 @@ static int getMidpointVertex(std::mt19937 &gen, scene::Mesh &mesh,
             float a_height = glm::length(mesh.vertices[a]);
             float b_height = glm::length(mesh.vertices[b]);
             float dist = glm::distance(mesh.vertices[a], mesh.vertices[b]);
-            float ab_height = ((a_height + b_height) / 2.f) + 0.05f * dist * distrib(gen);
+//            float ab_height = ((a_height + b_height) / 2.f) + 0.05f * dist * distrib(gen);
+            float ab_height = ((a_height + b_height) / 2.f);// + 0.05f * dist * distrib(gen);
 
             GLint ab = mesh.vertices.size();
             mesh.vertices.push_back(midpoint * ab_height);
@@ -70,8 +71,8 @@ std::shared_ptr<Model> createAsteroid() {
     std::mt19937 mt(rd());
     std::uniform_real_distribution<float> distrib(-1, 1);
 
-    for (unsigned i = 0; i < mesh.vertices.size(); i ++)
-        mesh.vertices[i] = mesh.vertices[i] + 0.1f * distrib(mt);
+//    for (unsigned i = 0; i < mesh.vertices.size(); i ++)
+//        mesh.vertices[i] = mesh.vertices[i] + 0.1f * distrib(mt);
 
     for (int i = 0; i < 4; i ++)
         subdivide(mt, mesh);

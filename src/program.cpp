@@ -207,8 +207,8 @@ int main(int argc, char** argv) {
     auto light = std::make_shared<scene::Light>();
     light->type = scene::Light::Type::spot;
     light->pos = {15, 120, 40};
-//    light->dir = {1, 0, 0};
-    light->dir = {0, 0, -1};
+    light->dir = {1, 0, 0};
+//    light->dir = {0, 0, -1};
     light->attenuationConstant = 0;
     light->attenuationLinear = 0;
     light->attenuationQuadratic = 1;
@@ -231,7 +231,7 @@ int main(int argc, char** argv) {
     light->colDiffuse = glm::vec3(2000);
     light->colSpecular = glm::vec3(2000);
     light->colAmbient = {0, 0, 0};
-    light->angleConeInner = 1;
+    light->angleConeInner = 0.8;
     light->angleConeOuter = 1;
     lightModel->lights.push_back(light);
     mainScene->addModel(lightModel);
@@ -303,7 +303,9 @@ int main(int argc, char** argv) {
     eagle5Model->textureProgram = textureProgram;
 //    eagle5Model->environmentMapProgram = sharedFlatReflectProgram;
     eagle5Model->environmentMapProgram = reflectProgram;
-    eagle5Model->setEnvironmentMap(cubeMap);
+//    eagle5Model->setEnvironmentMap(cubeMap);
+    eagle5Model->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
+    eagle5Model->dynamicReflections = true;
     eagle5Model->createMeshBuffers();
     eagle5Model->createVertexArrays();
     eagle5Model->pos = {50, 100, 9};
@@ -339,7 +341,9 @@ int main(int argc, char** argv) {
     cubeModel->textureProgram = textureProgram;
 //    cubeModel->environmentMapProgram = sharedFlatReflectProgram;
     cubeModel->environmentMapProgram = reflectProgram;
-    cubeModel->setEnvironmentMap(cubeMap);
+//    cubeModel->setEnvironmentMap(cubeMap);
+    cubeModel->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
+    cubeModel->dynamicReflections = true;
     cubeModel->createMeshBuffers();
     cubeModel->createVertexArrays();
 //    cubeModel->pos = {15, 120, 40};
@@ -355,9 +359,9 @@ int main(int argc, char** argv) {
     asteroidModel->flatProgram = flatProgram;
     asteroidModel->textureProgram = textureProgram;
     asteroidModel->environmentMapProgram = reflectProgram;
-    asteroidModel->setEnvironmentMap(cubeMap);
-//    asteroidModel->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
-//    asteroidModel->dynamicReflections = true;
+//    asteroidModel->setEnvironmentMap(cubeMap);
+    asteroidModel->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
+    asteroidModel->dynamicReflections = true;
     asteroidModel->createMeshBuffers();
     asteroidModel->createVertexArrays();
     asteroidModel->pos = {50, 120, 40};

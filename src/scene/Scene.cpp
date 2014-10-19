@@ -154,17 +154,24 @@ namespace scene {
         sharedLight->colAmbient = {1, 1, 1};
 
         std::vector<std::tuple<GLenum, glm::vec3, glm::vec3>> directions = {
-                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_POSITIVE_X, {0, -1, 0}, {0, 0, -1}),
-                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, {0,  1, 0}, {0, 0, -1}),
-                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, {0, 0,  1}, {-1, 0, 0}),
-                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, {0, 0, -1}, {1, 0, 0}),
-                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, {-1, 0, 0}, {0, 0, -1}),
-                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, { 1, 0, 0}, {0, 0, -1}),
+//                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_POSITIVE_X, {0, -1, 0}, {0, 0, -1}),
+//                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, {0,  1, 0}, {0, 0, -1}),
+//                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, {0, 0,  1}, {-1, 0, 0}),
+//                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, {0, 0, -1}, {1, 0, 0}),
+//                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, {-1, 0, 0}, {0, 0, -1}),
+//                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, { 1, 0, 0}, {0, 0, -1}),
+                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_POSITIVE_X, { 1,  0,  0}, { 0,  0, -1}),
+                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, {-1,  0,  0}, { 0,  0, -1}),
+                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, { 0,  0,  1}, { 0, -1,  0}),
+                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, { 0,  0, -1}, { 0,  1,  0}),
+                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, { 0, -1,  0}, { 0,  0, -1}),
+                std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, { 0,  1,  0}, { 0,  0, -1}),
         };
 
         for (auto params : directions) {
             GLenum target;
             std::tie(target, mapCamera.dir, mapCamera.up) = params;
+
             mapCamera.prepareTransforms();
             reflectionFramebuffer->attach(model->texEnvironmentMap, target);
 
@@ -294,7 +301,7 @@ namespace scene {
         skyBox->draw(*camera, skyBox->environmentMapProgram);
 
         // Draw all transparent meshes:
-        // Disable depth buffer writes:
+        // Disable depth buffer writes (for order invariant drawing):
         glDepthMask(GL_FALSE);
         lightNum = 1;
         for (auto light : lights) {
@@ -306,8 +313,8 @@ namespace scene {
             glViewport(0, 0, camera->frameWidth, camera->frameHeight);
 
             glEnable(GL_BLEND);
-//            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+//            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             checkForAndPrintGLError(__FILE__, __LINE__);
 
             drawModels(sharedLight, lightCamera, true);
