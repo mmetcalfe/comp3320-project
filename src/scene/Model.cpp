@@ -21,7 +21,7 @@ namespace scene {
 
 unsigned int getPostProcessingFlags() {
     unsigned int pFlags = 0x0000;
-//    pFlags |= aiProcess_CalcTangentSpace;         // Calculates the tangents and bitangents for the imported meshes.
+    //    pFlags |= aiProcess_CalcTangentSpace;         // Calculates the tangents and bitangents for the imported meshes.
     pFlags |= aiProcess_JoinIdenticalVertices;    // Identifies and joins identical vertex data sets within all imported meshes.
 //    pFlags |= aiProcess_MakeLeftHanded;           // Converts all the imported data to a left-handed coordinate space.
     pFlags |= aiProcess_Triangulate;              // Triangulates all faces of all meshes.
@@ -35,8 +35,8 @@ unsigned int getPostProcessingFlags() {
 //    pFlags |= aiProcess_ImproveCacheLocality;     // Reorders triangles for better vertex cache locality.
     pFlags |= aiProcess_RemoveRedundantMaterials; // Searches for redundant/unreferenced materials and removes them.
     pFlags |= aiProcess_FixInfacingNormals;       // This step tries to determine which meshes have normal vectors that are facing inwards and inverts them.
-    pFlags |= aiProcess_SortByPType;              // This step splits meshes with more than one primitive type in homogeneous sub-meshes.
-    pFlags |= aiProcess_FindDegenerates;          // This step searches all meshes for degenerate primitives and converts them to proper lines or points.
+//    pFlags |= aiProcess_SortByPType;              // This step splits meshes with more than one primitive type in homogeneous sub-meshes.
+//    pFlags |= aiProcess_FindDegenerates;          // This step searches all meshes for degenerate primitives and converts them to proper lines or points.
     pFlags |= aiProcess_FindInvalidData;          // This step searches all meshes for invalid data, such as zeroed normal vectors or invalid UV coords and removes/fixes them. This is intended to get rid of some common exporter errors.
     pFlags |= aiProcess_GenUVCoords;              // This step converts non-UV mappings (such as spherical or cylindrical mapping) to proper texture coordinate channels.
 //    pFlags |= aiProcess_TransformUVCoords;        // This step applies per-texture UV transformations and bakes them into stand-alone vtexture coordinate channels.

@@ -57,6 +57,10 @@ float rand(in vec4 seed) {
     return fract(sin(dot_product) * 43758.5453);
 }
 
+vec2 randVec2(in vec3 seed1, in float seed2, in float seed3) {
+    return vec2(rand(vec4(seed1, seed2)), rand(vec4(seed1, seed3)));
+}
+
 float doShadowMapping(in vec4 eyeSpacePosition) {
     float lightVisibility = 1.0;
     if (light.hasShadowMap) {
@@ -67,11 +71,11 @@ float doShadowMapping(in vec4 eyeSpacePosition) {
 
         float bias = 0.0;
         float samples = 16;
-        float radius = 1.0 / 300.0;
+        float radius = (1.0 / 300.0);
         for (int i = 0; i < samples; i++) {
 //            int index = int(4.0 * rand(vec4(eyeSpacePosition.xyz, i))) % 4;
 //            vec2 stratifiedCoord = vec2(shadowLookup.xy + poissonDisk[index] / 700.0); //,  (shadowLookup.z - bias ) / shadowLookup.w);
-            vec2 offset = vec2(rand(vec4(eyeSpacePosition.xyz, i)), rand(vec4(eyeSpacePosition.xyz, i + samples)));
+            vec2 offset = randVec2(eyeSpacePosition.xyz, i, i + samples);
 
             vec2 stratifiedCoord = vec2(shadowLookup.xy + offset * radius);
 

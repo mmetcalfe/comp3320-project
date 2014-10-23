@@ -474,6 +474,7 @@ namespace scene {
         models.push_back(model);
 
         for (auto light : model->lights) {
+            light->dir = glm::normalize(light->dir);
             std::weak_ptr<Light> weak(light);
             lights.push_back(weak);
         }

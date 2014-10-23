@@ -203,70 +203,20 @@ int main(int argc, char** argv) {
     mainScene->deferredShadingProgram = deferredShadingProgram;
 
     // Add some lights:
-    auto lightModel = std::make_shared<scene::Model>("spotlight 1");
+    auto lightModel = std::make_shared<scene::Model>("sun spotlight");
     auto light = std::make_shared<scene::Light>();
-    light->type = scene::Light::Type::spot;
-    light->pos = {15, 120, 40};
-    light->dir = {1, 0, 0};
-//    light->dir = {0, 0, -1};
-    light->attenuationConstant = 0;
-    light->attenuationLinear = 0;
-    light->attenuationQuadratic = 1;
-    light->angleConeOuter = 2;
-    light->angleConeInner = 1;
-    light->colDiffuse = glm::vec3(1000, 1000, 500);
-    light->colSpecular = glm::vec3(1000, 1000, 500);
-    light->colAmbient = {0, 0, 0};
-    lightModel->lights.push_back(light);
+    lightModel->lights.push_back(scene::Light::makeSpotlight({50, 0, 7}, {-1, 0, 0}, 1, 0.8));
     mainScene->addModel(lightModel);
 
-    lightModel = std::make_shared<scene::Model>("spotlight 2");
-    light = std::make_shared<scene::Light>();
-    light->type = scene::Light::Type::spot;
-    light->pos = {50, 200, 40};
-    light->dir = {0, -1, 0};
-    light->attenuationConstant = 0;
-    light->attenuationLinear = 0;
-    light->attenuationQuadratic = 1;
-    light->colDiffuse = glm::vec3(2000);
-    light->colSpecular = glm::vec3(2000);
-    light->colAmbient = {0, 0, 0};
-    light->angleConeInner = 0.8;
-    light->angleConeOuter = 1;
-    lightModel->lights.push_back(light);
+    lightModel = std::make_shared<scene::Model>("downlight 1");
+    lightModel->lights.push_back(scene::Light::makeSpotlight({10, 0, 7}, {0, 0, -1}, 2, 1, glm::vec3(200), glm::vec3(200)));
     mainScene->addModel(lightModel);
 
-    lightModel = std::make_shared<scene::Model>("point light 1");
-    light = std::make_shared<scene::Light>();
-    light->type = scene::Light::Type::point;
-    light->pos = {0, 0, 40};
-    light->dir = {1, 0, 0};
-    light->attenuationConstant = 0;
-    light->attenuationLinear = 0;
-    light->attenuationQuadratic = 1;
-    light->colDiffuse = glm::vec3(1000);
-    light->colSpecular = glm::vec3(1000);
-    light->colAmbient = {0, 0, 0};
-    light->angleConeInner = 1;
-    light->angleConeOuter = 1;
-    lightModel->lights.push_back(light);
+    lightModel = std::make_shared<scene::Model>("downlight 2");
+    lightModel->lights.push_back(scene::Light::makeSpotlight({-10, 0, 7}, {0, 0, -1}, 2, 1, glm::vec3(200), glm::vec3(200)));
     mainScene->addModel(lightModel);
 
-    lightModel = std::make_shared<scene::Model>("point light 2");
-    light = std::make_shared<scene::Light>();
-    light->type = scene::Light::Type::point;
-    light->pos = {50, 50, 50};
-    light->dir = {1, 0, 0};
-    light->attenuationConstant = 0;
-    light->attenuationLinear = 0.05;
-    light->attenuationQuadratic = 1;
-    light->colDiffuse = glm::vec3(1000);
-    light->colSpecular = glm::vec3(1000);
-    light->colAmbient = {0, 0, 0};
-    light->angleConeInner = 1;
-    light->angleConeOuter = 1;
-    lightModel->lights.push_back(light);
-    mainScene->addModel(lightModel);
+
 
     // TODO: Find a way to manage texture units!
     auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE2, GL_TEXTURE_CUBE_MAP);
@@ -303,29 +253,31 @@ int main(int argc, char** argv) {
     eagle5Model->textureProgram = textureProgram;
 //    eagle5Model->environmentMapProgram = sharedFlatReflectProgram;
     eagle5Model->environmentMapProgram = reflectProgram;
-//    eagle5Model->setEnvironmentMap(cubeMap);
-    eagle5Model->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
-    eagle5Model->dynamicReflections = true;
+    eagle5Model->setEnvironmentMap(cubeMap);
+//    eagle5Model->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
+//    eagle5Model->dynamicReflections = true;
     eagle5Model->createMeshBuffers();
     eagle5Model->createVertexArrays();
     eagle5Model->pos = {50, 100, 9};
     eagle5Model->dir = {0, 1, 0};
     eagle5Model->scale = glm::vec3(0.1);
     mainScene->addModel(eagle5Model);
+//
+//    auto houseModel = scene::Model::loadFromFile("assets/House01/House01.obj");
+//    houseModel->flatProgram = flatProgram;
+//    houseModel->textureProgram = textureProgram;
+////    houseModel->environmentMapProgram = sharedFlatReflectProgram;
+//    houseModel->environmentMapProgram = reflectProgram;
+//    houseModel->setEnvironmentMap(cubeMap);
+//    houseModel->createMeshBuffers();
+//    houseModel->createVertexArrays();
+//    houseModel->dir = {0, 1, 0};
+//    houseModel->scale = glm::vec3(3);
+//    mainScene->addModel(houseModel);
 
-    auto houseModel = scene::Model::loadFromFile("assets/House01/House01.obj");
-    houseModel->flatProgram = flatProgram;
-    houseModel->textureProgram = textureProgram;
-//    houseModel->environmentMapProgram = sharedFlatReflectProgram;
-    houseModel->environmentMapProgram = reflectProgram;
-    houseModel->setEnvironmentMap(cubeMap);
-    houseModel->createMeshBuffers();
-    houseModel->createVertexArrays();
-    houseModel->dir = {0, 1, 0};
-    houseModel->scale = glm::vec3(3);
-    mainScene->addModel(houseModel);
-
-    auto cityModel = scene::Model::loadFromFile("assets/rc8c1qtjiygw-O/Organodron City/Organodron City.obj");
+//    auto cityModel = scene::Model::loadFromFile("assets/rc8c1qtjiygw-O/Organodron City/Organodron City.obj");
+    auto cityModel = scene::Model::loadFromFile("assets/spaceship/spaceship.obj");
+//    auto cityModel = scene::Model::loadFromFile("assets/spaceship/spaceship.3ds");
     cityModel->flatProgram = flatProgram;
     cityModel->textureProgram = textureProgram;
 //    cityModel->environmentMapProgram = sharedFlatReflectProgram;
@@ -334,34 +286,36 @@ int main(int argc, char** argv) {
     cityModel->createMeshBuffers();
     cityModel->createVertexArrays();
     cityModel->dir = {0, 1, 0};
+//    cityModel->pos = {50, 150, 30};
+    cityModel->scale = glm::vec3(20);
     mainScene->addModel(cityModel);
-
-    auto cubeModel = scene::Model::loadFromFile("assets/cube.obj");
-    cubeModel->flatProgram = flatProgram;
-    cubeModel->textureProgram = textureProgram;
-//    cubeModel->environmentMapProgram = sharedFlatReflectProgram;
-    cubeModel->environmentMapProgram = reflectProgram;
+//
+//    auto cubeModel = scene::Model::loadFromFile("assets/cube.obj");
+//    cubeModel->flatProgram = flatProgram;
+//    cubeModel->textureProgram = textureProgram;
+////    cubeModel->environmentMapProgram = sharedFlatReflectProgram;
+//    cubeModel->environmentMapProgram = reflectProgram;
 //    cubeModel->setEnvironmentMap(cubeMap);
-    cubeModel->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
-    cubeModel->dynamicReflections = true;
-    cubeModel->createMeshBuffers();
-    cubeModel->createVertexArrays();
-//    cubeModel->pos = {15, 120, 40};
-//    cubeModel->scale = glm::vec3(3);
-    cubeModel->pos = {15, 120, 60};
-    cubeModel->scale = glm::vec3(10);
-    cubeModel->materials[0]->materialInfo.has.shininess = true;
-    cubeModel->materials[0]->shininess = 1;
-    cubeModel->materials[0]->colSpecular = glm::vec3(1);
-    mainScene->addModel(cubeModel);
+////    cubeModel->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
+////    cubeModel->dynamicReflections = true;
+//    cubeModel->createMeshBuffers();
+//    cubeModel->createVertexArrays();
+////    cubeModel->pos = {15, 120, 40};
+////    cubeModel->scale = glm::vec3(3);
+//    cubeModel->pos = {15, 120, 60};
+//    cubeModel->scale = glm::vec3(10);
+//    cubeModel->materials[0]->materialInfo.has.shininess = true;
+//    cubeModel->materials[0]->shininess = 1;
+//    cubeModel->materials[0]->colSpecular = glm::vec3(1);
+//    mainScene->addModel(cubeModel);
 
     auto asteroidModel = scene::createAsteroid();
     asteroidModel->flatProgram = flatProgram;
     asteroidModel->textureProgram = textureProgram;
     asteroidModel->environmentMapProgram = reflectProgram;
-//    asteroidModel->setEnvironmentMap(cubeMap);
-    asteroidModel->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
-    asteroidModel->dynamicReflections = true;
+    asteroidModel->setEnvironmentMap(cubeMap);
+//    asteroidModel->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
+//    asteroidModel->dynamicReflections = true;
     asteroidModel->createMeshBuffers();
     asteroidModel->createVertexArrays();
     asteroidModel->pos = {50, 120, 40};
@@ -404,8 +358,6 @@ int main(int argc, char** argv) {
         if (frameTimer.frameUpdate(glfwGetTime())) {
             glfwSetWindowTitle(window, frameTimer.timeStr.c_str());
         }
-
-        cubeModel->dir = glm::vec3(std::cos(glfwGetTime()), std::sin(glfwGetTime()), 0);
 
         skyBox->pos = mainScene->camera->pos;
 
