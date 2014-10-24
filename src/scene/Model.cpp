@@ -34,7 +34,7 @@ unsigned int getPostProcessingFlags() {
     pFlags |= aiProcess_ValidateDataStructure;    // Validates the imported scene data structure. This makes sure that all indices are valid, all animations and bones are linked correctly, all material references are correct .. etc.
 //    pFlags |= aiProcess_ImproveCacheLocality;     // Reorders triangles for better vertex cache locality.
     pFlags |= aiProcess_RemoveRedundantMaterials; // Searches for redundant/unreferenced materials and removes them.
-    pFlags |= aiProcess_FixInfacingNormals;       // This step tries to determine which meshes have normal vectors that are facing inwards and inverts them.
+//    pFlags |= aiProcess_FixInfacingNormals;       // This step tries to determine which meshes have normal vectors that are facing inwards and inverts them.
 //    pFlags |= aiProcess_SortByPType;              // This step splits meshes with more than one primitive type in homogeneous sub-meshes.
 //    pFlags |= aiProcess_FindDegenerates;          // This step searches all meshes for degenerate primitives and converts them to proper lines or points.
     pFlags |= aiProcess_FindInvalidData;          // This step searches all meshes for invalid data, such as zeroed normal vectors or invalid UV coords and removes/fixes them. This is intended to get rid of some common exporter errors.
@@ -116,6 +116,30 @@ Light copyAiLight(const std::string &fileName, const aiLight *srcLight) {
     return light;
 }
 
+std::unique_ptr<NUGL::Texture> loadAiMaterialTexture(unsigned int texNum, std::string const &fileName, aiMaterial const *srcMaterial, aiTextureType texType, unsigned int texUnit) {
+    aiString path;
+    auto mapModes = std::vector<aiTextureMapMode>(3);
+    srcMaterial->GetTexture(texType, texNum, &path, nullptr, nullptr, nullptr, nullptr,
+            mapModes.data());
+    boost::filesystem::path p(fileName);
+    boost::filesystem::path dir = p.parent_path();
+    dir += "/";
+    dir += path.C_Str();
+    std::cout << "Texture " << texNum << ": " << dir.string() << std::endl;
+
+    auto texture = std::make_unique<NUGL::Texture>(texUnit, GL_TEXTURE_2D);
+    texture->loadFromImage(dir.string());
+    //      TODO: Read texture settings from Assimp (+ Check for other texture types/layers).
+    //      TODO: Support 3D textures.
+    texture->setParam(GL_TEXTURE_WRAP_S, getGLTextureWrapForAiTextureMapMode(mapModes[0]));
+    texture->setParam(GL_TEXTURE_WRAP_T, getGLTextureWrapForAiTextureMapMode(mapModes[1]));
+    //        texture->setParam(GL_TEXTURE_WRAP_R, getGLTextureWrapForAiTextureMapMode(mapModes[2]));
+    texture->setParam(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    texture->setParam(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    return std::move(texture);
+}
+
 Material copyAiMaterial(const std::string &fileName, const aiMaterial *srcMaterial) {
     // TODO: Support remaining material properties from http://assimp.sourceforge.net/lib_html/materials.html
     Material material;
@@ -190,29 +214,22 @@ Material copyAiMaterial(const std::string &fileName, const aiMaterial *srcMateri
     }
 
     auto diffTexCount = srcMaterial->GetTextureCount(aiTextureType_DIFFUSE);
-
     for (unsigned int t = 0; t < diffTexCount; t++) {
         material.materialInfo.has.texDiffuse = true;
 
-        aiString path;
-        auto mapModes = std::vector<aiTextureMapMode>(3);
-        srcMaterial->GetTexture(aiTextureType_DIFFUSE, t, &path, nullptr, nullptr, nullptr, nullptr,
-                mapModes.data());
-        boost::filesystem::path p(fileName);
-        boost::filesystem::path dir = p.parent_path();
-        dir += "/";
-        dir += path.C_Str();
-//        std::cout << __FILE__ << ", " << __LINE__ << ": " << dir.string() << std::endl;
+        std::unique_ptr<NUGL::Texture> texDiffuse = loadAiMaterialTexture(t, fileName, srcMaterial, aiTextureType_DIFFUSE, GL_TEXTURE0 + t);
 
-        material.texDiffuse = std::make_unique<NUGL::Texture>(GL_TEXTURE0 + t, GL_TEXTURE_2D);
-        material.texDiffuse->loadFromImage(dir.string());
-//      TODO: Read texture settings from Assimp (+ Check for other texture types/layers).
-//      TODO: Support 3D textures.
-        material.texDiffuse->setParam(GL_TEXTURE_WRAP_S, getGLTextureWrapForAiTextureMapMode(mapModes[0]));
-        material.texDiffuse->setParam(GL_TEXTURE_WRAP_T, getGLTextureWrapForAiTextureMapMode(mapModes[1]));
-//        material.texDiffuse->setParam(GL_TEXTURE_WRAP_R, getGLTextureWrapForAiTextureMapMode(mapModes[2]));
-        material.texDiffuse->setParam(GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        material.texDiffuse->setParam(GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        material.texDiffuse = std::move(texDiffuse);
+        break; // Only use first texture. TODO: Support multiple textures.
+    }
+
+    auto heightTexCount = srcMaterial->GetTextureCount(aiTextureType_HEIGHT);
+    for (unsigned int t = 0; t < heightTexCount; t++) {
+        material.materialInfo.has.texHeight = true;
+
+        std::unique_ptr<NUGL::Texture> texHeight = loadAiMaterialTexture(t, fileName, srcMaterial, aiTextureType_HEIGHT, GL_TEXTURE4 + t);
+
+        material.texHeight = std::move(texHeight);
         break; // Only use first texture. TODO: Support multiple textures.
     }
 

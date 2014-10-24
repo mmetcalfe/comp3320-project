@@ -132,12 +132,20 @@ void Mesh::prepareMaterialShaderProgram(std::shared_ptr<NUGL::ShaderProgram> pro
 //        material->texAmbient->bind();
 //        program->setUniform("texAmbient", material->texAmbient);
 //    }
-//
-//    if (material->materialInfo.has.texHeight && program->materialInfo.has.texHeight) {
-//        material->texHeight->bind();
-//        program->setUniform("texHeight", material->texHeight);
-//    }
-//
+
+    if (material->materialInfo.has.texHeight && program->materialInfo.has.texHeight) {
+        if (material->texHeight != nullptr) {
+            material->texHeight->bind();
+            program->setUniform("texHeight", material->texHeight);
+            program->setUniform("hasTexHeight", true);
+        } else {
+            std::cerr << "WARNING: material->materialInfo.has.texHeight was true, but texHeight was null.";
+            program->setUniformIfActive("hasTexHeight", false);
+        }
+    } else {
+        program->setUniformIfActive("hasTexHeight", false);
+    }
+
 //    if (material->materialInfo.has.texNormals && program->materialInfo.has.texNormals) {
 //        material->texNormals->bind();
 //        program->setUniform("texNormals", material->texNormals);

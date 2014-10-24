@@ -27,6 +27,7 @@ namespace scene {
         bool twoSided = true;
 
         std::shared_ptr<NUGL::Texture> texDiffuse;
+        std::shared_ptr<NUGL::Texture> texHeight;
         std::shared_ptr<NUGL::Texture> texEnvironmentMap;
 
         // Summarises the types of data this material offers.

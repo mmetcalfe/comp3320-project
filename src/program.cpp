@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
     checkForAndPrintGLError(__FILE__, __LINE__);
 
 
-    // Load glsl:
+    // Load deferred rendering shaders:
     auto gBufferProgram = NUGL::ShaderProgram::createSharedFromFiles("gBufferProgram", {
             {GL_VERTEX_SHADER, "src/glsl/g-buffer.vert"},
             {GL_FRAGMENT_SHADER, "src/glsl/g-buffer.frag"},
@@ -129,6 +129,7 @@ int main(int argc, char** argv) {
     deferredShadingProgram->updateMaterialInfo();
     deferredShadingProgram->printDebugInfo();
 
+    // Load forward rendering shaders:
     auto flatProgram = NUGL::ShaderProgram::createSharedFromFiles("flatProgram", {
             {GL_VERTEX_SHADER, "src/glsl/position.vert"},
             {GL_FRAGMENT_SHADER, "src/glsl/uniform.frag"},
@@ -150,7 +151,6 @@ int main(int argc, char** argv) {
     auto reflectProgram = NUGL::ShaderProgram::createSharedFromFiles("reflectProgram", {
             {GL_VERTEX_SHADER, "src/glsl/shadow.vert"},
             {GL_FRAGMENT_SHADER, "src/glsl/shadow.frag"},
-//            {GL_FRAGMENT_SHADER, "src/glsl/lit_rfl_tex.frag"},
     });
     reflectProgram->bindFragDataLocation(0, "outColor");
     reflectProgram->link();
@@ -166,6 +166,16 @@ int main(int argc, char** argv) {
     skyboxProgram->updateMaterialInfo();
     skyboxProgram->printDebugInfo();
 
+    auto shadowMapProgram = NUGL::ShaderProgram::createSharedFromFiles("shadowMapProgram", {
+            {GL_VERTEX_SHADER, "src/glsl/shadow_map.vert"},
+            {GL_FRAGMENT_SHADER, "src/glsl/shadow_map.frag"},
+    });
+    shadowMapProgram->bindFragDataLocation(0, "outColor");
+    shadowMapProgram->link();
+    shadowMapProgram->updateMaterialInfo();
+    shadowMapProgram->printDebugInfo();
+
+    // Load compositing shaders:
     auto screenProgram = NUGL::ShaderProgram::createSharedFromFiles("screenProgram", {
             {GL_VERTEX_SHADER, "src/glsl/screen.vert"},
             {GL_FRAGMENT_SHADER, "src/glsl/textured.frag"},
@@ -183,15 +193,6 @@ int main(int argc, char** argv) {
     screenAlphaProgram->link();
     screenAlphaProgram->updateMaterialInfo();
     screenAlphaProgram->printDebugInfo();
-
-    auto shadowMapProgram = NUGL::ShaderProgram::createSharedFromFiles("shadowMapProgram", {
-            {GL_VERTEX_SHADER, "src/glsl/shadow_map.vert"},
-            {GL_FRAGMENT_SHADER, "src/glsl/shadow_map.frag"},
-    });
-    shadowMapProgram->bindFragDataLocation(0, "outColor");
-    shadowMapProgram->link();
-    shadowMapProgram->updateMaterialInfo();
-    shadowMapProgram->printDebugInfo();
 
     // Create Scene:
     mainScene = std::make_unique<scene::Scene>(screenProgram, screenAlphaProgram,
@@ -216,24 +217,28 @@ int main(int argc, char** argv) {
     lightModel->lights.push_back(scene::Light::makeSpotlight({-10, 0, 7}, {0, 0, -1}, 2, 1, glm::vec3(200), glm::vec3(200)));
     mainScene->addModel(lightModel);
 
+    lightModel = std::make_shared<scene::Model>("tube light");
+    lightModel->lights.push_back(scene::Light::makeSpotlight({0, 0, 7}, {0, 0, -1}, 2, 1, glm::vec3(200), glm::vec3(200)));
+    mainScene->addModel(lightModel);
+
 
 
     // TODO: Find a way to manage texture units!
     auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE2, GL_TEXTURE_CUBE_MAP);
     cubeMap->loadCubeMap({
-//            "assets/skybox_right1.png",
-//            "assets/skybox_left2.png",
-//            "assets/skybox_top3.png",
-//            "assets/skybox_bottom4.png",
-//            "assets/skybox_front5.png",
-//            "assets/skybox_back6.png"
+            "assets/skybox_right1.png",
+            "assets/skybox_left2.png",
+            "assets/skybox_top3.png",
+            "assets/skybox_bottom4.png",
+            "assets/skybox_front5.png",
+            "assets/skybox_back6.png"
 
-            "assets/PereaBeach1/posx.jpg",
-            "assets/PereaBeach1/negx.jpg",
-            "assets/PereaBeach1/posy.jpg",
-            "assets/PereaBeach1/negy.jpg",
-            "assets/PereaBeach1/posz.jpg",
-            "assets/PereaBeach1/negz.jpg"
+//            "assets/PereaBeach1/posx.jpg",
+//            "assets/PereaBeach1/negx.jpg",
+//            "assets/PereaBeach1/posy.jpg",
+//            "assets/PereaBeach1/negy.jpg",
+//            "assets/PereaBeach1/posz.jpg",
+//            "assets/PereaBeach1/negz.jpg"
     });
     cubeMap->setParam(GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     cubeMap->setParam(GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -258,11 +263,11 @@ int main(int argc, char** argv) {
 //    eagle5Model->dynamicReflections = true;
     eagle5Model->createMeshBuffers();
     eagle5Model->createVertexArrays();
-    eagle5Model->pos = {50, 100, 9};
+    eagle5Model->pos = {50, 50, 9};
     eagle5Model->dir = {0, 1, 0};
     eagle5Model->scale = glm::vec3(0.1);
     mainScene->addModel(eagle5Model);
-//
+
 //    auto houseModel = scene::Model::loadFromFile("assets/House01/House01.obj");
 //    houseModel->flatProgram = flatProgram;
 //    houseModel->textureProgram = textureProgram;
@@ -275,20 +280,19 @@ int main(int argc, char** argv) {
 //    houseModel->scale = glm::vec3(3);
 //    mainScene->addModel(houseModel);
 
-//    auto cityModel = scene::Model::loadFromFile("assets/rc8c1qtjiygw-O/Organodron City/Organodron City.obj");
-    auto cityModel = scene::Model::loadFromFile("assets/spaceship/spaceship.obj");
-//    auto cityModel = scene::Model::loadFromFile("assets/spaceship/spaceship.3ds");
-    cityModel->flatProgram = flatProgram;
-    cityModel->textureProgram = textureProgram;
-//    cityModel->environmentMapProgram = sharedFlatReflectProgram;
-    cityModel->environmentMapProgram = reflectProgram;
-    cityModel->setEnvironmentMap(cubeMap);
-    cityModel->createMeshBuffers();
-    cityModel->createVertexArrays();
-    cityModel->dir = {0, 1, 0};
-//    cityModel->pos = {50, 150, 30};
-    cityModel->scale = glm::vec3(20);
-    mainScene->addModel(cityModel);
+    auto spaceshipModel = scene::Model::loadFromFile("assets/spaceship/spaceship.obj");
+//    auto spaceshipModel = scene::Model::loadFromFile("assets/spaceship/spaceship.3ds");
+    spaceshipModel->flatProgram = flatProgram;
+    spaceshipModel->textureProgram = textureProgram;
+//    spaceshipModel->environmentMapProgram = sharedFlatReflectProgram;
+    spaceshipModel->environmentMapProgram = reflectProgram;
+    spaceshipModel->setEnvironmentMap(cubeMap);
+    spaceshipModel->createMeshBuffers();
+    spaceshipModel->createVertexArrays();
+    spaceshipModel->dir = {0, 1, 0};
+//    spaceshipModel->pos = {50, 150, 30};
+    spaceshipModel->scale = glm::vec3(20);
+    mainScene->addModel(spaceshipModel);
 //
 //    auto cubeModel = scene::Model::loadFromFile("assets/cube.obj");
 //    cubeModel->flatProgram = flatProgram;
@@ -309,7 +313,7 @@ int main(int argc, char** argv) {
 //    cubeModel->materials[0]->colSpecular = glm::vec3(1);
 //    mainScene->addModel(cubeModel);
 
-    auto asteroidModel = scene::createAsteroid();
+    auto asteroidModel = scene::createAsteroid(0.4, 0.1);
     asteroidModel->flatProgram = flatProgram;
     asteroidModel->textureProgram = textureProgram;
     asteroidModel->environmentMapProgram = reflectProgram;
@@ -318,8 +322,8 @@ int main(int argc, char** argv) {
 //    asteroidModel->dynamicReflections = true;
     asteroidModel->createMeshBuffers();
     asteroidModel->createVertexArrays();
-    asteroidModel->pos = {50, 120, 40};
-    asteroidModel->scale = glm::vec3(10);
+    asteroidModel->pos = {0, 0, 5};
+    asteroidModel->scale = glm::vec3(1);
     mainScene->addModel(asteroidModel);
 
     auto skyBox = scene::Model::loadFromFile("assets/cube.obj");
@@ -335,8 +339,9 @@ int main(int argc, char** argv) {
     // Setup Camera:
 //    mainScene->camera->pos = {15, 120, 40};
     mainScene->camera->near_ = 1;
-    mainScene->camera->pos = {37.2, 156, 38.1};
-    mainScene->camera->dir = {0.415, -0.646, -0.64};
+    mainScene->camera->pos = {5, 5, 5};
+//    mainScene->camera->pos = {37.2, 156, 38.1};
+//    mainScene->camera->dir = {0.415, -0.646, -0.64};
     mainScene->camera->fov = M_PI_4;
     mainScene->camera->speed = 10;
     mainScene->camera->lookSpeed = 0.005;

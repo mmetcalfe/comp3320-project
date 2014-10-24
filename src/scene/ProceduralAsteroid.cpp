@@ -10,8 +10,7 @@
 
 namespace scene {
 
-static int getMidpointVertex(std::mt19937 &gen, scene::Mesh &mesh,
-    std::map<std::tuple<GLint, GLint>, GLint> &lines, GLint a, GLint b) {
+static int getMidpointVertex(std::mt19937 &gen, scene::Mesh &mesh, std::map<std::tuple<GLint, GLint>, GLint> &lines, GLint a, GLint b, float noiseFactor) {
 
     std::uniform_real_distribution<float> distrib(-1, 1);
 
@@ -28,8 +27,8 @@ static int getMidpointVertex(std::mt19937 &gen, scene::Mesh &mesh,
             float a_height = glm::length(mesh.vertices[a]);
             float b_height = glm::length(mesh.vertices[b]);
             float dist = glm::distance(mesh.vertices[a], mesh.vertices[b]);
-//            float ab_height = ((a_height + b_height) / 2.f) + 0.05f * dist * distrib(gen);
-            float ab_height = ((a_height + b_height) / 2.f);// + 0.05f * dist * distrib(gen);
+            float ab_height = ((a_height + b_height) / 2.f) + noiseFactor * dist * distrib(gen);
+//            float ab_height = ((a_height + b_height) / 2.f);// + 0.05f * dist * distrib(gen);
 
             GLint ab = mesh.vertices.size();
             mesh.vertices.push_back(midpoint * ab_height);
@@ -41,7 +40,7 @@ static int getMidpointVertex(std::mt19937 &gen, scene::Mesh &mesh,
     }
 }
 
-static void subdivide(std::mt19937 &gen, scene::Mesh &mesh) {
+static void subdivide(std::mt19937 &gen, scene::Mesh &mesh, float noiseFactor) {
     std::map<std::tuple<GLint, GLint>, GLint> lines;
     std::vector<GLint> newElements;
 
@@ -50,9 +49,9 @@ static void subdivide(std::mt19937 &gen, scene::Mesh &mesh) {
         GLint b = mesh.elements[faceIndex + 1];
         GLint c = mesh.elements[faceIndex + 2];
 
-        GLint ab = getMidpointVertex(gen, mesh, lines, a, b);
-        GLint bc = getMidpointVertex(gen, mesh, lines, b, c);
-        GLint ac = getMidpointVertex(gen, mesh, lines, a, c);
+        GLint ab = getMidpointVertex(gen, mesh, lines, a, b, noiseFactor);
+        GLint bc = getMidpointVertex(gen, mesh, lines, b, c, noiseFactor);
+        GLint ac = getMidpointVertex(gen, mesh, lines, a, c, noiseFactor);
 
         newElements.push_back(a); newElements.push_back(ab); newElements.push_back(ac);
         newElements.push_back(ab); newElements.push_back(b); newElements.push_back(bc);
@@ -63,7 +62,7 @@ static void subdivide(std::mt19937 &gen, scene::Mesh &mesh) {
     mesh.elements = newElements;
 }
 
-std::shared_ptr<Model> createAsteroid() {
+std::shared_ptr<Model> createAsteroid(float baseNoise, float subDivisionNoise) {
     auto model = scene::Model::createIcosahedron();
     Mesh &mesh = model->meshes[0];
 
@@ -71,11 +70,11 @@ std::shared_ptr<Model> createAsteroid() {
     std::mt19937 mt(rd());
     std::uniform_real_distribution<float> distrib(-1, 1);
 
-//    for (unsigned i = 0; i < mesh.vertices.size(); i ++)
-//        mesh.vertices[i] = mesh.vertices[i] + 0.1f * distrib(mt);
+    for (unsigned i = 0; i < mesh.vertices.size(); i ++)
+        mesh.vertices[i] = mesh.vertices[i] + baseNoise * distrib(mt);
 
     for (int i = 0; i < 4; i ++)
-        subdivide(mt, mesh);
+        subdivide(mt, mesh, subDivisionNoise);
 
     for (unsigned i = 0; i < mesh.vertices.size(); i ++) {
         glm::vec3 normal = { 0, 0, 0 };
