@@ -206,19 +206,21 @@ int main(int argc, char** argv) {
     // Add some lights:
     auto lightModel = std::make_shared<scene::Model>("sun spotlight");
     auto light = std::make_shared<scene::Light>();
-    lightModel->lights.push_back(scene::Light::makeSpotlight({50, 0, 7}, {-1, 0, 0}, 1, 0.8));
+    lightModel->lights.push_back(scene::Light::makeSpotlight({50, 0, 7}, {-1, 0, 0}, 1, 1));
     mainScene->addModel(lightModel);
 
     lightModel = std::make_shared<scene::Model>("downlight 1");
-    lightModel->lights.push_back(scene::Light::makeSpotlight({10, 0, 7}, {0, 0, -1}, 2, 1, glm::vec3(200), glm::vec3(200)));
+    lightModel->lights.push_back(scene::Light::makeSpotlight({10, 0, 14}, {0, 0, -1}, 2, 1, glm::vec3(200), glm::vec3(200)));
     mainScene->addModel(lightModel);
 
     lightModel = std::make_shared<scene::Model>("downlight 2");
-    lightModel->lights.push_back(scene::Light::makeSpotlight({-10, 0, 7}, {0, 0, -1}, 2, 1, glm::vec3(200), glm::vec3(200)));
+    lightModel->lights.push_back(scene::Light::makeSpotlight({-10, 0, 14}, {0, 0, -1}, 2, 1, glm::vec3(200), glm::vec3(200)));
     mainScene->addModel(lightModel);
 
     lightModel = std::make_shared<scene::Model>("tube light");
-    lightModel->lights.push_back(scene::Light::makeSpotlight({0, 0, 7}, {0, 0, -1}, 2, 1, glm::vec3(200), glm::vec3(200)));
+    light = scene::Light::makeSpotlight({0, 0, 0}, {0, 0, 1}, 1.5, 1.5, glm::vec3(200), glm::vec3(200));
+    light->colAmbient = glm::vec3(0.1);
+    lightModel->lights.push_back(light);
     mainScene->addModel(lightModel);
 
 
@@ -317,9 +319,9 @@ int main(int argc, char** argv) {
     asteroidModel->flatProgram = flatProgram;
     asteroidModel->textureProgram = textureProgram;
     asteroidModel->environmentMapProgram = reflectProgram;
-    asteroidModel->setEnvironmentMap(cubeMap);
-//    asteroidModel->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
-//    asteroidModel->dynamicReflections = true;
+//    asteroidModel->setEnvironmentMap(cubeMap);
+    asteroidModel->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
+    asteroidModel->dynamicReflections = true;
     asteroidModel->createMeshBuffers();
     asteroidModel->createVertexArrays();
     asteroidModel->pos = {0, 0, 5};

@@ -105,21 +105,37 @@ void Mesh::prepareMaterialShaderProgram(std::shared_ptr<NUGL::ShaderProgram> pro
 //        program->setUniform("reserved_value", material->reserved_value);
 //    }
 
+
+    program->setUniformIfActive("hasTexEnvironmentMap", false);
     if (material->materialInfo.has.texEnvironmentMap && program->materialInfo.has.texEnvironmentMap) {
         if (material->texEnvironmentMap != nullptr) {
             material->texEnvironmentMap->bind();
             program->setUniform("texEnvironmentMap", material->texEnvironmentMap);
+            program->setUniformIfActive("hasTexEnvironmentMap", true);
         } else {
             std::cerr << "WARNING: material->materialInfo.has.texEnvironmentMap was true, but texEnvironmentMap was null.";
         }
     }
 
+    program->setUniformIfActive("hasTexDiffuse", false);
     if (material->materialInfo.has.texDiffuse && program->materialInfo.has.texDiffuse) {
         if (material->texDiffuse != nullptr) {
             material->texDiffuse->bind();
             program->setUniform("texDiffuse", material->texDiffuse);
+            program->setUniformIfActive("hasTexDiffuse", true);
         } else {
             std::cerr << "WARNING: material->materialInfo.has.texDiffuse was true, but texDiffuse was null.";
+        }
+    }
+
+    program->setUniformIfActive("hasTexHeight", false);
+    if (material->materialInfo.has.texHeight && program->materialInfo.has.texHeight) {
+        if (material->texHeight != nullptr) {
+            material->texHeight->bind();
+            program->setUniform("texHeight", material->texHeight);
+            program->setUniform("hasTexHeight", true);
+        } else {
+            std::cerr << "WARNING: material->materialInfo.has.texHeight was true, but texHeight was null.";
         }
     }
 
@@ -132,20 +148,7 @@ void Mesh::prepareMaterialShaderProgram(std::shared_ptr<NUGL::ShaderProgram> pro
 //        material->texAmbient->bind();
 //        program->setUniform("texAmbient", material->texAmbient);
 //    }
-
-    if (material->materialInfo.has.texHeight && program->materialInfo.has.texHeight) {
-        if (material->texHeight != nullptr) {
-            material->texHeight->bind();
-            program->setUniform("texHeight", material->texHeight);
-            program->setUniform("hasTexHeight", true);
-        } else {
-            std::cerr << "WARNING: material->materialInfo.has.texHeight was true, but texHeight was null.";
-            program->setUniformIfActive("hasTexHeight", false);
-        }
-    } else {
-        program->setUniformIfActive("hasTexHeight", false);
-    }
-
+//
 //    if (material->materialInfo.has.texNormals && program->materialInfo.has.texNormals) {
 //        material->texNormals->bind();
 //        program->setUniform("texNormals", material->texNormals);

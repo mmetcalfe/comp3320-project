@@ -38,6 +38,8 @@ uniform samplerCube texEnvironmentMap;
 uniform sampler2D texDiffuse;
 uniform sampler2D texHeight;
 uniform bool hasTexHeight;
+uniform bool hasTexDiffuse;
+uniform bool hasTexEnvironmentMap;
 
 float phong(in vec3 incident, in vec3 reflection, in float shininess) {
     return pow(clamp(dot(-incident, reflection), 0, 1), shininess);
@@ -120,7 +122,7 @@ void main() {
     // Environment map reflection:
     outEnvMapColSpecIntensity.rgba = vec4(0, 0, 0, 0);
 
-    if (shininess > 0) {
+    if (hasTexEnvironmentMap && shininess > 0) {
         vec3 viewReflect = reflect(incident, normal);
 //        float phongViewSpecular = phong(incident, viewReflect, shininess);
         vec4 sampleCoord = viewInverse * vec4(viewReflect, 0);
@@ -137,8 +139,12 @@ void main() {
     }
 
     // Diffuse albedo:
-    vec4 texCol = texture(texDiffuse, Texcoord);
-    outAlbedoRoughness.rgb = texCol.rgb * colDiffuse;
+    if (hasTexDiffuse) {
+        vec4 texCol = texture(texDiffuse, Texcoord);
+        outAlbedoRoughness.rgb = texCol.rgb * colDiffuse;
+    } else {
+        outAlbedoRoughness.rgb = colDiffuse;
+    }
 
     // Roughness:
     outAlbedoRoughness.a = shininess / 8; // Map to [0, 1].
