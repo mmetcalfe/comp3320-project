@@ -21,6 +21,8 @@ uniform float shininess;
 //uniform float shininessStrength;
 uniform samplerCube texEnvironmentMap;
 uniform sampler2D texDiffuse;
+uniform bool hasTexDiffuse;
+uniform bool hasTexEnvironmentMap;
 
 // Light uniforms:
 struct Light {
@@ -136,7 +138,7 @@ void main() {
 
     // Environment map reflection:
     vec3 outReflect;
-    if (shininess > 0) {
+    if (hasTexEnvironmentMap && shininess > 0) {
         vec3 viewReflect = reflect(incident, normal);
 //        float phongViewSpecular = phong(incident, viewReflect, shininess);
         vec4 sampleCoord = viewInverse * vec4(viewReflect, 0);
@@ -176,8 +178,12 @@ void main() {
     float spotFactor = calcSpotlightFactor(lightVec);
 
     // Diffuse component:
-    vec4 texCol = texture(texDiffuse, Texcoord);
-    vec3 outDiffuse = texCol.rgb * colDiffuse * light.colDiffuse * max(lightDot, 0);
+    vec3 outDiffuse = colDiffuse * light.colDiffuse * max(lightDot, 0);
+    if (hasTexDiffuse) {
+        vec4 texCol = texture(texDiffuse, Texcoord);
+        outDiffuse = outDiffuse * texCol.rgb;
+    }
+
 
     // Ambient component:
     vec3 outAmbient = colAmbient * light.colAmbient;

@@ -206,19 +206,25 @@ int main(int argc, char** argv) {
     // Add some lights:
     auto lightModel = std::make_shared<scene::Model>("sun spotlight");
     auto light = std::make_shared<scene::Light>();
-    lightModel->lights.push_back(scene::Light::makeSpotlight({50, 0, 7}, {-1, 0, 0}, 1, 1));
+    glm::vec3 sunPos = {10, 50, 12};
+    lightModel->lights.push_back(scene::Light::makeSpotlight(sunPos, glm::vec3(0, 0, 7) - sunPos, 1, 1));
+    mainScene->addModel(lightModel);
+
+    lightModel = std::make_shared<scene::Model>("sun spotlight");
+    glm::vec3 shipSunPos = {10 + 60, 50, 12};
+    lightModel->lights.push_back(scene::Light::makeSpotlight(shipSunPos, glm::vec3(0 + 60, 0, 7) - shipSunPos, 1, 1));
     mainScene->addModel(lightModel);
 
     lightModel = std::make_shared<scene::Model>("downlight 1");
-    lightModel->lights.push_back(scene::Light::makeSpotlight({10, 0, 14}, {0, 0, -1}, 2, 1, glm::vec3(200), glm::vec3(200)));
+    lightModel->lights.push_back(scene::Light::makeSpotlight({10, 0, 14}, {0, 0, -1}, 2, 1, glm::vec3(100), glm::vec3(100)));
     mainScene->addModel(lightModel);
 
     lightModel = std::make_shared<scene::Model>("downlight 2");
-    lightModel->lights.push_back(scene::Light::makeSpotlight({-10, 0, 14}, {0, 0, -1}, 2, 1, glm::vec3(200), glm::vec3(200)));
+    lightModel->lights.push_back(scene::Light::makeSpotlight({-10, 0, 14}, {0, 0, -1}, 2, 1, glm::vec3(100), glm::vec3(100)));
     mainScene->addModel(lightModel);
 
     lightModel = std::make_shared<scene::Model>("tube light");
-    light = scene::Light::makeSpotlight({0, 0, 0}, {0, 0, 1}, 1.5, 1.5, glm::vec3(200), glm::vec3(200));
+    light = scene::Light::makeSpotlight({0, 0, 0}, {0, 0, 1}, 1.5, 1.5, glm::vec3(50), glm::vec3(50));
     light->colAmbient = glm::vec3(0.1);
     lightModel->lights.push_back(light);
     mainScene->addModel(lightModel);
@@ -265,9 +271,9 @@ int main(int argc, char** argv) {
 //    eagle5Model->dynamicReflections = true;
     eagle5Model->createMeshBuffers();
     eagle5Model->createVertexArrays();
-    eagle5Model->pos = {50, 50, 9};
-    eagle5Model->dir = {0, 1, 0};
-    eagle5Model->scale = glm::vec3(0.1);
+    eagle5Model->pos = {60, 0, -5};
+    eagle5Model->dir = {-1, 1, 0};
+    eagle5Model->scale = glm::vec3(0.2);
     mainScene->addModel(eagle5Model);
 
 //    auto houseModel = scene::Model::loadFromFile("assets/House01/House01.obj");

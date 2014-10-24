@@ -389,7 +389,9 @@ namespace scene {
         glViewport(0, 0, framebufferSize.x, framebufferSize.y);
 
         screen->setTexture(shadowMapFramebuffer->textureAttachments[GL_DEPTH_ATTACHMENT]);
-        screen->render(4, lightNum, 3);
+
+        int gridSize = std::max(int(lights.size()), 4);
+        screen->render(gridSize, lightNum, gridSize - 1);
         screen->removeTexture();
     }
 
