@@ -77,7 +77,7 @@ vec3 perturb_normal( vec3 N, vec3 V, vec2 texcoord ) {
     float top = texture(texHeight, texcoord + vec2(0.0, t_d)).r;
     float bottom = texture(texHeight, texcoord + vec2(0.0, -t_d)).r;
 
-    vec3 map = normalize(vec3(left - right, bottom - top, 2.0));
+    vec3 map = normalize(vec3(left - right, bottom - top, 2));
 
 //    map.y = -map.y;
     mat3 TBN = cotangent_frame(N, -V, texcoord);
@@ -113,6 +113,8 @@ void main() {
 //
 ////        normal = vec3(disp, 0);
 //        normal = normalize(vec3(disp, 0) + normal);
+
+
         normal = perturb_normal(normal, incident, Texcoord);
     }
 

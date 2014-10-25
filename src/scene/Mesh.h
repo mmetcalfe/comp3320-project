@@ -28,7 +28,7 @@ namespace scene {
         std::unordered_map<NUGL::ShaderProgram, std::unique_ptr<NUGL::VertexArray>> vertexArrayMap;
 
         inline bool isTextured() {
-            return (bool)material->materialInfo.has.texDiffuse && !texCoords.empty();
+            return (bool)(material->materialInfo.has.texDiffuse || material->materialInfo.has.texHeight) && !texCoords.empty();
         }
 
         inline bool hasNormals() {

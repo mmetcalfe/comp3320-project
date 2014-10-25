@@ -428,7 +428,6 @@ namespace scene {
             glCullFace(GL_FRONT);
 
             for (auto model : models) {
-//                    model->shadowMapProgram = shadowMapProgram;
                 model->draw(*lightCamera, shadowMapProgram);
             }
 
