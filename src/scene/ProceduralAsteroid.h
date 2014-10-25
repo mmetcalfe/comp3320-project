@@ -3,5 +3,5 @@
 #include <memory>
 
 namespace scene {
-    std::shared_ptr<Model> createAsteroid(float baseNoise, float subDivisionNoise);
+    std::shared_ptr<Model> createAsteroid(float baseNoise, float subDivisionNoise, int subdivisions);
 }

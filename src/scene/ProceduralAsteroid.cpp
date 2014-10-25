@@ -62,7 +62,7 @@ static void subdivide(std::mt19937 &gen, scene::Mesh &mesh, float noiseFactor) {
     mesh.elements = newElements;
 }
 
-std::shared_ptr<Model> createAsteroid(float baseNoise, float subDivisionNoise) {
+std::shared_ptr<Model> createAsteroid(float baseNoise, float subDivisionNoise, int subdivisions) {
     auto model = scene::Model::createIcosahedron();
     Mesh &mesh = model->meshes[0];
 
@@ -73,7 +73,7 @@ std::shared_ptr<Model> createAsteroid(float baseNoise, float subDivisionNoise) {
     for (unsigned i = 0; i < mesh.vertices.size(); i ++)
         mesh.vertices[i] = mesh.vertices[i] + baseNoise * distrib(mt);
 
-    for (int i = 0; i < 4; i ++)
+    for (int i = 0; i < subdivisions; i ++)
         subdivide(mt, mesh, subDivisionNoise);
 
     for (unsigned i = 0; i < mesh.vertices.size(); i ++) {

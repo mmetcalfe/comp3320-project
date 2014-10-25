@@ -321,7 +321,7 @@ int main(int argc, char** argv) {
 //    cubeModel->materials[0]->colSpecular = glm::vec3(1);
 //    mainScene->addModel(cubeModel);
 
-    auto asteroidModel = scene::createAsteroid(0.4, 0.1);
+    auto asteroidModel = scene::createAsteroid(0.3, 0.2, 4);
     asteroidModel->flatProgram = flatProgram;
     asteroidModel->textureProgram = textureProgram;
     asteroidModel->environmentMapProgram = reflectProgram;
@@ -333,6 +333,24 @@ int main(int argc, char** argv) {
     asteroidModel->pos = {0, 0, 5};
     asteroidModel->scale = glm::vec3(1);
     mainScene->addModel(asteroidModel);
+
+    std::vector<std::shared_ptr<scene::Model>> asteroids;
+    for (int i = 0; i < 10; i++) {
+        auto asteroid = scene::createAsteroid(0.2, 0.2, 2);
+        asteroids.push_back(asteroid);
+
+        asteroid->flatProgram = flatProgram;
+        asteroid->textureProgram = textureProgram;
+        asteroid->environmentMapProgram = reflectProgram;
+        asteroid->setEnvironmentMap(cubeMap);
+//    asteroid->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
+//    asteroid->dynamicReflections = true;
+        asteroid->createMeshBuffers();
+        asteroid->createVertexArrays();
+        asteroid->pos = {0, 30, 0};
+        asteroid->scale = glm::vec3(5);
+        mainScene->addModel(asteroid);
+    }
 
     auto skyBox = scene::Model::loadFromFile("assets/cube.obj");
     skyBox->flatProgram = flatProgram;
@@ -373,6 +391,32 @@ int main(int argc, char** argv) {
         }
 
         skyBox->pos = mainScene->camera->pos;
+
+        // Tube-rock movement:
+        float t = glfwGetTime();
+        asteroidModel->pos = glm::vec3(0,0,8) + glm::vec3(0,0,3) * std::sin(t);
+        asteroidModel->dir = glm::normalize(glm::vec3(std::sin(2 * t) + std::cos(3 * t), std::cos(2 * t), std::cos(3 * t)));
+
+        // Asteroid movement:
+        srand(1031);
+        for (int i = 0; i < asteroids.size(); i++) {
+            auto asteroid = asteroids[i];
+
+            float k = rand() / (float)RAND_MAX;
+
+            float t = glfwGetTime() + k * 1097;
+            float radius = (40 + k * 160);
+            float tilt = ((k - 0.5) + 0.5) * 0.5;
+            float speed = 1600.0 / (radius * radius);
+
+            glm::vec4 pos = glm::vec4(std::cos(t * speed), std::sin(t * speed), 0, 1);
+            glm::mat4 rot;
+            rot = glm::rotate(rot, tilt, glm::normalize(glm::vec3(0,1,0)));
+            pos = rot * pos;
+            asteroid->pos = glm::vec3(pos.x, pos.y, pos.z) * radius;
+            asteroid->dir = glm::vec3(std::sin(k*t*5), std::cos(k*t*5), 0);
+        }
+
 
         mainScene->render();
 
