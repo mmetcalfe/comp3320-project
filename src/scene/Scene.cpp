@@ -12,7 +12,7 @@ namespace scene {
             std::shared_ptr<NUGL::ShaderProgram> screenAlphaProgram,
             glm::ivec2 windowSize, glm::ivec2 framebufferSize)
             : camera(std::make_unique<PlayerCamera>()) {
-        shadowMapSize = 1024;
+        shadowMapSize = 2048;
         reflectionMapSize = 512;
 
         this->windowSize = windowSize;
@@ -283,7 +283,7 @@ namespace scene {
 //            addFramebufferToScreen();
 
             // Render a tiny shadow map:
-            if (sharedLight->type == scene::Light::Type::spot)
+            if (sharedLight->type == scene::Light::Type::spot || sharedLight->type == scene::Light::Type::directional)
                 drawShadowMapThumbnail(lightNum - 1);
 
             profiler.split("drawShadowMapThumbnail ", lightNum);
@@ -414,7 +414,7 @@ namespace scene {
     std::shared_ptr<LightCamera> Scene::prepareShadowMap(int lightNum, std::shared_ptr<Light> sharedLight) {
         std::shared_ptr<LightCamera> lightCamera;
 
-        if (sharedLight->type == Light::Type::spot) {
+        if (sharedLight->type == Light::Type::spot || sharedLight->type == scene::Light::Type::directional) {
             lightCamera = LightCamera::fromLight(*sharedLight, shadowMapSize);
             // Render light's perspective into shadowMap.
             shadowMapFramebuffer->bind();

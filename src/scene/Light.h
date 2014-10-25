@@ -23,7 +23,7 @@ namespace scene {
         float attenuationConstant = 0;
         float attenuationLinear = 0;
         float attenuationQuadratic = 1;
-
+        float orthoSize = 10;
 
         static std::shared_ptr<Light> makeSpotlight(
                 glm::vec3 pos = glm::vec3(0, 0, 0),
@@ -43,6 +43,29 @@ namespace scene {
             light->colDiffuse = colDiffuse;
             light->colSpecular = colSpecular;
             light->colAmbient = colAmbient;
+
+            return light;
+        }
+
+        static std::shared_ptr<Light> makeDirectional(
+                glm::vec3 pos = glm::vec3(0, 0, 0),
+                glm::vec3 dir = glm::vec3(0, 0, -1),
+                float orthoSize = 10,
+                glm::vec3 colDiffuse = glm::vec3(1),
+                glm::vec3 colSpecular = glm::vec3(1),
+                glm::vec3 colAmbient = glm::vec3(0)) {
+            auto light = std::make_shared<Light>();
+
+            light->type = scene::Light::Type::directional;
+            light->pos = pos;
+            light->dir = dir;
+            light->colDiffuse = colDiffuse;
+            light->colSpecular = colSpecular;
+            light->colAmbient = colAmbient;
+            light->attenuationConstant = 1;
+            light->attenuationLinear = 0;
+            light->attenuationQuadratic = 0;
+            light->orthoSize = orthoSize;
 
             return light;
         }

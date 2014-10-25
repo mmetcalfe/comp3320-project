@@ -204,16 +204,23 @@ int main(int argc, char** argv) {
     mainScene->deferredShadingProgram = deferredShadingProgram;
 
     // Add some lights:
-    auto lightModel = std::make_shared<scene::Model>("sun spotlight");
+    auto lightModel = std::make_shared<scene::Model>("sun");
     auto light = std::make_shared<scene::Light>();
-    glm::vec3 sunPos = {10, 50, 12};
-    lightModel->lights.push_back(scene::Light::makeSpotlight(sunPos, glm::vec3(0, 0, 7) - sunPos, 1, 1));
+    glm::vec3 sunDir = glm::normalize(glm::vec3(-10, -50, -5));
+    glm::vec3 sunPos = glm::vec3(30, 50, 12) + sunDir * 0.0f;
+    lightModel->lights.push_back(scene::Light::makeDirectional(sunPos, sunDir, 150));
     mainScene->addModel(lightModel);
 
-    lightModel = std::make_shared<scene::Model>("sun spotlight");
-    glm::vec3 shipSunPos = {10 + 60, 50, 12};
-    lightModel->lights.push_back(scene::Light::makeSpotlight(shipSunPos, glm::vec3(0 + 60, 0, 7) - shipSunPos, 1, 1));
-    mainScene->addModel(lightModel);
+//    auto lightModel = std::make_shared<scene::Model>("sun spotlight");
+//    auto light = std::make_shared<scene::Light>();
+//    glm::vec3 sunPos = {10, 50, 12};
+//    lightModel->lights.push_back(scene::Light::makeSpotlight(sunPos, glm::vec3(0, 0, 7) - sunPos, 1, 1));
+//    mainScene->addModel(lightModel);
+//
+//    lightModel = std::make_shared<scene::Model>("sun spotlight");
+//    glm::vec3 shipSunPos = {10 + 60, 50, 12};
+//    lightModel->lights.push_back(scene::Light::makeSpotlight(shipSunPos, glm::vec3(0 + 60, 0, 7) - shipSunPos, 1, 1));
+//    mainScene->addModel(lightModel);
 
     lightModel = std::make_shared<scene::Model>("downlight 1");
     lightModel->lights.push_back(scene::Light::makeSpotlight({10, 0, 14}, {0, 0, -1}, 2, 1, glm::vec3(100), glm::vec3(100)));

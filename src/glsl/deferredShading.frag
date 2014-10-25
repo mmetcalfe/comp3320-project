@@ -29,8 +29,8 @@ struct Light {
     vec3 colAmbient;
     float angleConeInner;
     float angleConeOuter;
-    float fov;
 
+    bool isSpotlight;
     bool hasShadowMap;
     sampler2D texShadowMap;
     mat4 view;
@@ -122,9 +122,7 @@ vec3 eyeSpacePosFromDepth(in float depth, in vec2 texcoord) {
 }
 
 float calcSpotlightFactor(in vec3 lightVec) {
-    float spotFactor = 1.0;
-
-    if (!light.hasShadowMap)
+    if (!light.isSpotlight)
         return 1.0;
 
     float minDot = cos(light.angleConeOuter / 2.0); // TODO: precalc.

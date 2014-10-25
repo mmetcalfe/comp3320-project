@@ -22,7 +22,14 @@ namespace scene {
 
         inline void prepareTransforms() {
             lookAt(pos + dir);
-            proj = glm::perspective(fov, frameWidth / float(frameHeight), near_, far_);
+            if (useOrtho) {
+                float ratio = frameWidth / float(frameHeight);
+                float right = orthoWidth * 0.5;
+                float top = right / ratio;
+                proj = glm::ortho(-right, right, -top, top, near_, far_);
+            } else {
+                proj = glm::perspective(fov, frameWidth / float(frameHeight), near_, far_);
+            }
         }
 
         glm::vec3 pos;
@@ -34,6 +41,8 @@ namespace scene {
 
         int frameWidth = 800;
         int frameHeight = 600;
+        bool useOrtho = false;
+        float orthoWidth = 5;
 
         glm::mat4 view;
         glm::mat4 proj;
@@ -52,7 +61,14 @@ namespace scene {
             camera->fov = light.angleConeOuter;
             camera->frameWidth = frameSize;
             camera->frameHeight = frameSize;
+
+            if (light.type == Light::Type::directional) {
+                camera->useOrtho = true;
+                camera->orthoWidth = light.orthoSize;
+            }
+
             camera->prepareTransforms();
+
             return camera;
         }
 
