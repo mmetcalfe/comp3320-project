@@ -60,6 +60,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (action == GLFW_PRESS && key == GLFW_KEY_T)
         mainScene->profiler.glFinishEnabled = !mainScene->profiler.glFinishEnabled;
 
+    if (action == GLFW_PRESS && key == GLFW_KEY_SPACE)
+        mainScene->fpsMode = !mainScene->fpsMode;
+
     // previewOptions keys:
     if (action == GLFW_PRESS) {
         if (key == GLFW_KEY_GRAVE_ACCENT)
@@ -482,6 +485,10 @@ int main(int argc, char** argv) {
         mainScene->profiler.split("glfwPollEvents");
 
         mainScene->camera->processPlayerInput(window);
+        if (mainScene->fpsMode) {
+            mainScene->camera->pos.z = 6;
+            mainScene->camera->prepareTransforms();
+        }
         mainScene->profiler.split("processPlayerInput");
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)

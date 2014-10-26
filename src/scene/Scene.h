@@ -61,6 +61,8 @@ namespace scene {
             int index = 0;
         } previewOptions;
 
+        bool fpsMode = true;
+
         void renderReflectionMap(std::shared_ptr<Model> shared_ptr);
         void renderDynamicReflectionMaps();
 
