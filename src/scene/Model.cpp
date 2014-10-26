@@ -405,13 +405,13 @@ glm::mat4 Model::buildModelTransform(glm::vec3 pos, glm::vec3 dir, glm::vec3 up,
 }
 
 void Model::draw(Camera &camera, std::shared_ptr<NUGL::ShaderProgram> program, bool transparentOnly) {
-    transform = buildModelTransform(pos, dir, up, scale);
+    transform = modelTransform();
 
     drawNodeWithProgram(rootNode, transform, camera, program, transparentOnly);
 }
 
 void Model::draw(Camera &camera, std::shared_ptr<Light> light, std::shared_ptr<LightCamera> lightCamera, bool transparentOnly) {
-    transform = buildModelTransform(pos, dir, up, scale);
+    transform = modelTransform();
 
     drawNode(rootNode, transform, camera, light, lightCamera, transparentOnly);
 }

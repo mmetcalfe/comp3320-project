@@ -310,6 +310,10 @@ int main(int argc, char** argv) {
     robotModel->dir = {0, 1, 0};
     robotModel->pos = {0, 1, 0};
     robotModel->scale = glm::vec3(1);
+
+    glm::vec3 robotLightCol = glm::vec3(0.8, 0.8, 1) * 50.0f;
+    robotModel->lights.push_back(scene::Light::makeSpotlight({1.00111, 0.98452, 1.45769}, {0, 0, 1}, 2, 1, robotLightCol, robotLightCol));
+    robotModel->lights.push_back(scene::Light::makeSpotlight({-1.00111, 0.98452, 1.45769}, {0, 0, 1}, 2, 1, robotLightCol, robotLightCol));
     mainScene->addModel(robotModel);
 
 //    auto cubeModel = scene::Model::loadFromFile("assets/cube.obj");
@@ -436,6 +440,12 @@ int main(int argc, char** argv) {
             glm::vec3 lastPos = robotModel->pos;
             robotModel->pos = glm::vec3(std::cos(t / 6.), std::sin(t / 6.), 0) * radius;
             robotModel->dir = glm::normalize(robotModel->pos - lastPos);
+
+            glm::mat4 transform = robotModel->modelTransform();
+            robotModel->lights[0]->pos = glm::vec3(glm::vec4(1.00111, 0.98452, 1.45769, 1) * transform);
+            //robotModel->lights[0]->dir = glm::normalize(glm::vec3(-glm::vec4(0, 1, 0, 0) * transform));
+            robotModel->lights[1]->pos = glm::vec3(glm::vec4(-1.00111, 0.98452, 1.45769, 1) * transform);
+            //robotModel->lights[1]->dir = glm::normalize(glm::vec3(-glm::vec4(0, 1, 0, 0) * transform));
         }
 
         mainScene->render();

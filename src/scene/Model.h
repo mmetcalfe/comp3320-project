@@ -52,6 +52,9 @@ namespace scene {
         glm::mat4 transform; // Model transform generated from the above components.
 
         glm::mat4 buildModelTransform(glm::vec3 pos, glm::vec3 dir, glm::vec3 up, glm::vec3 scale);
+        glm::mat4 modelTransform() {
+            return buildModelTransform(pos, dir, up, scale);
+        }
 
         void createMeshBuffers();
 
