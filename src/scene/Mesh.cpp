@@ -97,6 +97,12 @@ void Mesh::prepareMaterialShaderProgram(std::shared_ptr<NUGL::ShaderProgram> pro
         program->setUniform("shininess", material->shininess);
     }
 
+    if (material->materialInfo.has.reflectivity && program->materialInfo.has.reflectivity) {
+        program->setUniform("reflectivity", material->reflectivity);
+    } else {
+        program->setUniformIfActive("reflectivity", 0.0f);
+    }
+
     if (material->materialInfo.has.shininessStrength && program->materialInfo.has.shininessStrength) {
         program->setUniform("shininessStrength", material->shininessStrength);
     }

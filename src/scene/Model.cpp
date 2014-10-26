@@ -177,6 +177,13 @@ Material copyAiMaterial(const std::string &fileName, const aiMaterial *srcMateri
         material.colTransparent.b = aiColTransparent.b;
     }
 
+//    float aiReflectivity;
+//    if (!srcMaterial->Get(AI_MATKEY_REFLECTIVITY, aiReflectivity)) {
+//        material.materialInfo.has.reflectivity = true;
+//        material.reflectivity = aiReflectivity;
+//        std::cerr << __FILE__ << ", " << __LINE__ << ": reflectivity " << aiReflectivity << " " << fileName << std::endl;
+//    }
+
     float aiOpacity;
     if (!srcMaterial->Get(AI_MATKEY_OPACITY, aiOpacity)) {
         material.materialInfo.has.opacity = true;
@@ -197,6 +204,12 @@ Material copyAiMaterial(const std::string &fileName, const aiMaterial *srcMateri
         material.materialInfo.has.shininessStrength = true;
         material.shininessStrength = aiShininessStrength;
     }
+
+//    float aiShininess;
+//    if (!srcMaterial->Get(AI_MATKEY_COLOR_EMISSIVE, aiShininess)) {
+//        material.materialInfo.has.shininess = true;
+//        material.shininess = aiShininess;
+//    }
 
     int aiTwoSided;
     if (!srcMaterial->Get(AI_MATKEY_TWOSIDED, aiTwoSided)) {

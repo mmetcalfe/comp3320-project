@@ -20,6 +20,8 @@ namespace scene {
         // Exponent in phong-shading.
         float shininess = 1;
 
+        float reflectivity = 0;
+
         // Scales specular color.
         float shininessStrength = 1;
 

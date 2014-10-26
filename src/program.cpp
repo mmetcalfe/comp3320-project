@@ -312,6 +312,12 @@ int main(int argc, char** argv) {
     robotModel->pos = {0, 1, 0};
     robotModel->scale = glm::vec3(1);
 
+    // Make the robot metallic:
+    for (auto material : robotModel->materials) {
+        material->materialInfo.has.reflectivity = true;
+        material->reflectivity = 1;
+    }
+
     glm::vec3 robotLightCol = glm::vec3(0.8, 0.8, 1) * 50.0f;
     robotModel->lights.push_back(scene::Light::makeSpotlight({0, 0, 0}, {0, 0, 0}, 1.5, 0.6, robotLightCol, robotLightCol));
     robotModel->lights.push_back(scene::Light::makeSpotlight({0, 0, 0}, {0, 0, 0}, 1.5, 0.6, robotLightCol, robotLightCol));
