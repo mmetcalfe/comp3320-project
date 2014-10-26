@@ -232,12 +232,12 @@ int main(int argc, char** argv) {
     // TODO: Find a way to manage texture units!
     auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE2, GL_TEXTURE_CUBE_MAP);
     cubeMap->loadCubeMap({
-            "assets/skybox_right1.png",
-            "assets/skybox_left2.png",
-            "assets/skybox_top3.png",
-            "assets/skybox_bottom4.png",
-            "assets/skybox_front5.png",
-            "assets/skybox_back6.png"
+            "assets/default_right1.png",
+            "assets/default_left2.png",
+            "assets/default_top3.png",
+            "assets/default_bottom4.png",
+            "assets/default_front5.png",
+            "assets/default_back6.png"
 
 //            "assets/PereaBeach1/posx.jpg",
 //            "assets/PereaBeach1/negx.jpg",
