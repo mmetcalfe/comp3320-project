@@ -1,0 +1,148 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[11pt]{scrartcl} % use larger type; default would be 10pt
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+\usepackage[title,titletoc,header]{appendix}
+\usepackage{multicol}
+% \usepackage{titling}
+\usepackage{longtable}
+
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage[a4paper]{geometry} % to change the page dimensions
+% \geometry{a4paper, margin=1.3in} % or letterpaper (US) or a5paper or....
+% \geometry{margin=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+
+\usepackage{pgfgantt} % gantt charts
+% \usepackage[export]{adjustbox}[2011/08/13] % For centering wide figures
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+
+
+\newcommand{\code}[1]{{\texttt{#1}}}
+\newcommand{\codefile}[1]{{\textit{#1}}}
+\newcommand{\program}[1]{\code{#1}}
+\newcommand{\taskname}[1]{{\textit{#1}}}
+
+%%% END Article customizations
+
+% \setlength{\parindent}{0pt}
+% \setlength{\parskip}{2ex plus 0.5ex minus 0.3ex}
+
+%%% The "real" document content comes below...
+
+% TODO: Catchy project title
+\title{Graphics Project Final Report}
+\subtitle{Game-engine demonstration via a dynamic space-themed environment}
+% \subtitle{A 3D testing environment for an enhanced virtual reality system}
+\author{ Mitchell Metcalfe, James Ross-Gowan }
+
+\date{\today} % Activate to display a given date or no date (if empty),
+            % otherwise the current date is printed
+\rhead{ COMP3320, Final Report, \today }
+
+\begin{document}
+% \newgeometry{top=2cm}
+\maketitle
+% \vspace{-1.5 cm}
+% \tableofcontents
+% \restoregeometry
+
+\begin{abstract}
+
+    This report summarises the final result of our graphics project. We outline
+    the initial goals and scope of the project, the changes that were made to
+    the goals and scope throughout the project, and the final scope and focus
+    of the project. Additionally, we discuss the features and effects
+    implemented in our game-engine, and the  techniques used to achieve them.
+
+\end{abstract}
+
+
+\section{Project Goals}
+
+    Our initial project proposal indicated that we would create a 3D engine and a test scene geared towards creating an immersive virtual reality system.
+    Due to time constraints, changes in the structure of our team, and an unexpected lack of access to VR equipment, we chose to shift our focus to creating a 3D game engine that would support visually impressive graphics. The test scene we have created is similar to the scene described in our initial proposal, except that we have optimised for visual quality, rather than the high frame-rate and low latency that a VR application would demand.
+
+
+\section{Final Submission}
+
+    Our final project submission and demonstration consists of a space scene
+    that has been constructed to showcase the many features of our game engine.
+
+    The scene consists of a circular room suspended in space, with a large glass tube containing a moving, reflective sphere at its centre. The room has four curved, elliptic, glass windows equally spaced around its circumfrence.
+    A complicated spaceship model
+    (sourced from \url{http://www.cgtrader.com/free-3d-models/space/spacecraft-sci-fi/eagle-5-transport})
+    has been placed outside the room, opposite one of the windows.
+    The room is illuminated by three spotlights, placed on the ceiling and inside the glass tube, and by sunlight from outside.
+    The room contains a reflective robot that moves around that floor.
+
+    % Image of the test scene
+
+    The following subsection describes the features and techniques that were used to create the test scene.
+
+    \subsection{Features Implemented}
+
+        \subsubsection{Load 3D model files}
+
+            The Assimp library was used to load 3D model and material data from
+
+        \subsubsection{Textures}
+        \subsubsection{Bump mapping}
+        \subsubsection{Environment mapped reflections}
+        \subsubsection{Skybox rendering}
+        \subsubsection{Filtered shadow maps}
+        \subsubsection{Forward and deferred rendering}
+        \subsubsection{Multiple lights}
+        \subsubsection{Point lights (without shadows)}
+        \subsubsection{Spotlights}
+        \subsubsection{Directional lights}
+        \subsubsection{Dynamic reflection mapping}
+        \subsubsection{Procedurally generated asteroids}
+        \subsubsection{Phong lighting}
+        \subsubsection{Fresnel effect for specular and environment reflections}
+        \subsubsection{Transparent meshes}
+
+\end{document}
+

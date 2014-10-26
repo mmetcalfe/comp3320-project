@@ -1,0 +1,83 @@
+\newcommand{\completedganttbar}[4][]{ %
+    \ganttbar[bar/.append style={draw=gray, fill=gray},#1]{#2}{#3}{#4} %
+}
+\newcommand{\optionalganttbar}[4][]{ %
+    \ganttbar[bar/.append style={draw=gray, pattern color=gray, pattern=north west lines},#1]{#2}{#3}{#4} %
+}
+\newcommand{\optionalganttlinkedbar}[4][]{ %
+    \ganttlinkedbar[bar/.append style={draw=gray, pattern color=gray, pattern=north west lines},#1]{#2}{#3}{#4} %
+}
+
+\begin{ganttchart}[
+        hgrid,
+        vgrid={*6{black, dotted},*1{black, dashed}}, % Note: NO SPACES!
+        title height = 1,
+        x unit=0.3cm,
+        y unit title=0.75cm,
+        y unit chart=1cm,
+        time slot format=isodate,
+        % progress=today,
+        % today=2014-8-20,
+        % bar/.append style={fill=green},
+        % bar incomplete/.append style={fill=white},
+        % group incomplete/.append style={draw=black,fill=none},
+        % progress label text={}
+        ]
+        {2014-08-4} % start date
+        {2014-11-2} % end date
+\setganttlinklabel{f-s}{}
+
+% \gantttitlecalendar*{2014-08-18}{2014-10-31}{month=name} \\
+\gantttitlecalendar*{2014-08-4}{2014-10-31}{month=name} \\
+\gantttitlecalendar*{2014-08-4}{2014-9-21}{week=2}
+\gantttitle{Mid-semester Break}{14}
+\gantttitlecalendar*{2014-10-6}{2014-11-2}{week=9}
+
+% \ganttlinkedbar{Task 2}{2014-08-20}{2014-10-5} \ganttnewline
+    
+\ganttnewline \ganttmilestone{Begin background research}{2014-08-3}
+% \ganttnewline \ganttgroup{Group 1}{2014-08-20}{2014-10-5}
+
+\ganttnewline \completedganttbar{Load and display textured 3D models}{2014-8-4}{2014-8-8}
+\ganttnewline \completedganttbar{Skybox rendering}{2014-8-9}{2014-8-13}
+\ganttnewline \completedganttbar{Static reflection mapping}{2014-8-14}{2014-8-17}
+\ganttnewline \completedganttbar{Prepare project proposal}{2014-8-18}{2014-8-19}
+
+\ganttnewline \ganttlinkedmilestone{Proposal Deadline}{2014-08-19} % 2014-08-20
+
+\ganttnewline \ganttbar{Prepare Background Presenation}{2014-8-20}{2014-8-31}
+
+\ganttnewline \ganttlinkedmilestone{Background Presenation}{2014-8-31} % 2014-09-01
+
+\ganttnewline \ganttbar{Spaceship model (interior and exterior)}{2014-08-20}{2014-09-14}
+\ganttnewline \ganttbar{Per-pixel diffuse lighting (supporting a single light)}{2014-08-20}{2014-09-14}
+\ganttnewline \ganttbar{Space skybox}{2014-9-1}{2014-09-14}
+\ganttnewline \ganttbar{Procedurally generated asteroids and planets}{2014-9-1}{2014-09-14}
+% \ganttnewline \ganttbar{Asteroids and planets}{2014-9-1}{2014-09-14}
+\ganttnewline \optionalganttbar{Displacement maps}{2014-9-1}{2014-09-14}
+
+\ganttnewline \ganttmilestone{Module 1 Deadline}{2014-09-14} % 2014-09-15
+
+\ganttnewline \ganttbar{Multiple lights}{2014-09-15}{2014-10-12}
+\ganttnewline \ganttbar{Shadow mapping with soft shadows}{2014-09-15}{2014-10-12}
+\ganttnewline \ganttbar{Dynamic reflection mapping}{2014-09-15}{2014-10-12}
+\ganttnewline \ganttbar{Robot model}{2014-09-15}{2014-10-12}
+
+\ganttnewline \ganttmilestone{Module 2 Deadline}{2014-10-12} % 2014-10-13
+
+\ganttnewline \optionalganttbar{Normal Mapping}{2014-09-15}{2014-10-26}
+\ganttnewline \optionalganttbar{Bloom lighting effects}{2014-09-15}{2014-10-26}
+\ganttnewline \optionalganttbar{Screen-space ambient occlusion}{2014-09-15}{2014-10-26}
+
+\ganttnewline \optionalganttbar{NUClear based architecture}{2014-09-15}{2014-9-28}
+% \ganttnewline \optionalganttlinkedbar[link type=f-s]{Add Oculus Rift support}{2014-9-29}{2014-10-26}
+\ganttnewline \optionalganttlinkedbar{Integrate motion tracking system}{2014-9-29}{2014-10-26}
+\ganttnewline \optionalganttbar{Add Oculus Rift support}{2014-9-29}{2014-10-26}
+
+\ganttnewline \ganttbar{Prepare Project Presenation}{2014-10-18}{2014-10-26} % 
+
+\ganttnewline \ganttmilestone{Project Deadline}{2014-10-26} % 2014-10-27
+    
+    % \ganttlink{elem2}{elem3}
+    % \ganttlink{elem3}{elem4}
+\end{ganttchart}
