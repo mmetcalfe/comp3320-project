@@ -61,6 +61,7 @@
 
 
 \newcommand{\code}[1]{{\texttt{#1}}}
+\newcommand{\libraryname}[1]{{\texttt{#1}}}
 \newcommand{\codefile}[1]{{\textit{#1}}}
 \newcommand{\program}[1]{\code{#1}}
 \newcommand{\taskname}[1]{{\textit{#1}}}
@@ -102,47 +103,201 @@
 
 \section{Project Goals}
 
-    Our initial project proposal indicated that we would create a 3D engine and a test scene geared towards creating an immersive virtual reality system.
-    Due to time constraints, changes in the structure of our team, and an unexpected lack of access to VR equipment, we chose to shift our focus to creating a 3D game engine that would support visually impressive graphics. The test scene we have created is similar to the scene described in our initial proposal, except that we have optimised for visual quality, rather than the high frame-rate and low latency that a VR application would demand.
+    Our initial project proposal indicated that we would create a 3D engine
+    using OpenGL and a test scene geared towards creating an immersive virtual
+    reality system. Due to time constraints, changes in the structure of our
+    team, and an unexpected lack of access to VR equipment, we chose to shift
+    our focus to creating a 3D game engine that would support visually
+    impressive graphics. The test scene we have created is similar to the scene
+    described in our initial proposal, except that we have optimised for visual
+    quality, rather than the high frame-rate and low latency that a VR
+    application would demand.
 
 
 \section{Final Submission}
 
-    Our final project submission and demonstration consists of a space scene
-    that has been constructed to showcase the many features of our game engine.
-
-    The scene consists of a circular room suspended in space, with a large glass tube containing a moving, reflective sphere at its centre. The room has four curved, elliptic, glass windows equally spaced around its circumfrence.
-    A complicated spaceship model
-    (sourced from \url{http://www.cgtrader.com/free-3d-models/space/spacecraft-sci-fi/eagle-5-transport})
-    has been placed outside the room, opposite one of the windows.
-    The room is illuminated by three spotlights, placed on the ceiling and inside the glass tube, and by sunlight from outside.
-    The room contains a reflective robot that moves around that floor.
+    Our final project submission and demonstration consists of our OpenGL game
+    engine code, and a space scene that has been constructed to showcase the
+    many features of our game engine. The scene consists of a circular room
+    suspended in space, with a large glass tube containing a moving, reflective
+    sphere at its centre. The room has four curved, elliptic, glass windows
+    equally spaced around its circumference. A complicated spaceship model
+    (sourced from \url{http://www.cgtrader.com/free-3d-models/space/spacecraft-
+    sci-fi/eagle-5-transport}) has been placed outside the room, opposite one
+    of the windows. The room is illuminated by three spotlights, placed on the
+    ceiling and inside the glass tube, and by sunlight from outside. The room
+    contains a reflective robot that moves around the floor.
+    A number of procedurally generated asteroids orbit the circular room.
+    The scene has a background of stars and nebulae.
 
     % Image of the test scene
 
-    The following subsection describes the features and techniques that were used to create the test scene.
+    The following subsection describes the features and techniques that were
+    used to create the test scene.
 
     \subsection{Features Implemented}
 
         \subsubsection{Load 3D model files}
 
-            The Assimp library was used to load 3D model and material data from
+            The \libraryname{Assimp} library was used to load 3D model and
+            material data from model files.
 
         \subsubsection{Textures}
+
+            Our engine can render both textured and untextured meshes.
+
+            The texture image filenames for textured materials are loaded by
+            \libraryname{Assimp}, and then \libraryname{libjpg} or
+            \libraryname{libpng} is used to load the image data before
+            supplying it to OpenGL.
+
+            Untextured meshes are supported by rendering the entire mesh in a
+            single colour.
+
+            A model can contain both textured and untextured meshes.
+
         \subsubsection{Bump mapping}
-        \subsubsection{Environment mapped reflections}
+
+            Our engine supports bump map textures that are used to perturb
+            normals during shading to simulate the interaction of lighting with
+            fine surface details.
+
+            A bump map is used to render the floor stubs
+            on the floor of the spaceship in the demonstration scene.
+
         \subsubsection{Skybox rendering}
+
+            A cube map is used to render a skybox. This gives the scene a
+            plausible backdrop, increasing realism.
+
+        \subsubsection{Environment mapped reflections}
+
+            Each object can be assigned a cubemap texture to be used as an
+            environment map for simulating reflections.
+
         \subsubsection{Filtered shadow maps}
+
+            Shadow mapping is used to render shadows. Both spotlights and
+            directional lights can use shadow maps. Spotlight shadows are not
+            supported (as their implementation is more time-consuming).
+
+            When determining the lighting contribution based on a shadow map,
+            we sample the shadow map at multiple random points uniformly
+            distributed around the actual shadow map coordinate for the point.
+            The lighting contribution for the pixel is multiplied by the
+            fraction of the sample points that were not in shadow. This has the
+            effect of smoothing the edges of the shadows - removing the obvious
+            jagged edges that result from limited shadow map resolution.
+
         \subsubsection{Forward and deferred rendering}
+
+            To support multiple lights efficiently, we implemented a deferred
+            renderer in addition to a forward renderer. When performing
+            deferred rendering, we first render the eye-space normals, albedo,
+            roughness, environment map reflection term, and depth to a set of
+            framebuffers (collectively referred to as the `Geometry Buffer' or
+            `G-Buffer'). These buffers are used as inputs to another shader
+            which is used to add the contribution of each light to the screen
+            in multiple additional render passes.
+
+            The common optimisation of rendering `light shapes' to the stencil
+            buffer before rendering lighting contributions was not implemented
+            due to time constraints. As a result, several lights must be
+            present in the scene before our deferred shading implementation
+            exhibits a clear speed advantage.
+
         \subsubsection{Multiple lights}
-        \subsubsection{Point lights (without shadows)}
-        \subsubsection{Spotlights}
-        \subsubsection{Directional lights}
+
+            Both our forward and deferred shading implementations support an
+            arbitrary number of lights in the scene. Multple lights are
+            supported by simply rendering the contribution of each light to a
+            temporary framebuffer before adding that framebuffer to the screen
+            in turn.
+
+        \subsection{Light types}
+
+            Our engine supports three types of lights:
+
+            \begin{itemize}
+
+            \item[Point lights:]
+
+                Simple point lights that emit light in all directions. These do
+                not cast shadows.
+
+            \item[Spotlights:]
+
+                Spotlights that emit a cone of light in a given direction.
+                These cast shadows and have an adjustable `inner angle', which
+                allows the light emitted to be more intense at the centre of
+                the cone, and fall off towards the edges.
+
+            \item[Directional lights:]
+
+                Defines a square region that emits light with a constant
+                direction vector - as if a light source at infinity were
+                shining through a square window. These cast shadows by using an
+                orthographic projection to render the shadow map. A directional
+                light is used to simulate sunlight in our demonstration scene.
+
+            \end{itemize}
+
         \subsubsection{Dynamic reflection mapping}
+
+            Our engine allows dynamic reflections on a per-object basis. If
+            dynamic reflections are enabled for a given object, an environment
+            map is rendered for that object centred at the object's origin.
+            This environment map is then used to calculate the reflection term
+            when shading the object.
+
+            Environment maps are rendered using the forward shading
+            implementation. All objects other than the given reflective object
+            are rendered to the environment map.
+
+            Rendering dynamic reflection maps is very slow, but significantly
+            improves the realism of reflections.
+
         \subsubsection{Procedurally generated asteroids}
+
+            The asteroids in the test scene are procedurally generated and
+            placed.
+
+            The mesh of each asteroid is generated by recursively subdividing
+            the faces of an icosahedron, while randomly perturbing the distance
+            from the icosahedron's center of each new point.
+
         \subsubsection{Phong lighting}
+
+            The Phong lighting formula is used to calculate the lighting
+            contribution from each light at each screen pixel. Each material
+            has a configurable `shininess' parameter.
+
         \subsubsection{Fresnel effect for specular and environment reflections}
-        \subsubsection{Transparent meshes}
+
+            An additional term is used in the lighting calculation to simulate
+            the `Fresnel effect', where light appears more intense when
+            reflected at glancing angles. This more accurately simulates
+            lighting on many glossy surfaces.
+
+        \subsubsection{Transparent materials}
+
+            Transparency (or, more accurately, `dissolve') is supported as a
+            material property. Transparent materials are only rendered using
+            the deferred shading implementation. To render transparent
+            materials, all fully opaque materials are first rendered to the
+            g-buffer. Then, depth writes are disabled, and for each transparent
+            mesh, the mesh is rendered to a framebuffer using the depth buffer
+            from the g-buffer, before adding that framebuffer to the screen
+            multiplied by the opacity of the material. The result is order-
+            independent transparency that looks reasonable.
+
+
+\section{Conclusion}
+
+    In summary, we created an OpenGL game-engine that supports many features
+    present in high-end game-engines. We demonstrated the features of our
+    engine by rendering a complex, dynamic, space-themed scene in real-time.
+
 
 \end{document}
 
