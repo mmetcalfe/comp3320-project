@@ -299,7 +299,19 @@ int main(int argc, char** argv) {
 //    spaceshipModel->pos = {50, 150, 30};
     spaceshipModel->scale = glm::vec3(20);
     mainScene->addModel(spaceshipModel);
-//
+
+    auto robotModel = scene::Model::loadFromFile("assets/graph-robot.obj");
+    robotModel->flatProgram = flatProgram;
+    robotModel->textureProgram = textureProgram;
+    robotModel->environmentMapProgram = reflectProgram;
+    robotModel->setEnvironmentMap(cubeMap);
+    robotModel->createMeshBuffers();
+    robotModel->createVertexArrays();
+    robotModel->dir = {0, 1, 0};
+    robotModel->pos = {0, 1, 0};
+    robotModel->scale = glm::vec3(1);
+    mainScene->addModel(robotModel);
+
 //    auto cubeModel = scene::Model::loadFromFile("assets/cube.obj");
 //    cubeModel->flatProgram = flatProgram;
 //    cubeModel->textureProgram = textureProgram;
@@ -415,6 +427,15 @@ int main(int argc, char** argv) {
             pos = rot * pos;
             asteroid->pos = glm::vec3(pos.x, pos.y, pos.z) * radius;
             asteroid->dir = glm::vec3(std::sin(k*t*5), std::cos(k*t*5), 0);
+        }
+
+        // Robot movement:
+        {
+            float t = glfwGetTime();
+            float radius = 11. + (std::sin(t / 1.5) * 3.);
+            glm::vec3 lastPos = robotModel->pos;
+            robotModel->pos = glm::vec3(std::cos(t / 6.), std::sin(t / 6.), 0) * radius;
+            robotModel->dir = glm::normalize(robotModel->pos - lastPos);
         }
 
         mainScene->render();
