@@ -31,6 +31,7 @@ struct Light {
     float angleConeOuter;
 
     bool isSpotlight;
+    bool isDirectional;
     bool hasShadowMap;
     sampler2D texShadowMap;
     mat4 view;
@@ -88,15 +89,17 @@ float doShadowMapping(in vec4 eyeSpacePosition) {
         lightVisibility = clamp(lightVisibility, 0.0, 1.0);
 
         // Apply the view frustum:
-        float upper = 1;
-        float lower = 0;
-        if (shadowLookup.x < lower || shadowLookup.x > upper ||
-                shadowLookup.y < lower || shadowLookup.y > upper
-                || shadowLookup.z > upper // || shadowLookup.z < lower
-                ) {
-            lightVisibility = 0;
-        } else if (shadowLookup.z < lower) {
-            lightVisibility = 1;
+        if (!light.isDirectional) {
+            float upper = 1;
+            float lower = 0;
+            if (shadowLookup.x < lower || shadowLookup.x > upper ||
+                    shadowLookup.y < lower || shadowLookup.y > upper
+                    || shadowLookup.z > upper // || shadowLookup.z < lower
+                    ) {
+                lightVisibility = 0;
+            } else if (shadowLookup.z < lower) {
+                lightVisibility = 1;
+            }
         }
     }
 
@@ -163,8 +166,15 @@ void main() {
 
     // Normal and light vectors:
     vec3 normal = normalize(eyeSpaceNormal.xyz);
-    vec3 lightVecRaw = eyeSpacePosition.xyz - (view * vec4(light.pos, 1)).xyz;
-    vec3 lightVec = normalize(lightVecRaw);
+    vec3 lightVecRaw;
+    vec3 lightVec;
+    if (!light.isDirectional) {
+        lightVecRaw = eyeSpacePosition.xyz - (view * vec4(light.pos, 1)).xyz;
+        lightVec = normalize(lightVecRaw);
+    } else {
+        lightVecRaw = (view * vec4(light.dir, 0)).xyz;
+        lightVec = normalize(lightVecRaw);
+    }
 
     // Don't show lighting on surfaces that are facing the wrong way:
     float lightDot = -dot(lightVec, normal);

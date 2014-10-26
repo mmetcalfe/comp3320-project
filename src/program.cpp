@@ -208,30 +208,21 @@ int main(int argc, char** argv) {
     auto light = std::make_shared<scene::Light>();
     glm::vec3 sunDir = glm::normalize(glm::vec3(-10, -50, -5));
     glm::vec3 sunPos = glm::vec3(30, 50, 12) + sunDir * 0.0f;
-    lightModel->lights.push_back(scene::Light::makeDirectional(sunPos, sunDir, 150));
+    lightModel->lights.push_back(scene::Light::makeDirectional(sunPos, sunDir, 125));
     mainScene->addModel(lightModel);
 
-//    auto lightModel = std::make_shared<scene::Model>("sun spotlight");
-//    auto light = std::make_shared<scene::Light>();
-//    glm::vec3 sunPos = {10, 50, 12};
-//    lightModel->lights.push_back(scene::Light::makeSpotlight(sunPos, glm::vec3(0, 0, 7) - sunPos, 1, 1));
-//    mainScene->addModel(lightModel);
-//
-//    lightModel = std::make_shared<scene::Model>("sun spotlight");
-//    glm::vec3 shipSunPos = {10 + 60, 50, 12};
-//    lightModel->lights.push_back(scene::Light::makeSpotlight(shipSunPos, glm::vec3(0 + 60, 0, 7) - shipSunPos, 1, 1));
-//    mainScene->addModel(lightModel);
-
+    glm::vec3 downlightCol = glm::vec3(1, 1, 0.4) * 100.0f;
+    glm::vec3 tubelightCol = glm::vec3(0.4, 0.4, 1) * 50.0f;
     lightModel = std::make_shared<scene::Model>("downlight 1");
-    lightModel->lights.push_back(scene::Light::makeSpotlight({10, 0, 14}, {0, 0, -1}, 2, 1, glm::vec3(100), glm::vec3(100)));
+    lightModel->lights.push_back(scene::Light::makeSpotlight({10, 0, 14}, {0, 0, -1}, 2, 1, downlightCol, downlightCol));
     mainScene->addModel(lightModel);
 
     lightModel = std::make_shared<scene::Model>("downlight 2");
-    lightModel->lights.push_back(scene::Light::makeSpotlight({-10, 0, 14}, {0, 0, -1}, 2, 1, glm::vec3(100), glm::vec3(100)));
+    lightModel->lights.push_back(scene::Light::makeSpotlight({-10, 0, 14}, {0, 0, -1}, 2, 1, downlightCol, downlightCol));
     mainScene->addModel(lightModel);
 
     lightModel = std::make_shared<scene::Model>("tube light");
-    light = scene::Light::makeSpotlight({0, 0, 0}, {0, 0, 1}, 1.5, 1.5, glm::vec3(50), glm::vec3(50));
+    light = scene::Light::makeSpotlight({0, 0, 0}, {0, 0, 1}, 1.5, 1.5, tubelightCol, tubelightCol);
     light->colAmbient = glm::vec3(0.1);
     lightModel->lights.push_back(light);
     mainScene->addModel(lightModel);
@@ -333,9 +324,9 @@ int main(int argc, char** argv) {
     asteroidModel->flatProgram = flatProgram;
     asteroidModel->textureProgram = textureProgram;
     asteroidModel->environmentMapProgram = reflectProgram;
-//    asteroidModel->setEnvironmentMap(cubeMap);
-    asteroidModel->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
-    asteroidModel->dynamicReflections = true;
+    asteroidModel->setEnvironmentMap(cubeMap);
+//    asteroidModel->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
+//    asteroidModel->dynamicReflections = true;
     asteroidModel->createMeshBuffers();
     asteroidModel->createVertexArrays();
     asteroidModel->pos = {0, 0, 5};

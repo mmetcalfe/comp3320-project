@@ -506,6 +506,7 @@ void Model::setLightUniformsOnShaderProgram(std::shared_ptr<NUGL::ShaderProgram>
             program->setUniform("light.angleConeInner", light->angleConeInner);
             program->setUniform("light.angleConeOuter", light->angleConeOuter);
             program->setUniformIfActive("light.isSpotlight", light->type == Light::Type::spot);
+            program->setUniformIfActive("light.isDirectional", light->type == Light::Type::directional);
 
             if (program->uniformIsActive("light.texShadowMap")) {
                 program->use();
