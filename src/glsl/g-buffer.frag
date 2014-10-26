@@ -126,11 +126,10 @@ void main() {
 
     if (hasTexEnvironmentMap && shininess > 0) {
         vec3 viewReflect = reflect(incident, normal);
-//        float phongViewSpecular = phong(incident, viewReflect, shininess);
         vec4 sampleCoord = viewInverse * vec4(viewReflect, 0);
         sampleCoord = vec4(sampleCoord.x, sampleCoord.z, -sampleCoord.y, 1);
         vec4 reflectCol = texture(texEnvironmentMap, sampleCoord.xyz);
-//        outEnvMapColSpecIntensity.rgb = reflectCol.rgb * colSpecular; // * phongViewSpecular;
+//        outEnvMapColSpecIntensity.rgb = reflectCol.rgb; // * colSpecular;
 
         // Based on: http://en.wikibooks.org/wiki/GLSL_Programming/Unity/Specular_Highlights_at_Silhouettes
         float fresnelFactor = pow(1.0 - max(0.0, dot(normal, -incident)), 2.0);

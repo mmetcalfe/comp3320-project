@@ -328,7 +328,8 @@ int main(int argc, char** argv) {
 //    cubeModel->materials[0]->colSpecular = glm::vec3(1);
 //    mainScene->addModel(cubeModel);
 
-    auto asteroidModel = scene::createAsteroid(0.3, 0.2, 4);
+//    auto asteroidModel = scene::createAsteroid(0.3, 0.2, 4);
+    auto asteroidModel = scene::createAsteroid(0, 0, 4);
     asteroidModel->flatProgram = flatProgram;
     asteroidModel->textureProgram = textureProgram;
     asteroidModel->environmentMapProgram = reflectProgram;
@@ -338,7 +339,8 @@ int main(int argc, char** argv) {
     asteroidModel->createMeshBuffers();
     asteroidModel->createVertexArrays();
     asteroidModel->pos = {0, 0, 5};
-    asteroidModel->scale = glm::vec3(1);
+//    asteroidModel->scale = glm::vec3(1);
+    asteroidModel->scale = glm::vec3(1.5);
     mainScene->addModel(asteroidModel);
 
     std::vector<std::shared_ptr<scene::Model>> asteroids;
@@ -412,7 +414,7 @@ int main(int argc, char** argv) {
             float k = rand() / (float)RAND_MAX;
 
             float t = glfwGetTime() + k * 1097;
-            float radius = (40 + k * 160);
+            float radius = (80 + k * 80);
             float tilt = ((k - 0.5) + 0.5) * 0.5;
             float speed = 1600.0 / (radius * radius);
 
@@ -423,7 +425,6 @@ int main(int argc, char** argv) {
             asteroid->pos = glm::vec3(pos.x, pos.y, pos.z) * radius;
             asteroid->dir = glm::vec3(std::sin(k*t*5), std::cos(k*t*5), 0);
         }
-
 
         mainScene->render();
 

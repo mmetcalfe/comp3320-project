@@ -43,6 +43,7 @@ namespace scene {
         bool dynamicReflections = false;
         std::shared_ptr<NUGL::Texture> texEnvironmentMap;
 
+        bool hidden = false;
 
         glm::vec3 pos = {0, 0, 0}; // The object's position in world space.
         glm::vec3 dir = {1, 0, 0}; // The object's x-axis in world space.

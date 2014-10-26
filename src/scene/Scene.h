@@ -20,7 +20,7 @@ namespace scene {
                 glm::ivec2 framebufferSize);
 
         void render();
-        void forwardRender();
+        void forwardRender(std::shared_ptr<NUGL::Framebuffer> target, glm::ivec2 targetSize, std::shared_ptr<Camera> camera);
         void deferredRender();
 
         void addModel(std::shared_ptr<Model>);
@@ -36,10 +36,10 @@ namespace scene {
          * Weak pointers to all lights attached to all models in the scene.
          */
         std::vector<std::weak_ptr<Light>> lights;
-        std::unique_ptr<PlayerCamera> camera;
+        std::shared_ptr<PlayerCamera> camera;
         std::unique_ptr<NUGL::Framebuffer> framebuffer;
         std::unique_ptr<NUGL::Framebuffer> shadowMapFramebuffer;
-        std::unique_ptr<NUGL::Framebuffer> reflectionFramebuffer;
+        std::shared_ptr<NUGL::Framebuffer> reflectionFramebuffer;
         std::unique_ptr<NUGL::Framebuffer> gBuffer;
         std::unique_ptr<utility::PostprocessingScreen> screen;
         std::shared_ptr<NUGL::ShaderProgram> shadowMapProgram;
@@ -57,17 +57,17 @@ namespace scene {
         void renderReflectionMap(std::shared_ptr<Model> shared_ptr);
         void renderDynamicReflectionMaps();
 
-        void drawModels(std::shared_ptr<Light> sharedLight, std::shared_ptr<LightCamera> lightCamera, bool transparentOnly = false);
+        void drawModels(std::shared_ptr<Light> sharedLight, std::shared_ptr<LightCamera> lightCamera, bool transparentOnly, Camera &camera);
 
         std::shared_ptr<LightCamera> prepareShadowMap(int lightNum, std::shared_ptr<Light> sharedLight);
 
-        void addFramebufferToScreen();
+        void addFramebufferToTarget(glm::ivec2 targetSize, std::shared_ptr<NUGL::Framebuffer> target = nullptr, float gridDim = 1, float gridX = 0, float gridY = 0);
 
         void drawShadowMapThumbnail(int lightNum);
 
         void prepareGBuffer(glm::ivec2 ivec2);
 
-        void drawModels(std::shared_ptr<NUGL::ShaderProgram> shared_ptr);
+        void drawModels(std::shared_ptr<NUGL::ShaderProgram> shared_ptr, Camera &camera);
 
         void drawGBufferThumbnails();
     };

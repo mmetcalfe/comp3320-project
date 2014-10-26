@@ -137,15 +137,16 @@ namespace scene {
     }
 
     void Scene::renderReflectionMap(std::shared_ptr<Model> model) {
-        Camera mapCamera;
+        std::shared_ptr<Camera> mapCamera = std::make_shared<Camera>();
         glm::vec4 pos = model->transform * glm::vec4(0, 0, 0, 1);
-        mapCamera.pos = {pos.x, pos.y, pos.z};
-        mapCamera.dir = {0, -1, 0};
-        mapCamera.up = {0, 0, -1};
-        mapCamera.fov = M_PI_2;
-        mapCamera.frameWidth = reflectionMapSize;
-        mapCamera.frameHeight = reflectionMapSize;
-        mapCamera.prepareTransforms();
+        mapCamera->pos = {pos.x, pos.y, pos.z};
+        mapCamera->dir = {0, -1, 0};
+        mapCamera->up = {0, 0, -1};
+        mapCamera->fov = M_PI_2;
+        mapCamera->frameWidth = reflectionMapSize;
+        mapCamera->frameHeight = reflectionMapSize;
+        mapCamera->near_ = 1;
+        mapCamera->prepareTransforms();
 
         auto sharedLight = std::make_shared<scene::Light>();
         sharedLight->type = scene::Light::Type::point;
@@ -170,21 +171,30 @@ namespace scene {
 
         for (auto params : directions) {
             GLenum target;
-            std::tie(target, mapCamera.dir, mapCamera.up) = params;
+            std::tie(target, mapCamera->dir, mapCamera->up) = params;
 
-            mapCamera.prepareTransforms();
+            mapCamera->prepareTransforms();
             reflectionFramebuffer->attach(model->texEnvironmentMap, target);
 
             reflectionFramebuffer->bind();
-            glViewport(0, 0, mapCamera.frameWidth, mapCamera.frameHeight);
-
+            glViewport(0, 0, mapCamera->frameWidth, mapCamera->frameHeight);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            for (auto drawModel : models) {
-                if (model == drawModel)
-                    continue;
+            bool forwardRenderReflections = true;
+            if (forwardRenderReflections) {
+                model->hidden = true;
+                profiler.disable();
+                forwardRender(reflectionFramebuffer, {mapCamera->frameWidth, mapCamera->frameHeight}, mapCamera);
+                profiler.enable();
+                model->hidden = false;
 
-                drawModel->draw(mapCamera, sharedLight, nullptr);
+            } else {
+                for (auto drawModel : models) {
+                    if (model == drawModel)
+                        continue;
+
+                    drawModel->draw(*mapCamera, sharedLight, nullptr);
+                }
             }
         }
     }
@@ -203,7 +213,7 @@ namespace scene {
         if (useDeferredRendering)
             deferredRender();
         else
-            forwardRender();
+            forwardRender(nullptr, framebufferSize, camera);
 
         profiler.printEvery(1);
     }
@@ -226,7 +236,7 @@ namespace scene {
         glViewport(0, 0, camera->frameWidth, camera->frameHeight);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
-        drawModels(gBufferProgram);
+        drawModels(gBufferProgram, *camera);
         glDisable(GL_CULL_FACE);
 
         profiler.split("render g-buffer");
@@ -280,7 +290,7 @@ namespace scene {
             profiler.split("deferred light ", lightNum);
 
 //            // Add the light's contribution to the screen:
-//            addFramebufferToScreen();
+//            addFramebufferToTarget();
 
             // Render a tiny shadow map:
             if (sharedLight->type == scene::Light::Type::spot || sharedLight->type == scene::Light::Type::directional)
@@ -317,7 +327,7 @@ namespace scene {
 //            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             checkForAndPrintGLError(__FILE__, __LINE__);
 
-            drawModels(sharedLight, lightCamera, true);
+            drawModels(sharedLight, lightCamera, true, *camera);
             glDisable(GL_BLEND);
 
             profiler.split("transparent: light ", lightNum);
@@ -333,13 +343,13 @@ namespace scene {
 
         profiler.split("deferred lighting");
 
-        addFramebufferToScreen();
+        addFramebufferToTarget(framebufferSize, nullptr, 2, 0.5, 0.5);
 
         // Render g-buffer thumbnails:
         drawGBufferThumbnails();
     }
 
-    void Scene::forwardRender() {
+    void Scene::forwardRender(std::shared_ptr<NUGL::Framebuffer> target, glm::ivec2 targetSize, std::shared_ptr<Camera> camera) {
         int lightNum = 1;
         for (auto light : lights) {
             auto sharedLight = light.lock();
@@ -350,12 +360,12 @@ namespace scene {
             framebuffer->bind();
             glViewport(0, 0, camera->frameWidth, camera->frameHeight);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            drawModels(sharedLight, lightCamera);
+            drawModels(sharedLight, lightCamera, false, *camera);
 
             profiler.split("framebuffer ", lightNum);
 
             // Add the light's contribution to the screen:
-            addFramebufferToScreen();
+            addFramebufferToTarget(targetSize, target);
 
             // Render a tiny shadow map:
             drawShadowMapThumbnail(lightNum - 1);
@@ -395,19 +405,23 @@ namespace scene {
         screen->removeTexture();
     }
 
-    void Scene::addFramebufferToScreen() {
-        NUGL::Framebuffer::useDefault();
+    void Scene::addFramebufferToTarget(glm::ivec2 targetSize, std::shared_ptr<NUGL::Framebuffer> target, float gridDim, float gridX, float gridY) {
+        if (target == nullptr) {
+            NUGL::Framebuffer::useDefault();
+        } else {
+            target->bind();
+        }
+
+//        glViewport(0, 0, targetSize.x, targetSize.y);
         glViewport(0, 0, framebufferSize.x, framebufferSize.y);
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-        screen->setTexture(framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
-        if (useDeferredRendering)
-            screen->render(2, 0.5, 0.5);
-        else
-            screen->render();
-//        screen->render(4, 3, 1);
-        screen->removeTexture();
 
+        screen->setTexture(framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
+
+        screen->render(gridDim, gridX, gridY);
+
+        screen->removeTexture();
         glDisable(GL_BLEND);
     }
 
@@ -441,15 +455,21 @@ namespace scene {
         return lightCamera;
     }
 
-    void Scene::drawModels(std::shared_ptr<Light> sharedLight, std::shared_ptr<LightCamera> lightCamera, bool transparentOnly) {
+    void Scene::drawModels(std::shared_ptr<Light> sharedLight, std::shared_ptr<LightCamera> lightCamera, bool transparentOnly, Camera &camera) {
         for (auto model : models) {
-            model->draw(*camera, sharedLight, lightCamera, transparentOnly);
+            if (model->hidden)
+                continue;
+
+            model->draw(camera, sharedLight, lightCamera, transparentOnly);
         }
     }
 
-    void Scene::drawModels(std::shared_ptr<NUGL::ShaderProgram> program) {
+    void Scene::drawModels(std::shared_ptr<NUGL::ShaderProgram> program, Camera &camera) {
         for (auto model : models) {
-            model->draw(*camera, program);
+            if (model->hidden)
+                continue;
+
+            model->draw(camera, program);
         }
     }
 
@@ -462,12 +482,10 @@ namespace scene {
             if (model->texEnvironmentMap == nullptr) {
                 auto tex = createCubeMapTexture(reflectionMapSize);
                 model->setEnvironmentMap(move(tex));
-                profiler.split("create reflection map ", refMapNum);
             }
 
             renderReflectionMap(model);
             profiler.split("reflection map ", refMapNum++);
-//            model->setEnvironmentMap(reflectionFramebuffer->textureAttachment);
         }
     }
 

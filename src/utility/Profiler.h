@@ -13,6 +13,7 @@ public:
         this->sampleLimit = sampleLimit;
         lastPrint = std::chrono::system_clock::now();
         glFinishEnabled = true;
+        disabled = false;
         reset();
     };
 
@@ -20,7 +21,19 @@ public:
         start = std::chrono::system_clock::now();
     }
 
+    inline void disable() {
+        disabled = true;
+    }
+
+    inline void enable() {
+        disabled = false;
+    }
+
+
     inline void split(std::string label) {
+        if (disabled)
+            return;
+
         // Wait until the effects of all previously called GL commands are complete.
         if (glFinishEnabled)
             glFinish();
@@ -92,4 +105,5 @@ public:
     unsigned sampleLimit;
     std::map<std::string, std::deque<std::chrono::microseconds>> durationMap;
     bool glFinishEnabled;
+    bool disabled = false;
 };
