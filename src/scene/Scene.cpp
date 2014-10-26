@@ -169,7 +169,14 @@ namespace scene {
                 std::make_tuple<GLenum, glm::vec3, glm::vec3>(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, { 0,  1,  0}, { 0,  0, -1}),
         };
 
-        for (auto params : directions) {
+//        for (int i = 0; i < directions.size(); i++) {
+//            auto params = directions[i];
+
+            // Render one face each frame:
+            static int i = 0;
+            i = (i + 1) % directions.size();
+            auto params = directions[i];
+
             GLenum target;
             std::tie(target, mapCamera->dir, mapCamera->up) = params;
 
@@ -196,7 +203,7 @@ namespace scene {
                     drawModel->draw(*mapCamera, sharedLight, nullptr);
                 }
             }
-        }
+//        }
     }
 
     void Scene::render() {
@@ -485,6 +492,7 @@ namespace scene {
             }
 
             renderReflectionMap(model);
+
             profiler.split("reflection map ", refMapNum++);
         }
     }

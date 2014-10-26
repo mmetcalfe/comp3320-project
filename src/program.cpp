@@ -228,7 +228,6 @@ int main(int argc, char** argv) {
     mainScene->addModel(lightModel);
 
 
-
     // TODO: Find a way to manage texture units!
     auto cubeMap = std::make_shared<NUGL::Texture>(GL_TEXTURE2, GL_TEXTURE_CUBE_MAP);
     cubeMap->loadCubeMap({
@@ -304,7 +303,9 @@ int main(int argc, char** argv) {
     robotModel->flatProgram = flatProgram;
     robotModel->textureProgram = textureProgram;
     robotModel->environmentMapProgram = reflectProgram;
-    robotModel->setEnvironmentMap(cubeMap);
+//    robotModel->setEnvironmentMap(cubeMap);
+    robotModel->setEnvironmentMap(nullptr); // TODO: Improve environment map management.
+    robotModel->dynamicReflections = true;
     robotModel->createMeshBuffers();
     robotModel->createVertexArrays();
     robotModel->dir = {0, 1, 0};
@@ -335,8 +336,8 @@ int main(int argc, char** argv) {
 //    cubeModel->materials[0]->colSpecular = glm::vec3(1);
 //    mainScene->addModel(cubeModel);
 
-//    auto asteroidModel = scene::createAsteroid(0.3, 0.2, 4);
-    auto asteroidModel = scene::createAsteroid(0, 0, 4);
+    auto asteroidModel = scene::createAsteroid(0.3, 0.2, 4);
+//    auto asteroidModel = scene::createAsteroid(0, 0, 4);
     asteroidModel->flatProgram = flatProgram;
     asteroidModel->textureProgram = textureProgram;
     asteroidModel->environmentMapProgram = reflectProgram;
@@ -346,8 +347,8 @@ int main(int argc, char** argv) {
     asteroidModel->createMeshBuffers();
     asteroidModel->createVertexArrays();
     asteroidModel->pos = {0, 0, 5};
-//    asteroidModel->scale = glm::vec3(1);
-    asteroidModel->scale = glm::vec3(1.5);
+    asteroidModel->scale = glm::vec3(1.2);
+//    asteroidModel->scale = glm::vec3(1.5);
     mainScene->addModel(asteroidModel);
 
     std::vector<std::shared_ptr<scene::Model>> asteroids;
