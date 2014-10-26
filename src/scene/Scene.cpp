@@ -300,8 +300,10 @@ namespace scene {
 //            addFramebufferToTarget();
 
             // Render a tiny shadow map:
-            if (sharedLight->type == scene::Light::Type::spot || sharedLight->type == scene::Light::Type::directional)
+            if (!previewOptions.disable && (sharedLight->type == scene::Light::Type::spot ||
+                    sharedLight->type == scene::Light::Type::directional)) {
                 drawShadowMapThumbnail(lightNum - 1);
+            }
 
             profiler.split("drawShadowMapThumbnail ", lightNum);
             lightNum++;
@@ -350,10 +352,16 @@ namespace scene {
 
         profiler.split("deferred lighting");
 
-        addFramebufferToTarget(framebufferSize, nullptr, 2, 0.5, 0.5);
+        if (previewOptions.disable) {
+            addFramebufferToTarget(framebufferSize, nullptr);
+        } else {
+            if (!previewOptions.fullscreen)
+                addFramebufferToTarget(framebufferSize, nullptr, 2, 0.5, 0.5);
+        }
 
         // Render g-buffer thumbnails:
-        drawGBufferThumbnails();
+        if (!previewOptions.disable)
+            drawGBufferThumbnails();
     }
 
     void Scene::forwardRender(std::shared_ptr<NUGL::Framebuffer> target, glm::ivec2 targetSize, std::shared_ptr<Camera> camera) {
@@ -375,7 +383,8 @@ namespace scene {
             addFramebufferToTarget(targetSize, target);
 
             // Render a tiny shadow map:
-            drawShadowMapThumbnail(lightNum - 1);
+            if (!previewOptions.disable)
+                drawShadowMapThumbnail(lightNum - 1);
 
             profiler.split("light ", lightNum);
             lightNum++;
@@ -391,8 +400,12 @@ namespace scene {
             auto tex = pair.second;
 
             screen->setTexture(tex);
-            screen->render(4, texNum, 0);
-//            screen->renderAlpha(4, texNum, 1);
+            if (previewOptions.fullscreen) {
+                if (!previewOptions.shadowMap && previewOptions.index == texNum)
+                    screen->render();
+            } else {
+                screen->render(4, texNum, 0);
+            }
             screen->removeTexture();
 
             texNum++;
@@ -407,8 +420,14 @@ namespace scene {
 
         screen->setTexture(shadowMapFramebuffer->textureAttachments[GL_DEPTH_ATTACHMENT]);
 
-        int gridSize = std::max(int(lights.size()), 4);
-        screen->render(gridSize, lightNum, gridSize - 1);
+        if (previewOptions.fullscreen && previewOptions.shadowMap) {
+            if (previewOptions.index == lightNum)
+                screen->render();
+        } else {
+            int gridSize = std::max(int(lights.size()), 4);
+            screen->render(gridSize, lightNum, gridSize - 1);
+        }
+
         screen->removeTexture();
     }
 

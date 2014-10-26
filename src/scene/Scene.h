@@ -54,6 +54,13 @@ namespace scene {
         glm::ivec2 framebufferSize = {800, 600};
         bool useDeferredRendering = true;
 
+        struct {
+            bool disable = true;
+            bool fullscreen = false;
+            bool shadowMap = false;
+            int index = 0;
+        } previewOptions;
+
         void renderReflectionMap(std::shared_ptr<Model> shared_ptr);
         void renderDynamicReflectionMaps();
 

@@ -59,6 +59,21 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
     if (action == GLFW_PRESS && key == GLFW_KEY_T)
         mainScene->profiler.glFinishEnabled = !mainScene->profiler.glFinishEnabled;
+
+    // previewOptions keys:
+    if (action == GLFW_PRESS) {
+        if (key == GLFW_KEY_GRAVE_ACCENT)
+            mainScene->previewOptions.disable = !mainScene->previewOptions.disable;
+
+        if (key == GLFW_KEY_EQUAL)
+            mainScene->previewOptions.fullscreen = !mainScene->previewOptions.fullscreen;
+
+        if (key == GLFW_KEY_MINUS)
+            mainScene->previewOptions.shadowMap = !mainScene->previewOptions.shadowMap;
+
+        if (key >= GLFW_KEY_0 && key <= GLFW_KEY_9)
+            mainScene->previewOptions.index = key - GLFW_KEY_0 - 1;
+    }
 }
 
 int main(int argc, char** argv) {
