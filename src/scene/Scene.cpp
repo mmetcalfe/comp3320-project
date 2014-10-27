@@ -187,7 +187,6 @@ namespace scene {
             glViewport(0, 0, mapCamera->frameWidth, mapCamera->frameHeight);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-            bool forwardRenderReflections = true;
             if (forwardRenderReflections) {
                 model->hidden = true;
                 profiler.disable();

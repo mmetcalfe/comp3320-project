@@ -53,6 +53,7 @@ namespace scene {
         glm::ivec2 windowSize = {800, 600};
         glm::ivec2 framebufferSize = {800, 600};
         bool useDeferredRendering = true;
+        bool forwardRenderReflections = false;
 
         struct {
             bool disable = true;

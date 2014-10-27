@@ -63,6 +63,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (action == GLFW_PRESS && key == GLFW_KEY_SPACE)
         mainScene->fpsMode = !mainScene->fpsMode;
 
+    if (action == GLFW_PRESS && key == GLFW_KEY_R)
+        mainScene->forwardRenderReflections = !mainScene->forwardRenderReflections;
+
     // previewOptions keys:
     if (action == GLFW_PRESS) {
         if (key == GLFW_KEY_GRAVE_ACCENT)
@@ -222,15 +225,17 @@ int main(int argc, char** argv) {
     mainScene->deferredShadingProgram = deferredShadingProgram;
 
     // Add some lights:
+    glm::vec3 sunlightCol = glm::vec3(1, 1, 0.7);
+    glm::vec3 downlightCol = glm::vec3(1, 1, 1) * 100.0f;
+    glm::vec3 tubelightCol = glm::vec3(0.4, 0.4, 1) * 50.0f;
+
     auto lightModel = std::make_shared<scene::Model>("sun");
     auto light = std::make_shared<scene::Light>();
     glm::vec3 sunDir = glm::normalize(glm::vec3(-10, -50, -5));
     glm::vec3 sunPos = glm::vec3(30, 50, 12) + sunDir * 0.0f;
-    lightModel->lights.push_back(scene::Light::makeDirectional(sunPos, sunDir, 125));
+    lightModel->lights.push_back(scene::Light::makeDirectional(sunPos, sunDir, 125, sunlightCol, sunlightCol));
     mainScene->addModel(lightModel);
 
-    glm::vec3 downlightCol = glm::vec3(1, 1, 0.4) * 100.0f;
-    glm::vec3 tubelightCol = glm::vec3(0.4, 0.4, 1) * 50.0f;
     lightModel = std::make_shared<scene::Model>("downlight 1");
     lightModel->lights.push_back(scene::Light::makeSpotlight({10, 0, 14}, {0, 0, -1}, 2, 1, downlightCol, downlightCol));
     mainScene->addModel(lightModel);
@@ -340,7 +345,7 @@ int main(int argc, char** argv) {
         material->reflectivity = 1;
     }
 
-    glm::vec3 robotLightCol = glm::vec3(0.8, 0.8, 1) * 50.0f;
+    glm::vec3 robotLightCol = glm::vec3(0.6, 0.6, 1) * 50.0f;
     robotModel->lights.push_back(scene::Light::makeSpotlight({0, 0, 0}, {0, 0, 0}, 1.5, 0.6, robotLightCol, robotLightCol));
     robotModel->lights.push_back(scene::Light::makeSpotlight({0, 0, 0}, {0, 0, 0}, 1.5, 0.6, robotLightCol, robotLightCol));
     mainScene->addModel(robotModel);
