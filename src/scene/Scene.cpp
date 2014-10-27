@@ -277,34 +277,37 @@ namespace scene {
         for (auto light : lights) {
             auto sharedLight = light.lock();
 
-            auto lightCamera = prepareShadowMap(lightNum, sharedLight);
+            if (sharedLight->enabled) {
+                auto lightCamera = prepareShadowMap(lightNum, sharedLight);
 
-            framebuffer->bind();
-            glViewport(0, 0, camera->frameWidth, camera->frameHeight);
+                framebuffer->bind();
+                glViewport(0, 0, camera->frameWidth, camera->frameHeight);
 //            glClear(GL_COLOR_BUFFER_BIT);
 
-            gBuffer->bindTextures();
-            screen->setTexture(framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
+                gBuffer->bindTextures();
+                screen->setTexture(framebuffer->textureAttachments[GL_COLOR_ATTACHMENT0]);
 
-            Model::setLightUniformsOnShaderProgram(deferredShadingProgram, sharedLight, lightCamera);
+                Model::setLightUniformsOnShaderProgram(deferredShadingProgram, sharedLight, lightCamera);
 
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-            screen->render(deferredShadingProgram);
-            glDisable(GL_BLEND);
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+                screen->render(deferredShadingProgram);
+                glDisable(GL_BLEND);
 
-            profiler.split("deferred light ", lightNum);
+                profiler.split("deferred light ", lightNum);
 
 //            // Add the light's contribution to the screen:
 //            addFramebufferToTarget();
 
-            // Render a tiny shadow map:
-            if (!previewOptions.disable && (sharedLight->type == scene::Light::Type::spot ||
-                    sharedLight->type == scene::Light::Type::directional)) {
-                drawShadowMapThumbnail(lightNum - 1);
+                // Render a tiny shadow map:
+                if (!previewOptions.disable && (sharedLight->type == scene::Light::Type::spot ||
+                        sharedLight->type == scene::Light::Type::directional)) {
+                    drawShadowMapThumbnail(lightNum - 1);
+                }
+
+                profiler.split("drawShadowMapThumbnail ", lightNum);
             }
 
-            profiler.split("drawShadowMapThumbnail ", lightNum);
             lightNum++;
         }
 
@@ -325,20 +328,23 @@ namespace scene {
         for (auto light : lights) {
             auto sharedLight = light.lock();
 
-            auto lightCamera = prepareShadowMap(lightNum, sharedLight);
+            if (sharedLight->enabled) {
+                auto lightCamera = prepareShadowMap(lightNum, sharedLight);
 
-            framebuffer->bind();
-            glViewport(0, 0, camera->frameWidth, camera->frameHeight);
+                framebuffer->bind();
+                glViewport(0, 0, camera->frameWidth, camera->frameHeight);
 
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 //            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            checkForAndPrintGLError(__FILE__, __LINE__);
+                checkForAndPrintGLError(__FILE__, __LINE__);
 
-            drawModels(sharedLight, lightCamera, true, *camera);
-            glDisable(GL_BLEND);
+                drawModels(sharedLight, lightCamera, true, *camera);
+                glDisable(GL_BLEND);
 
-            profiler.split("transparent: light ", lightNum);
+                profiler.split("transparent: light ", lightNum);
+            }
+
             lightNum++;
         }
 
@@ -368,24 +374,27 @@ namespace scene {
         for (auto light : lights) {
             auto sharedLight = light.lock();
 
-            auto lightCamera = prepareShadowMap(lightNum, sharedLight);
+            if (sharedLight->enabled) {
+                auto lightCamera = prepareShadowMap(lightNum, sharedLight);
 
-            // Render the light's contribution to the framebuffer:
-            framebuffer->bind();
-            glViewport(0, 0, camera->frameWidth, camera->frameHeight);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            drawModels(sharedLight, lightCamera, false, *camera);
+                // Render the light's contribution to the framebuffer:
+                framebuffer->bind();
+                glViewport(0, 0, camera->frameWidth, camera->frameHeight);
+                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+                drawModels(sharedLight, lightCamera, false, *camera);
 
-            profiler.split("framebuffer ", lightNum);
+                profiler.split("framebuffer ", lightNum);
 
-            // Add the light's contribution to the screen:
-            addFramebufferToTarget(targetSize, target);
+                // Add the light's contribution to the screen:
+                addFramebufferToTarget(targetSize, target);
 
-            // Render a tiny shadow map:
-            if (!previewOptions.disable)
-                drawShadowMapThumbnail(lightNum - 1);
+                // Render a tiny shadow map:
+                if (!previewOptions.disable)
+                    drawShadowMapThumbnail(lightNum - 1);
 
-            profiler.split("light ", lightNum);
+                profiler.split("light ", lightNum);
+            }
+
             lightNum++;
         }
     }

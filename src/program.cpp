@@ -66,6 +66,9 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (action == GLFW_PRESS && key == GLFW_KEY_R)
         mainScene->forwardRenderReflections = !mainScene->forwardRenderReflections;
 
+    if (action == GLFW_PRESS && key == GLFW_KEY_F)
+        mainScene->flashlightOn = !mainScene->flashlightOn;
+
     // previewOptions keys:
     if (action == GLFW_PRESS) {
         if (key == GLFW_KEY_GRAVE_ACCENT)
@@ -228,6 +231,7 @@ int main(int argc, char** argv) {
     glm::vec3 sunlightCol = glm::vec3(1, 1, 0.7);
     glm::vec3 downlightCol = glm::vec3(1, 1, 1) * 100.0f;
     glm::vec3 tubelightCol = glm::vec3(0.4, 0.4, 1) * 50.0f;
+    glm::vec3 flashlightCol = glm::vec3(1, 1, 1) * 50.0f;
 
     auto lightModel = std::make_shared<scene::Model>("sun");
     auto light = std::make_shared<scene::Light>();
@@ -248,6 +252,12 @@ int main(int argc, char** argv) {
     light = scene::Light::makeSpotlight({0, 0, 0}, {0, 0, 1}, 1.5, 1.5, tubelightCol, tubelightCol);
     light->colAmbient = glm::vec3(0.1);
     lightModel->lights.push_back(light);
+    mainScene->addModel(lightModel);
+
+    lightModel = std::make_shared<scene::Model>("flash light");
+    auto flashlight = scene::Light::makeSpotlight({0, 0, 0}, {0, 0, 1}, 0.5, 0.2, flashlightCol, flashlightCol);
+    flashlight->colAmbient = glm::vec3(0.1);
+    lightModel->lights.push_back(flashlight);
     mainScene->addModel(lightModel);
 
 
@@ -415,7 +425,8 @@ int main(int argc, char** argv) {
     // Setup Camera:
 //    mainScene->camera->pos = {15, 120, 40};
     mainScene->camera->near_ = 1;
-    mainScene->camera->pos = {5, 5, 5};
+    mainScene->camera->pos = {-20, 0, 5};
+    mainScene->camera->dir = {1, 0, 0};
 //    mainScene->camera->pos = {37.2, 156, 38.1};
 //    mainScene->camera->dir = {0.415, -0.646, -0.64};
     mainScene->camera->fov = M_PI_4;
@@ -498,6 +509,9 @@ int main(int argc, char** argv) {
             mainScene->camera->pos.z = 6;
             mainScene->camera->prepareTransforms();
         }
+        flashlight->enabled = mainScene->flashlightOn;
+        flashlight->pos = mainScene->camera->pos;
+        flashlight->dir = mainScene->camera->dir;
         mainScene->profiler.split("processPlayerInput");
 
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)

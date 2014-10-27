@@ -24,6 +24,7 @@ namespace scene {
         float attenuationLinear = 0;
         float attenuationQuadratic = 1;
         float orthoSize = 10;
+        bool enabled = true;
 
         static std::shared_ptr<Light> makeSpotlight(
                 glm::vec3 pos = glm::vec3(0, 0, 0),
