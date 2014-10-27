@@ -330,6 +330,10 @@ int main(int argc, char** argv) {
     robotModel->pos = {0, 1, 0};
     robotModel->scale = glm::vec3(1);
 
+    // Make the robot's light globes emissive:
+    robotModel->materials[2]->materialInfo.has.emissive = true;
+    robotModel->materials[2]->emissive = 1;
+
     // Make the robot metallic:
     for (auto material : robotModel->materials) {
         material->materialInfo.has.reflectivity = true;

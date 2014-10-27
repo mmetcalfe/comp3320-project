@@ -160,7 +160,8 @@ void main() {
     vec3 albedo = albedoRoughness.rgb;
     float roughness = albedoRoughness.a * 8; // Map from [0, 1].
     vec3 envMapCol = envMapColSpecIntensity.rgb;
-    float specIntensity = envMapColSpecIntensity.a;
+    float emissiveFactor = envMapColSpecIntensity.a;
+    bool emissive = emissiveFactor > 0.5;
 
     vec3 eyeSpacePosition = eyeSpacePosFromDepth(depth, Texcoord);
 
@@ -213,6 +214,10 @@ void main() {
     // Final colour:
     float intensity = calculateIntensity(length(lightVecRaw));
     vec3 finalColor = outAmbient + (outDiffuse + outSpecular) * intensity * lightVisibility * spotFactor;
+
+    if (emissive) {
+        finalColor = albedo;
+    }
 
     outColor = vec4(finalColor, 1.0);
 }

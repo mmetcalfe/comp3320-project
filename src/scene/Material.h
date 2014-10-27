@@ -28,6 +28,8 @@ namespace scene {
         // Indicates whether backface culling must be disabled.
         bool twoSided = true;
 
+        float emissive = 0;
+
         std::shared_ptr<NUGL::Texture> texDiffuse;
         std::shared_ptr<NUGL::Texture> texHeight;
         std::shared_ptr<NUGL::Texture> texEnvironmentMap;

@@ -34,6 +34,7 @@ uniform vec3 colDiffuse;
 uniform vec3 colSpecular;
 uniform float shininess;
 uniform float reflectivity;
+uniform float emissive;
 //uniform float shininessStrength;
 uniform samplerCube texEnvironmentMap;
 uniform sampler2D texDiffuse;
@@ -140,8 +141,11 @@ void main() {
             outEnvMapColSpecIntensity.rgb = fresnelCol * reflectCol.rgb * colSpecular;
         }
     } else {
-        outEnvMapColSpecIntensity.rgba = vec4(0, 0, 0, 0);
+        outEnvMapColSpecIntensity.rgb = vec3(0, 0, 0);
     }
+
+    outEnvMapColSpecIntensity.a = emissive;
+
 
     // Diffuse albedo:
     if (hasTexDiffuse) {

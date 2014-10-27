@@ -27,9 +27,10 @@ namespace NUGL {
             uint16_t shininess         : 1;
             uint16_t shininessStrength : 1;
             uint16_t reflectivity      : 1;
+            uint16_t emissive          : 1;
             uint16_t texEnvironmentMap : 1;
             uint16_t texDiffuse        : 1;
-            uint16_t texSpecular       : 1;
+//            uint16_t texSpecular       : 1;
             uint16_t texAmbient        : 1;
             uint16_t texHeight         : 1;
             uint16_t texNormals        : 1;
@@ -248,9 +249,9 @@ namespace NUGL {
             materialInfo.has.shininess = uniformIsActive("shininess");
             materialInfo.has.shininessStrength = uniformIsActive("shininessStrength");
             materialInfo.has.reflectivity = uniformIsActive("reflectivity");
+            materialInfo.has.emissive = uniformIsActive("emissive");
             materialInfo.has.texEnvironmentMap = uniformIsActive("texEnvironmentMap");
             materialInfo.has.texDiffuse = uniformIsActive("texDiffuse");
-            materialInfo.has.texSpecular = uniformIsActive("texSpecular");
             materialInfo.has.texAmbient = uniformIsActive("texAmbient");
             materialInfo.has.texHeight = uniformIsActive("texHeight");
             materialInfo.has.texNormals = uniformIsActive("texNormals");

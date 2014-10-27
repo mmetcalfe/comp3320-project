@@ -205,10 +205,11 @@ Material copyAiMaterial(const std::string &fileName, const aiMaterial *srcMateri
         material.shininessStrength = aiShininessStrength;
     }
 
-//    float aiShininess;
-//    if (!srcMaterial->Get(AI_MATKEY_COLOR_EMISSIVE, aiShininess)) {
-//        material.materialInfo.has.shininess = true;
-//        material.shininess = aiShininess;
+//    float aiEmissive;
+//    if (!srcMaterial->Get(AI_MATKEY_COLOR_EMISSIVE, aiEmissive)) {
+////        material.materialInfo.has.shininess = true;
+//        material.shininess = aiEmissive;
+//        std::cerr << __FILE__ << ", " << __LINE__ << ": AI_MATKEY_COLOR_EMISSIVE " << aiEmissive << " " << fileName << std::endl;
 //    }
 
     int aiTwoSided;
