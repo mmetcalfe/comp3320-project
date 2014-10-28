@@ -138,7 +138,7 @@ namespace scene {
 
     void Scene::renderReflectionMap(std::shared_ptr<Model> model) {
         std::shared_ptr<Camera> mapCamera = std::make_shared<Camera>();
-        glm::vec4 pos = model->transform * glm::vec4(0, 0, 0, 1);
+        glm::vec4 pos = model->transform * glm::vec4(0, 0, 1.2, 1);
         mapCamera->pos = {pos.x, pos.y, pos.z};
         mapCamera->dir = {0, -1, 0};
         mapCamera->up = {0, 0, -1};
@@ -189,11 +189,10 @@ namespace scene {
 
             if (forwardRenderReflections) {
                 model->hidden = true;
-                profiler.push("forwardRender shadows");
+                profiler.push("forwardRenderReflections");
                 forwardRender(reflectionFramebuffer, {mapCamera->frameWidth, mapCamera->frameHeight}, mapCamera);
                 profiler.pop();
                 model->hidden = false;
-
             } else {
                 for (auto drawModel : models) {
                     if (model == drawModel)
@@ -372,6 +371,8 @@ namespace scene {
     void Scene::forwardRender(std::shared_ptr<NUGL::Framebuffer> target, glm::ivec2 targetSize, std::shared_ptr<Camera> camera) {
         int lightNum = 1;
         for (auto light : lights) {
+            profiler.push("light ", lightNum);
+
             auto sharedLight = light.lock();
 
             if (sharedLight->enabled) {
@@ -383,7 +384,7 @@ namespace scene {
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
                 drawModels(sharedLight, lightCamera, false, *camera);
 
-                profiler.split("framebuffer ", lightNum);
+                profiler.split("drawModels");
 
                 // Add the light's contribution to the screen:
                 addFramebufferToTarget(targetSize, target);
@@ -392,10 +393,11 @@ namespace scene {
                 if (!previewOptions.disable)
                     drawShadowMapThumbnail(lightNum - 1);
 
-                profiler.split("light ", lightNum);
+                profiler.split("addFramebufferToTarget");
             }
 
             lightNum++;
+            profiler.pop();
         }
     }
 

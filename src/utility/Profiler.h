@@ -120,10 +120,30 @@ public:
         nodeStack.push_back(childNode);
         currentNode = childNode;
     }
+    // Allow any sequence of stringstreamable arguments to be passed to split.
+    template<typename T, typename... Args>
+    inline void push(std::string s, T t, Args... args) {
+        std::stringstream ss;
+        ss << s << t;
+
+        push(ss.str(), args...);
+    }
+    template<typename T, typename... Args>
+    inline void push(T t, Args... args) {
+        std::stringstream ss;
+        ss << t;
+
+        push(ss.str(), args...);
+    }
+
 
     inline void pop() {
-        nodeStack.pop_back();
-        currentNode = nodeStack.back();
+        if (nodeStack.size() > 1) {
+            nodeStack.pop_back();
+            currentNode = nodeStack.back();
+        } else {
+            std::cerr << __FILE__ << ", " << __LINE__ << ": Cannot pop the only ProfilerNode" << std::endl;
+        }
     }
 
     inline void split(std::string label) {
