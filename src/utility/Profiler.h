@@ -29,7 +29,6 @@ public:
         disabled = false;
     }
 
-
     inline void split(std::string label) {
         if (disabled)
             return;
@@ -74,19 +73,38 @@ public:
     }
 
     inline void print() {
+        int maxlen = 0;
+        double total = 0;
+
+        std::vector<std::pair<std::string, double>> data;
+        for (const auto& pair : durationMap) {
+            maxlen = std::max((int)pair.first.length(), maxlen);
+            double avg = average(pair.first);
+            total += avg;
+            data.emplace_back(pair.first, avg);
+        }
+        sort(data.begin(), data.end(), [](std::pair<std::string, double>& p1, std::pair<std::string, double>& p2) {
+            return p1.second > p2.second;
+        });
+
         // TODO: Sort the output by order added / duration.
         std::cout << "Times:"
                 << " (glFinishEnabled: " << std::boolalpha << glFinishEnabled << " (T to toggle))"
                 << std::endl;
-        for (const auto& pair : durationMap) {
+        for (const auto& pair : data) {
             std::cout << "  "
-                    <<  std::setw(20)
+                    <<  std::setw(maxlen)
                     << pair.first << ": "
                     << std::fixed
                     << std::setw(10)
                     << std::setprecision(4)
-                    << average(pair.first)
-                    << " ms" << std::endl;
+//                    << average(pair.first) << " ms"
+                    << pair.second << " ms, "
+                    << std::setw(5)
+                    << std::setprecision(2)
+                    << (100 * pair.second / total)
+                    << "%"
+                    << std::endl;
         }
     }
 
