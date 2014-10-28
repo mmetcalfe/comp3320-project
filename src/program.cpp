@@ -510,7 +510,7 @@ int main(int argc, char** argv) {
             mainScene->camera->prepareTransforms();
         }
         flashlight->enabled = mainScene->flashlightOn;
-        flashlight->pos = mainScene->camera->pos;
+        flashlight->pos = mainScene->camera->pos + glm::cross(mainScene->camera->dir, mainScene->camera->up) * 2.0f;
         flashlight->dir = mainScene->camera->dir;
         mainScene->profiler.split("processPlayerInput");
 
