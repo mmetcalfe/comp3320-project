@@ -189,9 +189,9 @@ namespace scene {
 
             if (forwardRenderReflections) {
                 model->hidden = true;
-                profiler.disable();
+                profiler.push("forwardRender shadows");
                 forwardRender(reflectionFramebuffer, {mapCamera->frameWidth, mapCamera->frameHeight}, mapCamera);
-                profiler.enable();
+                profiler.pop();
                 model->hidden = false;
 
             } else {
