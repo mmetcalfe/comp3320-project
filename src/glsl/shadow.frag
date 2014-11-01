@@ -72,8 +72,8 @@ float doShadowMapping(in vec4 eyeSpacePosition) {
         vec3 shadowLookup = (lightClipPosDivided * 0.5) + 0.5;
 
         float bias = 0.0;
-        float samples = 16;
-        float radius = 1.0 / 300.0;
+        float samples = 1; // 16;
+        float radius = 0; // 1.0 / 300.0;
         for (int i = 0; i < samples; i++) {
 //            int index = int(4.0 * rand(vec4(eyeSpacePosition.xyz, i))) % 4;
 //            vec2 stratifiedCoord = vec2(shadowLookup.xy + poissonDisk[index] / 700.0); //,  (shadowLookup.z - bias ) / shadowLookup.w);
@@ -137,6 +137,7 @@ void main() {
     vec3 incident = normalize(eyeSpacePosition.xyz);
 
     // Environment map reflection:
+//    vec3 outReflect = vec3(0,0,0);
     vec3 outReflect;
     if (hasTexEnvironmentMap && shininess > 0) {
         vec3 viewReflect = reflect(incident, normal);

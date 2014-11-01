@@ -69,6 +69,15 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     if (action == GLFW_PRESS && key == GLFW_KEY_F)
         mainScene->flashlightOn = !mainScene->flashlightOn;
 
+    if (action == GLFW_PRESS && key == GLFW_KEY_P)
+        mainScene->paused = !mainScene->paused;
+
+    if (action == GLFW_PRESS && key == GLFW_KEY_L) {
+        mainScene->cameraLocked = !mainScene->cameraLocked;
+
+        glfwSetInputMode(window, GLFW_CURSOR, !mainScene->cameraLocked? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+    }
+
     // previewOptions keys:
     if (action == GLFW_PRESS) {
         if (key == GLFW_KEY_GRAVE_ACCENT)
@@ -105,13 +114,16 @@ int main(int argc, char** argv) {
     // Windowed:
     int screenWidth = 700;
     int screenHeight = 700;
-    GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "OpenGL", nullptr, nullptr);
+//    GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "OpenGL", nullptr, nullptr);
+
+    // Fullscreen:
+    const GLFWvidmode* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+    GLFWwindow* window = glfwCreateWindow(videoMode->width, videoMode->height, "OpenGL", glfwGetPrimaryMonitor(), nullptr);
+
+    glfwGetWindowSize(window, &screenWidth, &screenHeight);
+
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
-
-//    // Fullscreen:
-//    const GLFWvidmode* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-//    GLFWwindow* window = glfwCreateWindow(videoMode->width, videoMode->height, "OpenGL", glfwGetPrimaryMonitor(), nullptr);
 
     glfwMakeContextCurrent(window);
 
@@ -453,44 +465,46 @@ int main(int argc, char** argv) {
 
         skyBox->pos = mainScene->camera->pos;
 
-        // Tube-rock movement:
-        float t = glfwGetTime();
-        asteroidModel->pos = glm::vec3(0,0,8) + glm::vec3(0,0,3) * std::sin(t);
-        asteroidModel->dir = glm::normalize(glm::vec3(std::sin(2 * t) + std::cos(3 * t), std::cos(2 * t), std::cos(3 * t)));
-
-        // Asteroid movement:
-        srand(1031);
-        for (int i = 0; i < asteroids.size(); i++) {
-            auto asteroid = asteroids[i];
-
-            float k = rand() / (float)RAND_MAX;
-
-            float t = glfwGetTime() + k * 1097;
-            float radius = (80 + k * 80);
-            float tilt = ((k - 0.5) + 0.5) * 0.5;
-            float speed = 1600.0 / (radius * radius);
-
-            glm::vec4 pos = glm::vec4(std::cos(t * speed), std::sin(t * speed), 0, 1);
-            glm::mat4 rot;
-            rot = glm::rotate(rot, tilt, glm::normalize(glm::vec3(0,1,0)));
-            pos = rot * pos;
-            asteroid->pos = glm::vec3(pos.x, pos.y, pos.z) * radius;
-            asteroid->dir = glm::vec3(std::sin(k*t*5), std::cos(k*t*5), 0);
-        }
-
-        // Robot movement:
-        {
+        if (!mainScene->paused) {
+            // Tube-rock movement:
             float t = glfwGetTime();
-            float radius = 11. + (std::sin(t / 1.5) * 3.);
-            glm::vec3 lastPos = robotModel->pos;
-            robotModel->pos = glm::vec3(std::cos(t / 6.), std::sin(t / 6.), 0) * radius;
-            robotModel->dir = glm::normalize(robotModel->pos - lastPos);
+            asteroidModel->pos = glm::vec3(0,0,8) + glm::vec3(0,0,3) * std::sin(t);
+            asteroidModel->dir = glm::normalize(glm::vec3(std::sin(2 * t) + std::cos(3 * t), std::cos(2 * t), std::cos(3 * t)));
 
-            glm::mat4 transform = robotModel->modelTransform();
-            robotModel->lights[0]->pos = glm::vec3(transform * glm::vec4(1.00111, 1.45769, -0.98452, 1));
-            robotModel->lights[0]->dir = glm::normalize(glm::vec3(transform * glm::vec4(0, 0, -1, 0)));
-            robotModel->lights[1]->pos = glm::vec3(transform * glm::vec4(-1.00111, 1.45769, -0.98452, 1));
-            robotModel->lights[1]->dir = glm::normalize(glm::vec3(transform * glm::vec4(0, 0, -1, 0)));
+            // Asteroid movement:
+            srand(1031);
+            for (int i = 0; i < asteroids.size(); i++) {
+                auto asteroid = asteroids[i];
+
+                float k = rand() / (float)RAND_MAX;
+
+                float t = glfwGetTime() + k * 1097;
+                float radius = (80 + k * 80);
+                float tilt = ((k - 0.5) + 0.5) * 0.5;
+                float speed = 1600.0 / (radius * radius);
+
+                glm::vec4 pos = glm::vec4(std::cos(t * speed), std::sin(t * speed), 0, 1);
+                glm::mat4 rot;
+                rot = glm::rotate(rot, tilt, glm::normalize(glm::vec3(0,1,0)));
+                pos = rot * pos;
+                asteroid->pos = glm::vec3(pos.x, pos.y, pos.z) * radius;
+                asteroid->dir = glm::vec3(std::sin(k*t*5), std::cos(k*t*5), 0);
+            }
+
+            // Robot movement:
+            {
+                float t = glfwGetTime();
+                float radius = 11. + (std::sin(t / 1.5) * 3.);
+                glm::vec3 lastPos = robotModel->pos;
+                robotModel->pos = glm::vec3(std::cos(t / 6.), std::sin(t / 6.), 0) * radius;
+                robotModel->dir = glm::normalize(robotModel->pos - lastPos);
+
+                glm::mat4 transform = robotModel->modelTransform();
+                robotModel->lights[0]->pos = glm::vec3(transform * glm::vec4(1.00111, 1.45769, -0.98452, 1));
+                robotModel->lights[0]->dir = glm::normalize(glm::vec3(transform * glm::vec4(0, 0, -1, 0)));
+                robotModel->lights[1]->pos = glm::vec3(transform * glm::vec4(-1.00111, 1.45769, -0.98452, 1));
+                robotModel->lights[1]->dir = glm::normalize(glm::vec3(transform * glm::vec4(0, 0, -1, 0)));
+            }
         }
 
         mainScene->render();
@@ -504,7 +518,10 @@ int main(int argc, char** argv) {
         glfwPollEvents();
         mainScene->profiler.split("glfwPollEvents");
 
-        mainScene->camera->processPlayerInput(window);
+        if (!mainScene->cameraLocked) {
+            mainScene->camera->processPlayerInput(window);
+        }
+
         if (mainScene->fpsMode) {
             mainScene->camera->pos.z = 6;
             mainScene->camera->prepareTransforms();

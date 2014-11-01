@@ -55,6 +55,8 @@ namespace scene {
         bool useDeferredRendering = true;
         bool forwardRenderReflections = false;
         bool flashlightOn = false;
+        bool paused = false;
+        bool cameraLocked = true;
 
         struct {
             bool disable = true;

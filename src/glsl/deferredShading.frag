@@ -73,6 +73,10 @@ float doShadowMapping(in vec4 eyeSpacePosition) {
         float bias = 0.0;
         float samples = 16;
         float radius = (1.0 / 300.0);
+        if (light.isDirectional) {
+            radius = (1.0 / 600.0);
+        }
+
         for (int i = 0; i < samples; i++) {
 //            int index = int(4.0 * rand(vec4(eyeSpacePosition.xyz, i))) % 4;
 //            vec2 stratifiedCoord = vec2(shadowLookup.xy + poissonDisk[index] / 700.0); //,  (shadowLookup.z - bias ) / shadowLookup.w);

@@ -138,6 +138,7 @@ namespace scene {
 
     void Scene::renderReflectionMap(std::shared_ptr<Model> model) {
         std::shared_ptr<Camera> mapCamera = std::make_shared<Camera>();
+        // TODO: Add actual renderReflectionMap origin offset.
         glm::vec4 pos = model->transform * glm::vec4(0, 0, 1.2, 1);
         mapCamera->pos = {pos.x, pos.y, pos.z};
         mapCamera->dir = {0, -1, 0};
