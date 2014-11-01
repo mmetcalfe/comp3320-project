@@ -87,18 +87,27 @@
 % \newgeometry{top=2cm}
 \maketitle
 % \vspace{-1.5 cm}
-% \tableofcontents
 % \restoregeometry
 
 \begin{abstract}
 
-    This report summarises the final result of our graphics project. We outline
-    the initial goals and scope of the project, the changes that were made to
-    the goals and scope throughout the project, and the final scope and focus
-    of the project. Additionally, we discuss the features and effects
-    implemented in our game-engine, and the  techniques used to achieve them.
+    % Indicate that the project is a game engine targeted at high-quality visualisations.
+
+    This report summarises the final result of our graphics project to create a
+    game engine targeted at high-quality visualisations.  We describe the
+    demonstration scene diplayed in our project presentation, and discuss the
+    features and effects implemented in our game-engine, and the techniques
+    used to achieve them. Additionally, we discuss the performance of our game
+    engine, compare it to a popular commercial game engine, and outline areas
+    of focus for future work.
 
 \end{abstract}
+
+\newpage
+
+\tableofcontents
+
+\newpage
 
 % So far the report seems to be mainly about project management.
 % For the final reprot it would be good to have:
@@ -134,11 +143,21 @@
     sci-fi/eagle-5-transport}) has been placed outside the room, opposite one
     of the windows. The room is illuminated by three spotlights, placed on the
     ceiling and inside the glass tube, and by sunlight from outside. The room
-    contains a reflective robot that moves around the floor.
-    A number of procedurally generated asteroids orbit the circular room.
-    The scene has a background of stars and nebulae.
+    contains a reflective metal robot with two forward-facing spotlights, that
+    moves around the floor. A number of procedurally generated asteroids orbit
+    the circular room. The scene has a background of stars and nebulae.
 
     % Image of the test scene
+
+    \begin{figure}%[H]
+    \centering
+        % \makebox[\textwidth][c]{\resizebox{0.95\paperwidth}{!}{\input{module2_gantt.tex}}}
+        \includegraphics[width=0.8\textwidth]{room-overview.png}
+        \caption[Space-room interior]{
+            Screenshot of the inside of the room.
+        }
+        \label{room-overview}
+    \end{figure}
 
     The following subsection describes the features and techniques that were
     used to create the test scene.
@@ -202,13 +221,15 @@
             To support multiple lights efficiently, we implemented a deferred
             renderer in addition to a forward renderer. When performing
             deferred rendering, we first render the eye-space normals, albedo,
-            roughness, environment map reflection term, and depth to a set of
-            framebuffers (collectively referred to as the `Geometry Buffer' or
-            `G-Buffer'). These buffers are used as inputs to another shader
-            which is used to add the contribution of each light to the screen
-            in multiple additional render passes.
+            roughness, environment map reflection term, emissive flag, metallic
+            flag, and depth to a set of framebuffers (collectively referred to
+            as the `Geometry Buffer' or `G-Buffer'). These buffers are used as
+            inputs to another shader which is used to add the contribution of
+            each light to the screen in multiple additional render passes.
 
-            The common optimisation of rendering `light shapes' to the stencil
+            % TODO: G-buffer diagram + Killzone 2 reference?
+
+            The common optimisation of rendering `light volumes' to the stencil
             buffer before rendering lighting contributions was not implemented
             due to time constraints. As a result, several lights must be
             present in the scene before our deferred shading implementation
@@ -299,30 +320,298 @@
             multiplied by the opacity of the material. The result is order-
             independent transparency that looks reasonable.
 
+        \subsubsection{Emissive materials}
+
+            Simple emissive materials are implemented by treating the diffuse
+            colour of the material as the emissive colour. The light-globes of
+            the robot in the demonstration scene are a white emissive material.
+
+        \subsubsection{Metallic materials}
+
+            A modified lighting calculation has been implemented to support
+            metallic materials. This material type simulates a shiny metal by
+            multiplying the diffuse colour by the environment map reflection
+            when calculating environment map reflections. The result is the
+            appearence of a shiny metal rather than a glossy plastic surface.
+            This material is applied to the robot in the demonstration scene.
+
+
+\section{Implementation details}
+
+    % Languages used:
+
+    The game engine is implemented in \libraryname{C++}, and uses a
+    \libraryname{CMake} build system.
+
+    % List libraries used + purposes:
+
+    The \libraryname{GLFW} library was used for \libraryname{OpenGL} context
+    creation, and to provide keyboard and mouse input.
+%
+    \libraryname{Assimp} was used to support loading 3D models from a variety
+    of file formats (only the \codefile{OBJ} and \codefile{MTL} formats were
+    actually used in the final project).
+%
+    The libraries \libraryname{libpng} and \libraryname{libjpg} were used to
+    load textures (as \libraryname{Assimp} only provides the file names of
+    textures used in each material).
+
+    % Tools used:
+
+    Most of the development work was done using the \libraryname{CLion} IDE.
+    %
+    \libraryname{Blender} was used to create the custom 3D models that appear
+    in the demonstration scene.
+
 
 \section{Code structure}
 
-    % Brief outline of the program's structure
+    The code is organised into three main namespaces:
+
+    \begin{description}
+
+        \item[\codefile{NUGL}:]
+
+            Contains an object-oriented wrapper around the raw OpenGL C API.
+            Most interaction with OpenGL is done through the objects in this
+            namespace.
+
+            Most of these wrapper classes are fairly minimal, except that the
+            Texture class contains helper functions for creating and loading
+            various kinds of textures, and the ShaderProgram class is aware of
+            the materials system, and can report which of a number of
+            application defined uniforms the shader program supports.
+
+        \item[\codefile{scene}:]
+
+            Contains classes that together provide the means to describe and render a scene.
+
+            A brief outline of classes in this namespace is provided below.
+
+            \begin{description}
+
+                \item[\codefile{Camera}:]
+
+                    Represents a camera with a position and an orientation in
+                    world space, and provides methods to obtain the \code{view}
+                    and \code{proj} matrices Both perspective and orthogonal
+                    cameras are supported. The LightCamera subclass provides a
+                    function to create a camera from a light specifically for
+                    rendering shadow maps, and the PlayerCamera subclass
+                    provides methods to support camera movement using the mouse
+                    and keyboard.
+
+                \item[\codefile{Light}:]
+
+                    A struct that contains all information necessary to
+                    represent any of the three supported light types. Helper
+                    methods exist to create lights with default settings
+                    easily.
+
+                \item[\codefile{Material}:]
+
+                    A struct containing the parameters and textures that define a material.
+
+                \item[\codefile{Mesh}:]
+
+                    Represents a component of a model, with its own material,
+                    and vertex and element buffers. Provides methods for
+                    rendering the component.
+
+                \item[\codefile{Model}:]
+
+                    Represents an entire model that might be loaded from a
+                    file, and placed within the scene. Modelled after the
+                    representation that \libraryname{Assimp} uses, the model is
+                    represented as a hierarchy of nodes, each containing
+                    meshes, a transform relative to its parent, and child
+                    nodes. Models can also contain lights (like the robot in
+                    the demonstration scene).
+                    Methods are provided to load and render models.
+
+                \item[\codefile{ProceduralAsteroid}:]
+
+                    Provides methods to procedurally generate asteroid models.
+
+                \item[\codefile{Scene}:]
+
+                    Represents an entire scene as a collection of Models, and a
+                    dedicated skybox model. Provides the main rendering
+                    methods, that accumulate lighting passes and write to the
+                    default framebuffer. Both forward and deferred rendering
+                    paths are supported.
+
+            \end{description}
+
+        \item[\codefile{utility}:]
+
+            Contains a variety of utility functions and classes related to
+            maths, string handling, profiling, debugging, memory
+            management, and rendering.
+
+    \end{description}
+
+    The entry point of the program is found in program.cpp - the only file
+    containing code in the default namespace. This file contains code to create
+    the OpenGL context, load and set up the demonstration scene, run the main
+    program loop, update the positions of moving objects, and to handle basic
+    keyboard controls.
 
 \section{Performance evaluation}
 
-    % Outline performance bottlenecks.
-    % Include comments on:
-    %  - Mipmapping
+    A profiler class was created to to aid in optimising parts of the engine
+    during development. To measure the runtime of various operations within the
+    OpenGL driver, the profiler code has to call \code{glFinish} to synchronise
+    the CPU and the GPU to ensure that the work it is trying to measure the
+    runtime of has been completed. For this reason, while the times the
+    profiler outputs are useful in estimating the relative runtimes of
+    different parts of the program, the times shown are not representitive of
+    the actual runtimes while not profiling. The code is typically close to
+    twice as fast when not profiling, as the OpenGL driver is able to run parts
+    of the program in parallel (and there is less synchronisation overhead).
+
+    Below is some typical output of the built-in profiler when rendering the
+    room scene at $1920*1080$ pixels on an early 2013 MacBook Pro running OS X
+    10.9.5, with a 2.7 GHz Intel Core i7 processor, 16 GB of 1600 MHz DDR3
+    system memory, and an NVIDIA GeForce GT 650M graphics card with 1024 MB of
+    graphics memory:
+
+    {
+        \small
+        \input{profiler_output.tex}
+    }
+
     %  - Dynamic reflections (+ simplified geometry/shaders)
+
+    From the profiler output, we can see that 28.4\% of the time taken to
+    render each frame is used in rendering the (single) dynamic reflection map.
+    Only one face of the dynamic reflection cube map is rendered each frame.
+    Time could be saved here by using simplified scene geometry when rendering
+    reflections.
+
+    % - Render shadow maps once per frame
+
+    We can see that the shadow map for each light is rendered once while
+    rendering to the reflection map, and again before the deferred shading
+    pass. Time could be saved here by storing all shadow maps in separate
+    textures and rendering them once at the start of each frame.
+
     %  - Light bounding volumes for deferred shading
-    %  - Shader optimisation (avoiding matrix multiplies, uniform changes)
-    % Include sample output of the built-in profiler.
+
+    The profiler output shows that 45.24\% of the rendering time is spent on
+    the deferred lighting passes. This time could be significantly reduced by
+    using the common optimisation of rendering the bounding volumes of each
+    light's area of effect to the stencil buffer before rendering the light, to
+    ensure that only pixels that could be influenced by the light are processed
+    by the pixel shader.
+
+    %  - Mipmapping
+
+    None of the textures used in the engine have had mipmaps created for them.
+    Generating mipmaps and enabling mipmapping would have the potential to
+    speed up all rendering code that samples from textures.
+
+    Additional optimisations would be to reduce the number of matrix multiplies
+    in the shader programs (some of them can be trivially precalculated), and
+    to reduce the number of draw calls by implementing basic visibility testing
+    of entire meshes or models.
 
 % -- How does your project compare to similar existing implementations?
 \section{Comparison to existing engines}
 
-    % 
+    In this section we will briefly compare my engine to an existing game
+    engine, to highlight which features they share. The engine chosen for this
+    comparison is Unreal Engine 4 (see \url{www.unrealengine.com}), a modern
+    top-tier, professional game engine. Specifically, we will compare the
+    rendering engines of the two game engine, particularly features relating to
+    materials, reflections and lighting, as these were our areas of focus.
+
+    \subsection{Materials}
+
+        Both our engine and the Unreal engine support the following material properties:
+
+        \begin{itemize}
+            \item A base colour;
+            \item Metallic;
+            \item Roughness;
+            \item Opacity;
+            \item Emissive;
+            \item Diffuse colour texturing;
+            \item Bump mapping;
+            \item Reflections;
+        \end{itemize}
+
+        The Unreal engine provides several more options for some of these
+        properties. For example, while our engine's metallic value is boolean,
+        Unreal engine accepts a \code{float} indicating how metallic the
+        material appears.
+
+        The Unreal engine's material system supports a number of additional
+        features including:
+
+        \begin{itemize}
+            \item True translucent materials, whose specular highlights appear at full brightness;
+            \item Refraction through transparent materials;
+            \item Tesselation;
+            \item Glossy reflections;
+        \end{itemize}
+
+    \subsection{Lighting}
+
+        Both our engine and Unreal Engine 4 support the following types of
+        dynamic light:
+
+        \begin{itemize}
+            \item Point light;
+            \item Spot light with cone falloff;
+            \item Directional light;
+        \end{itemize}
+
+        With regard to these basic light types, Unreal Engine supports shadows
+        for all three types of light, whereas our engine supports shadows for
+        spot lights and directional lights, but not for point lights.
+
+        Unreal engine supports many additional lighting features, including:
+
+        \begin{itemize}
+            \item Indirect lighting via lightmaps for static objects, and a global illumination cache for dynamic objects;
+            \item Illuminating Engineering Society (IES) light profiles;
+        \end{itemize}
+
+    \subsection{Reflections}
+
+        Both our engine and Unreal Engine 4 support reflection of environment
+        maps and reflection using dynamically rendered cube maps.
+
+        Unreal engine supports several other reflection methods and many
+        reflection parameters. Notably, it supports static reflection maps that
+        are rendered at load time (a feature that our engine could be made to
+        support with little effort), and screenspace raytraced reflections.
 
 % -- What would be the next steps if there would be more time?
 \section{Future work}
 
-    % Outline four or so potential additional features
+    The following lists outline areas of focus for improvement of the game
+    engine if more development time were available. We distinguish between
+    improvements to current features, and new features that could be
+    introduced.
+
+    \paragraph{Minor improvements:}
+    \begin{itemize}
+        \item Render environment map only once in forward shading pipeline;
+        \item Profile application (optimise shaders, uniforms, etc.);
+        \item Implement light bounding volumes to speed up deferred shading;
+    \end{itemize}
+
+    \paragraph{Potential new features:}
+    \begin{itemize}
+        \item HDR rendering;
+        \item Bloom lighting;
+        \item Displacement mapping;
+        \item Screen-space ambient occlusion;
+        \item Screen-space ray-traced reflections;
+        \item Physically based soft shadows;
+    \end{itemize}
 
 % -- What is the most interesting part of your project? Where did you put the emphasis?
 
