@@ -139,24 +139,37 @@
     suspended in space, with a large glass tube containing a moving, reflective
     sphere at its centre. The room has four curved, elliptic, glass windows
     equally spaced around its circumference. A complicated spaceship model
-    (sourced from \url{http://www.cgtrader.com/free-3d-models/space/spacecraft-
-    sci-fi/eagle-5-transport}) has been placed outside the room, opposite one
+    (sourced from
+%
+    \url{http://www.cgtrader.com/free-3d-models/space/spacecraft-sci-fi/eagle-5-transport})
+%
+    has been placed outside the room, opposite one
     of the windows. The room is illuminated by three spotlights, placed on the
     ceiling and inside the glass tube, and by sunlight from outside. The room
     contains a reflective metal robot with two forward-facing spotlights, that
     moves around the floor. A number of procedurally generated asteroids orbit
-    the circular room. The scene has a background of stars and nebulae.
-
-    % Image of the test scene
+    the circular room. The scene has a background of stars and nebulae. Figure~\ref{fig:scene-overview}
+    and Figure~\ref{fig:robot-closeups} show the scene and the robot respectively.
 
     \begin{figure}%[H]
-    \centering
-        % \makebox[\textwidth][c]{\resizebox{0.95\paperwidth}{!}{\input{module2_gantt.tex}}}
-        \includegraphics[width=0.8\textwidth]{room-overview.png}
-        \caption[Space-room interior]{
-            Screenshot of the inside of the room.
+        \centering
+        \includegraphics[width=0.4\textwidth]{room-overview.png}
+        \includegraphics[width=0.4\textwidth]{scene-overview.png}
+        \caption[Demonstration scene]{
+            Two screenshots of the demonstration scene.
         }
-        \label{room-overview}
+        \label{fig:scene-overview}
+    \end{figure}
+
+    \begin{figure}%[H]
+        \centering
+        \includegraphics[width=0.3\textwidth]{robot-1.png}
+        \includegraphics[width=0.3\textwidth]{robot-2.png}
+        \includegraphics[width=0.3\textwidth]{robot-3.png}
+        \caption[Space-room exterior]{
+            Close-up views of the robot
+        }
+        \label{fig:robot-closeups}
     \end{figure}
 
     The following subsection describes the features and techniques that were
@@ -180,8 +193,18 @@
 
             Untextured meshes are supported by rendering the entire mesh in a
             single colour.
+            A model can contain both textured and untextured meshes, as shown in the screenshot of the textured spaceship model in Figure~\ref{fig:ship-textures}.
 
-            A model can contain both textured and untextured meshes.
+            \begin{figure}%[H]
+                \centering
+                % \makebox[\textwidth][c]{\resizebox{0.95\paperwidth}{!}{\input{module2_gantt.tex}}}
+                \includegraphics[width=0.5\textwidth]{ship-textures.png}
+                \caption[Textured spaceship]{
+                    The textured spaceship model (from
+                    \url{http://www.cgtrader.com/free-3d-models/space/spacecraft-sci-fi/eagle-5-transport}).
+                }
+                \label{fig:ship-textures}
+            \end{figure}
 
         \subsubsection{Bump mapping}
 
@@ -189,8 +212,22 @@
             normals during shading to simulate the interaction of lighting with
             fine surface details.
 
-            A bump map is used to render the floor stubs
-            on the floor of the spaceship in the demonstration scene.
+            A bump map is used to render the floor stubs on the floor of the
+            spaceship in the demonstration scene, as shown in Figure~\ref{fig:bump-mapping}.
+
+            \begin{figure}%[H]
+                \centering
+                \includegraphics[width=0.5\textwidth]{bump-mapping-1.png}
+                \\
+                \includegraphics[width=0.3\textwidth]{robot-normals-a.png}
+                \includegraphics[width=0.3\textwidth]{robot-normals-n.png}
+                \includegraphics[width=0.3\textwidth]{robot-normals-f.png}
+                \caption[Textured spaceship]{
+                    Top: Close-up of the bump-mapped floor and robot.
+                    Bottom: Albedo component, view-space normals, and final render of the bump-mapped robot and floor. Note that the albedo compoent has no texturing.
+                }
+                \label{fig:bump-mapping}
+            \end{figure}
 
         \subsubsection{Skybox rendering}
 
@@ -201,6 +238,20 @@
 
             Each object can be assigned a cubemap texture to be used as an
             environment map for simulating reflections.
+            Figure~\ref{fig:reflection} illustrates the reflections on the robot in the demonstration scene.
+
+            \begin{figure}%[H]
+                \centering
+                \includegraphics[width=0.5\textwidth]{reflection.png}
+                \\
+                \includegraphics[width=0.4\textwidth]{deferred-robot-f.png}
+                \includegraphics[width=0.4\textwidth]{deferred-robot-r.png}
+                \caption[Textured spaceship]{
+                    Top: The robot reflecting a window and the asteroid in the tube.
+                    Bottom: An image of the robot, and the contribution to that image from reflections alone.
+                }
+                \label{fig:reflection}
+            \end{figure}
 
         \subsubsection{Filtered shadow maps}
 
@@ -216,6 +267,23 @@
             effect of smoothing the edges of the shadows - removing the obvious
             jagged edges that result from limited shadow map resolution.
 
+            Figure~\ref{fig:shadow-maps} shows the shadow maps rendered for the demonstration scene.
+
+            \begin{figure}%[H]
+                \centering
+                \includegraphics[width=0.3\textwidth]{shadow-map-3.png}
+                \includegraphics[width=0.3\textwidth]{shadow-map-2.png}
+                \includegraphics[width=0.3\textwidth]{shadow-map-4.png}
+                \includegraphics[width=0.3\textwidth]{shadow-map-5.png}
+                \includegraphics[width=0.3\textwidth]{shadow-map-7.png}
+                \includegraphics[width=0.3\textwidth]{shadow-map-6.png}
+                \includegraphics[width=0.3\textwidth]{shadow-map-1.png}
+                \caption[Deferred rendering buffers]{
+                    Sample shadow maps of the 7 lights in the demonstration scene.
+                }
+                \label{fig:shadow-maps}
+            \end{figure}
+
         \subsubsection{Forward and deferred rendering}
 
             To support multiple lights efficiently, we implemented a deferred
@@ -226,8 +294,28 @@
             as the `Geometry Buffer' or `G-Buffer'). These buffers are used as
             inputs to another shader which is used to add the contribution of
             each light to the screen in multiple additional render passes.
+            The main components of the g-buffer for a sample frame can be seen in Figure~\ref{fig:deferred-rendering}.
 
-            % TODO: G-buffer diagram + Killzone 2 reference?
+            \begin{figure}%[H]
+                \centering
+                \includegraphics[width=0.3\textwidth]{deferred-1-a.png}
+                \includegraphics[width=0.3\textwidth]{deferred-1-n.png}
+                \includegraphics[width=0.3\textwidth]{deferred-1-r.png}
+                \includegraphics[width=0.3\textwidth]{deferred-1-d.png}
+                \includegraphics[width=0.3\textwidth]{deferred-1-f.png}
+                \includegraphics[width=0.3\textwidth]{deferred-1-forward.png}
+                \caption[Deferred rendering buffers]{
+                    The deferred rendering path. From top left to bottom right:
+                    The albedo buffer;
+                    View-space normals;
+                    Environment map reflection buffer;
+                    Depth buffer;
+                    The final image;
+                    and an example of the simplified forward rendering path that
+                    is used to render the dynamic environment map.
+                }
+                \label{fig:deferred-rendering}
+            \end{figure}
 
             The common optimisation of rendering `light volumes' to the stencil
             buffer before rendering lighting contributions was not implemented
@@ -267,7 +355,17 @@
                 direction vector - as if a light source at infinity were
                 shining through a square window. These cast shadows by using an
                 orthographic projection to render the shadow map. A directional
-                light is used to simulate sunlight in our demonstration scene.
+                light is used to simulate sunlight in our demonstration scene, as seen in Figure~\ref{fig:directional-light}.
+
+                \begin{figure}%[H]
+                    \centering
+                    \includegraphics[width=0.4\textwidth]{directional-1.png}
+                    \includegraphics[width=0.4\textwidth]{directional-2.png}
+                    \caption[Directional lights]{
+                        Two views of the shadows cast by the directional light.
+                    }
+                    \label{fig:directional-light}
+                \end{figure}
 
             \end{itemize}
 
@@ -295,6 +393,17 @@
             the faces of an icosahedron, while randomly perturbing the distance
             from the icosahedron's center of each new point.
 
+            One of the asteroids in the demonstration scene is pictured in Figure~\ref{fig:asteroid}.
+
+            \begin{figure}%[H]
+                \centering
+                \includegraphics[width=0.5\textwidth]{asteroid.png}
+                \caption[Asteroid]{
+                    A closeup view of the tube-asteroid.
+                }
+                \label{fig:asteroid}
+            \end{figure}
+
         \subsubsection{Phong lighting}
 
             The Phong lighting formula is used to calculate the lighting
@@ -319,6 +428,16 @@
             from the g-buffer, before adding that framebuffer to the screen
             multiplied by the opacity of the material. The result is order-
             independent transparency that looks reasonable.
+            An example screenshot is included as Figure~\ref{fig:transparent}.
+
+            \begin{figure}%[H]
+                \centering
+                \includegraphics[width=0.5\textwidth]{transparency.png}
+                \caption[Transparent materials]{
+                    A screenshot showing models viewed through several layers of glass.
+                }
+                \label{fig:transparent}
+            \end{figure}
 
         \subsubsection{Emissive materials}
 

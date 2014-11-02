@@ -114,11 +114,11 @@ int main(int argc, char** argv) {
     // Windowed:
     int screenWidth = 700;
     int screenHeight = 700;
-//    GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "OpenGL", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(screenWidth, screenHeight, "OpenGL", nullptr, nullptr);
 
     // Fullscreen:
-    const GLFWvidmode* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-    GLFWwindow* window = glfwCreateWindow(videoMode->width, videoMode->height, "OpenGL", glfwGetPrimaryMonitor(), nullptr);
+//    const GLFWvidmode* videoMode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+//    GLFWwindow* window = glfwCreateWindow(videoMode->width, videoMode->height, "OpenGL", glfwGetPrimaryMonitor(), nullptr);
 
     glfwGetWindowSize(window, &screenWidth, &screenHeight);
 
